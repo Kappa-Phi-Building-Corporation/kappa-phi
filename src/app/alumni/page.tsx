@@ -6,8 +6,8 @@ export const metadata = { title: 'Alumni Information' }
 
 const memberSections = [
   { label: 'Your Personal Profile', href: '/profile', soon: false },
-  { label: 'Alumni Records & Contact Directory', href: '/alumni/directory', soon: true },
-  { label: 'Big Brother Tree', href: '/alumni/tree', soon: true },
+  { label: 'Alumni Records & Contact Directory', href: '/alumni/directory', soon: false },
+  { label: 'Big Brother Tree', href: '/alumni/tree', soon: false },
   { label: 'Chapter Eternal Memorial & Missing Brothers', href: '/alumni/eternal', soon: true },
   { label: 'Board Minutes, Reports & Financial Info', href: '/alumni/board-docs', soon: true },
 ]

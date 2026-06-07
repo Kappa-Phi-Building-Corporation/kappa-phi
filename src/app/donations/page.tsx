@@ -97,15 +97,13 @@ export default function DonationsPage() {
           </p>
           <div className="flex flex-wrap gap-3">
             <a
-              href="https://kappa-phi.org/Byron.html"
-              target="_blank" rel="noopener noreferrer"
+              href="/donations/byron"
               className="inline-block bg-kp-gold text-black font-bold px-6 py-3 rounded-xl hover:opacity-90 transition-opacity text-sm no-underline"
             >
               Donate to the Scholarship
             </a>
             <a
-              href="https://kappa-phi.org/scholarship.html"
-              target="_blank" rel="noopener noreferrer"
+              href="/donations/scholarship"
               className="inline-block border-2 border-white/40 text-white font-bold px-6 py-3 rounded-xl hover:border-kp-gold hover:text-kp-gold transition-colors text-sm no-underline"
             >
               Apply for the Scholarship

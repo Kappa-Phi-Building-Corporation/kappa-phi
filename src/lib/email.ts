@@ -1,0 +1,56 @@
+// Email utility — uses Resend (https://resend.com) via plain fetch.
+// Required env vars:
+//   RESEND_API_KEY   — your Resend API key
+//   EMAIL_FROM       — verified sending address, e.g. noreply@kappa-phi.org
+//   ADMIN_EMAIL      — where admin notifications are sent (default: kappaphi@kappa-phi.org)
+
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL ?? 'kappaphi@kappa-phi.org'
+const FROM = process.env.EMAIL_FROM ?? 'Kappa Phi BC <noreply@kappa-phi.org>'
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://kappa-phi.org'
+
+export async function sendAdminNewUserEmail(userName: string, userEmail: string) {
+  const apiKey = process.env.RESEND_API_KEY
+  if (!apiKey) {
+    console.warn('[email] RESEND_API_KEY not set — skipping admin notification')
+    return
+  }
+
+  const adminUrl = `${SITE_URL}/admin/users`
+
+  const html = `
+    <div style="font-family:sans-serif;max-width:560px;margin:0 auto;color:#1a1a2e">
+      <div style="background:#1a3a6b;padding:24px 32px;border-radius:8px 8px 0 0">
+        <span style="color:#c9a227;font-weight:900;font-size:22px">ΔΤΔ Kappa Phi BC</span>
+      </div>
+      <div style="background:#f9f9f9;padding:32px;border-radius:0 0 8px 8px;border:1px solid #e0e0e0">
+        <h2 style="margin-top:0">New Member Registration — Action Required</h2>
+        <p><strong>${userName}</strong> (${userEmail}) has verified their email address and is waiting for account approval.</p>
+        <p>Please visit the admin panel to review and approve or deny their access:</p>
+        <a href="${adminUrl}" style="display:inline-block;background:#c9a227;color:#000;font-weight:700;padding:12px 28px;border-radius:6px;text-decoration:none;margin-top:8px">
+          Review in Admin Panel →
+        </a>
+        <p style="margin-top:32px;font-size:13px;color:#666">
+          Kappa Phi Building Corporation · Epsilon Nu Chapter · Missouri S&amp;T
+        </p>
+      </div>
+    </div>
+  `
+
+  const res = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      from: FROM,
+      to: [ADMIN_EMAIL],
+      subject: `New Member Registration: ${userName}`,
+      html,
+    }),
+  })
+
+  if (!res.ok) {
+    console.error('[email] Failed to send admin notification:', await res.text())
+  }
+}

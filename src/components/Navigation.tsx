@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
+import { logout } from '@/app/auth/actions'
 
 const navItems = [
   { label: 'Home', href: '/' },
@@ -16,7 +17,13 @@ const navItems = [
   { label: 'Portal', href: '/portal' },
 ]
 
-export default function Navigation() {
+type NavUser = {
+  email: string
+  firstName?: string
+  isAdmin: boolean
+}
+
+export default function Navigation({ navUser }: { navUser: NavUser | null }) {
   const pathname = usePathname()
   const [open, setOpen] = useState(false)
 
@@ -59,13 +66,50 @@ export default function Navigation() {
           ))}
         </nav>
 
-        {/* Alumni Login CTA */}
-        <Link
-          href="/alumni"
-          className="hidden lg:block ml-auto shrink-0 bg-kp-gold text-black font-bold px-4 py-2 rounded-lg text-sm no-underline hover:opacity-90 transition-opacity"
-        >
-          Alumni Login
-        </Link>
+        {/* Desktop right side — auth-aware */}
+        <div className="hidden lg:flex items-center gap-2 ml-auto shrink-0">
+          {navUser ? (
+            <>
+              {navUser.isAdmin && (
+                <Link
+                  href="/admin/users"
+                  className={`px-3 py-1.5 rounded-md text-sm font-medium no-underline transition-colors ${
+                    isActive('/admin')
+                      ? 'bg-kp-gold text-black'
+                      : 'text-blue-100 hover:bg-kp-blue-light hover:text-white'
+                  }`}
+                >
+                  Admin
+                </Link>
+              )}
+              <Link
+                href="/profile"
+                className={`px-3 py-1.5 rounded-md text-sm font-medium no-underline transition-colors ${
+                  isActive('/profile')
+                    ? 'bg-kp-gold text-black'
+                    : 'text-blue-100 hover:bg-kp-blue-light hover:text-white'
+                }`}
+              >
+                {navUser.firstName ? `${navUser.firstName}` : 'My Account'}
+              </Link>
+              <form action={logout}>
+                <button
+                  type="submit"
+                  className="px-3 py-1.5 rounded-md text-sm font-medium text-blue-200 hover:bg-kp-blue-light hover:text-white transition-colors"
+                >
+                  Sign Out
+                </button>
+              </form>
+            </>
+          ) : (
+            <Link
+              href="/login"
+              className="bg-kp-gold text-black font-bold px-4 py-2 rounded-lg text-sm no-underline hover:opacity-90 transition-opacity"
+            >
+              Alumni Login
+            </Link>
+          )}
+        </div>
 
         {/* Mobile hamburger */}
         <button
@@ -103,13 +147,51 @@ export default function Navigation() {
                 {item.label}
               </Link>
             ))}
-            <Link
-              href="/alumni"
-              onClick={() => setOpen(false)}
-              className="col-span-2 mt-2 text-center bg-kp-gold text-black font-bold px-4 py-2.5 rounded-lg text-sm no-underline hover:opacity-90"
-            >
-              Alumni Login
-            </Link>
+
+            {navUser ? (
+              <>
+                {navUser.isAdmin && (
+                  <Link
+                    href="/admin/users"
+                    onClick={() => setOpen(false)}
+                    className={`px-3 py-2.5 rounded-md text-sm font-medium no-underline transition-colors ${
+                      isActive('/admin')
+                        ? 'bg-kp-gold text-black'
+                        : 'text-blue-100 hover:bg-kp-blue-light hover:text-white'
+                    }`}
+                  >
+                    Admin
+                  </Link>
+                )}
+                <Link
+                  href="/profile"
+                  onClick={() => setOpen(false)}
+                  className={`px-3 py-2.5 rounded-md text-sm font-medium no-underline transition-colors ${
+                    isActive('/profile')
+                      ? 'bg-kp-gold text-black'
+                      : 'bg-kp-gold/10 text-kp-gold hover:bg-kp-gold/20'
+                  }`}
+                >
+                  {navUser.firstName ?? 'My Account'}
+                </Link>
+                <form action={logout} className="col-span-2 mt-1">
+                  <button
+                    type="submit"
+                    className="w-full text-center px-4 py-2.5 rounded-lg text-sm font-medium border border-blue-700 text-blue-300 hover:border-kp-gold hover:text-kp-gold transition-colors"
+                  >
+                    Sign Out
+                  </button>
+                </form>
+              </>
+            ) : (
+              <Link
+                href="/login"
+                onClick={() => setOpen(false)}
+                className="col-span-2 mt-2 text-center bg-kp-gold text-black font-bold px-4 py-2.5 rounded-lg text-sm no-underline hover:opacity-90"
+              >
+                Alumni Login
+              </Link>
+            )}
           </div>
         </div>
       )}
