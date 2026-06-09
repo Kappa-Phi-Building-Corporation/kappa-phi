@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { createClient } from '@/lib/supabase/server'
 
 const stats = [
   { number: '500+', label: 'Brothers Initiated' },
@@ -41,7 +42,11 @@ const gallery = [
   { src: '/images/stpats-parade.jpg', alt: 'St. Pats parade' },
 ]
 
-export default function Home() {
+export default async function Home() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  const isLoggedIn = !!user
+
   return (
     <>
       {/* ── Hero ── */}
@@ -75,10 +80,10 @@ export default function Home() {
 
             <div className="flex flex-wrap gap-3">
               <Link
-                href="/alumni"
+                href={isLoggedIn ? '/alumni' : '/login'}
                 className="bg-kp-gold text-black font-bold px-7 py-3.5 rounded-xl no-underline hover:opacity-90 transition-opacity text-sm"
               >
-                Alumni Login
+                {isLoggedIn ? 'Alumni Information' : 'Alumni Login'}
               </Link>
               <Link
                 href="/donations"
@@ -214,10 +219,10 @@ export default function Home() {
                   Make a Donation
                 </Link>
                 <Link
-                  href="/alumni"
+                  href={isLoggedIn ? '/alumni' : '/login'}
                   className="border border-white/40 text-white font-medium px-7 py-3 rounded-xl no-underline hover:border-kp-gold hover:text-kp-gold transition-colors text-sm"
                 >
-                  Alumni Portal
+                  {isLoggedIn ? 'Alumni Information' : 'Alumni Login'}
                 </Link>
               </div>
             </div>

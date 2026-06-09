@@ -8,7 +8,8 @@ const memberSections = [
   { label: 'Your Personal Profile', href: '/profile', soon: false },
   { label: 'Alumni Records & Contact Directory', href: '/alumni/directory', soon: false },
   { label: 'Big Brother Tree', href: '/alumni/tree', soon: false },
-  { label: 'Chapter Eternal Memorial & Missing Brothers', href: '/alumni/eternal', soon: true },
+  { label: 'Chapter Eternal Memorial', href: '/alumni/chapter-eternal', soon: false },
+  { label: 'Missing Brothers', href: '/alumni/missing', soon: true },
   { label: 'Board Minutes, Reports & Financial Info', href: '/alumni/board-docs', soon: true },
 ]
 

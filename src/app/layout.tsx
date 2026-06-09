@@ -17,21 +17,38 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  let navUser: { email: string; firstName?: string; isAdmin: boolean } | null = null
+  let navUser: { email: string; firstName?: string; isAdmin: boolean; adminPendingCount?: number } | null = null
 
   if (user) {
-    const { data: profile } = await createAdminClient()
+    const admin = createAdminClient()
+    const { data: profile } = await admin
       .from('profiles')
       .select('role')
       .eq('id', user.id)
       .single()
 
     const meta = (user.user_metadata ?? {}) as Record<string, string>
+    const isAdmin = profile?.role === 'admin'
+
+    let adminPendingCount: number | undefined
+    if (isAdmin) {
+      const [
+        { count: pendingUsers },
+        { count: pendingLinks },
+        { count: pendingChanges },
+      ] = await Promise.all([
+        admin.from('profiles').select('*', { count: 'exact', head: true }).eq('is_approved', false),
+        admin.from('profiles').select('*', { count: 'exact', head: true }).in('link_request_status', ['pending', 'conflict']),
+        admin.from('member_change_requests').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
+      ])
+      adminPendingCount = (pendingUsers ?? 0) + (pendingLinks ?? 0) + (pendingChanges ?? 0)
+    }
 
     navUser = {
       email: user.email ?? '',
       firstName: meta.first_name || undefined,
-      isAdmin: profile?.role === 'admin',
+      isAdmin,
+      adminPendingCount,
     }
   }
 

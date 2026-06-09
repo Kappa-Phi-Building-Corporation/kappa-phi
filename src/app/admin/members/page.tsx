@@ -24,7 +24,6 @@ export default async function AdminMembersPage({
   let query = admin
     .from('members')
     .select('id, first_name, last_name, badge_number, pledge_class, email, is_deceased, is_missing, hide_entry')
-    .order('badge_number', { ascending: true, nullsFirst: false })
 
   if (q) {
     query = query.or(
@@ -33,7 +32,16 @@ export default async function AdminMembersPage({
   }
 
   const { data: members } = await query.limit(500)
-  const rows = members ?? []
+
+  // Sort numerically — badge_number is TEXT so lexicographic DB sort is wrong
+  const rows = (members ?? []).sort((a, b) => {
+    const na = parseInt(a.badge_number ?? '', 10)
+    const nb = parseInt(b.badge_number ?? '', 10)
+    if (isNaN(na) && isNaN(nb)) return 0
+    if (isNaN(na)) return 1
+    if (isNaN(nb)) return -1
+    return na - nb
+  })
 
   return (
     <div className="bg-kp-dark min-h-screen">

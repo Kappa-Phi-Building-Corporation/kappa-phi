@@ -1,8 +1,147 @@
+import { createAdminClient } from '@/lib/supabase/admin'
+import PastEventsToggle from './PastEventsToggle'
+
 export const metadata = { title: 'Alumni Events & Calendar' }
 
-export default function EventsPage() {
+// Cache for 1 hour; revalidated on demand when admin saves an event
+export const revalidate = 3600
+
+function formatTime(t: string | null): string | null {
+  if (!t) return null
+  const match = t.match(/^(\d{1,2}):(\d{2})$/)
+  if (!match) return t
+  const h = parseInt(match[1])
+  const m = match[2]
+  const period = h >= 12 ? 'PM' : 'AM'
+  const h12 = h % 12 || 12
+  return m === '00' ? `${h12} ${period}` : `${h12}:${m} ${period}`
+}
+
+function fmtDate(d: string) {
+  return new Date(d + 'T12:00:00').toLocaleDateString('en-US', {
+    month: 'long', day: 'numeric', year: 'numeric',
+  })
+}
+
+function formatDateRange(start: string, end: string | null): string {
+  const startDate = new Date(start + 'T12:00:00')
+  const fmt = (d: Date) =>
+    d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+  if (!end) return fmt(startDate)
+  const endDate = new Date(end + 'T12:00:00')
+  if (startDate.getFullYear() === endDate.getFullYear()) {
+    if (startDate.getMonth() === endDate.getMonth()) {
+      return `${startDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}–${endDate.getDate()}, ${endDate.getFullYear()}`
+    }
+    return `${startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} – ${fmt(endDate)}`
+  }
+  return `${fmt(startDate)} – ${fmt(endDate)}`
+}
+
+type EventRow = {
+  id: string
+  title: string
+  description: string | null
+  start_date: string
+  end_date: string | null
+  start_time: string | null
+  end_time: string | null
+  location: string | null
+  link_label: string | null
+  link_url: string | null
+}
+
+const CalendarIcon = () => (
+  <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+  </svg>
+)
+
+function EventDateTime({ event }: { event: EventRow }) {
+  const startFmt = formatTime(event.start_time)
+  const endFmt = formatTime(event.end_time)
+  const isSingleDay = !event.end_date || event.end_date === event.start_date
+
+  if (isSingleDay) {
+    // Single day — put date and time on one line
+    return (
+      <div className="flex items-start gap-2.5 text-sm">
+        <span className="text-kp-gold mt-0.5"><CalendarIcon /></span>
+        <div>
+          <span className="text-white font-semibold">{fmtDate(event.start_date)}</span>
+          {startFmt && endFmt && (
+            <span className="text-gray-400"> &nbsp;·&nbsp; {startFmt} – {endFmt}</span>
+          )}
+          {startFmt && !endFmt && (
+            <span className="text-gray-400"> &nbsp;·&nbsp; Starting at {startFmt}</span>
+          )}
+        </div>
+      </div>
+    )
+  }
+
+  // Multi-day with no times — compact range is unambiguous
+  if (!startFmt && !endFmt) {
+    return (
+      <div className="flex items-center gap-2.5 text-sm">
+        <span className="text-kp-gold"><CalendarIcon /></span>
+        <span className="text-white font-semibold">{formatDateRange(event.start_date, event.end_date)}</span>
+      </div>
+    )
+  }
+
+  // Multi-day with at least one time — label each end explicitly
+  return (
+    <div className="flex items-start gap-2.5 text-sm">
+      <span className="text-kp-gold mt-0.5"><CalendarIcon /></span>
+      <div className="space-y-1.5">
+        <div className="flex items-baseline gap-2">
+          <span className="text-kp-gold text-xs font-bold uppercase tracking-wider w-9 shrink-0">Start</span>
+          <span className="text-white font-medium">
+            {fmtDate(event.start_date)}{startFmt ? ` at ${startFmt}` : ''}
+          </span>
+        </div>
+        <div className="flex items-baseline gap-2">
+          <span className="text-gray-500 text-xs font-bold uppercase tracking-wider w-9 shrink-0">End</span>
+          <span className="text-gray-300">
+            {fmtDate(event.end_date!)}{endFmt ? ` at ${endFmt}` : ''}
+          </span>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default async function EventsPage() {
+  const admin = createAdminClient()
+  const today = new Date().toISOString().split('T')[0]
+
+  const [{ data: upcomingRaw }, { data: pastRaw }] = await Promise.all([
+    admin
+      .from('events')
+      .select('id, title, description, start_date, end_date, start_time, end_time, location, link_label, link_url')
+      .eq('is_published', true)
+      .gte('start_date', today)
+      .order('start_date', { ascending: true }),
+    admin
+      .from('events')
+      .select('id, title, description, start_date, end_date, start_time, end_time, location, link_label, link_url')
+      .eq('is_published', true)
+      .lt('start_date', today)
+      .order('start_date', { ascending: false })
+      .limit(50),
+  ])
+
+  // Promote any multi-day event still in progress (started before today, ends today or later)
+  const inProgress = (pastRaw ?? []).filter(e => e.end_date && e.end_date >= today)
+  const trueUpcoming = upcomingRaw ?? []
+  const upcoming = [...inProgress, ...trueUpcoming]
+  const past = (pastRaw ?? []).filter(e => !e.end_date || e.end_date < today)
+
   return (
     <div className="bg-kp-dark min-h-screen">
+      {/* Hero */}
       <div
         className="border-b border-kp-border relative overflow-hidden"
         style={{
@@ -21,85 +160,67 @@ export default function EventsPage() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-12 space-y-6">
-        {/* St. Pats 2026 */}
-        <div className="bg-kp-surface border border-kp-border rounded-2xl overflow-hidden">
-          <div className="bg-kp-blue px-6 py-4 flex items-center justify-between">
-            <h2 className="text-kp-gold font-black text-lg">118th Annual St. Pats — 2026</h2>
-            <span className="text-blue-200 text-sm font-medium">March 11–15, 2026</span>
-          </div>
-          <div className="p-6 space-y-5">
-            <p className="text-kp-gold font-bold">GET FIRED UP about PATS 26!</p>
+      <div className="max-w-4xl mx-auto px-4 py-12 space-y-6">
 
-            {[
-              {
-                date: 'Wednesday, March 11',
-                items: [
-                  'Various — contact the Delt Ombudsman for general Pats activities',
-                  '7pm–10pm: FOL Casino Night · Havener Center, St. Pats Ballroom · $7 at the door',
-                ],
-              },
-              {
-                date: 'Thursday, March 12',
-                items: ['Noon: Gonzo & Games and beer garden at Schuman Park pavilion'],
-              },
-              {
-                date: 'Friday, March 13',
-                items: [
-                  'All day/night: Hanging at the Shelter',
-                  '8:30am: Screwdrivers & Donuts (and more) in the Great Room',
-                  'Noon: Gonzo & Games and beer garden at Schuman Park pavilion',
-                ],
-              },
-              {
-                date: 'Saturday, March 14',
-                items: [
-                  'Early Morning: Street Painting, Hair of the Dog',
-                  'Morning: Drinking on Pine, parade around 11am',
-                  '2pm: Housing Corporation general membership meeting',
-                ],
-              },
-              {
-                date: 'Sunday, March 15',
-                items: ['Go home safely! 🏠'],
-              },
-            ].map(({ date, items }) => (
-              <div key={date}>
-                <h3 className="text-white font-bold text-sm mb-2">{date}</h3>
-                <ul className="space-y-1.5">
-                  {items.map(item => (
-                    <li key={item} className="flex gap-2 text-gray-300 text-sm">
-                      <span className="text-kp-gold shrink-0 mt-0.5 text-xs">◆</span>
-                      {item}
-                    </li>
-                  ))}
-                </ul>
+        {/* Upcoming events */}
+        {upcoming.length === 0 ? (
+          <div className="bg-kp-surface border border-kp-border rounded-2xl px-6 py-10 text-center">
+            <div className="text-gray-500 text-sm">No upcoming events scheduled.</div>
+            <div className="text-gray-600 text-xs mt-1">Check back soon or follow us on social media for updates.</div>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <h2 className="text-xs font-bold uppercase tracking-widest text-kp-gold">Upcoming Events</h2>
+            {upcoming.map(event => (
+              <div
+                key={event.id}
+                className="bg-kp-surface border border-kp-gold/30 rounded-2xl overflow-hidden"
+              >
+                {/* Title only in header */}
+                <div className="bg-kp-blue/30 border-b border-kp-gold/20 px-6 py-4">
+                  <h3 className="text-kp-gold font-black text-lg leading-tight">{event.title}</h3>
+                </div>
+
+                <div className="p-6 space-y-4">
+                  {/* Date/time — unambiguous */}
+                  <EventDateTime event={event} />
+
+                  {event.location && (
+                    <div className="flex items-center gap-2.5 text-gray-400 text-sm">
+                      <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                          d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                      {event.location}
+                    </div>
+                  )}
+
+                  {event.description && (
+                    <p className="text-gray-300 text-sm leading-relaxed whitespace-pre-line">
+                      {event.description}
+                    </p>
+                  )}
+
+                  {event.link_url && event.link_label && (
+                    <div>
+                      <a
+                        href={event.link_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-block bg-kp-gold text-black font-bold px-5 py-2.5 rounded-lg text-sm no-underline hover:opacity-90 transition-opacity"
+                      >
+                        {event.link_label}
+                      </a>
+                    </div>
+                  )}
+                </div>
               </div>
             ))}
           </div>
-        </div>
+        )}
 
-        {/* HC Virtual Meeting */}
-        <div className="bg-kp-surface border border-kp-border rounded-2xl p-6">
-          <div className="flex items-start justify-between flex-wrap gap-3">
-            <div>
-              <h2 className="text-white font-bold text-lg mb-1">HC General Membership Meeting</h2>
-              <p className="text-gray-400 text-sm">Saturday, March 14, 2026 · 2pm–3pm CST · Virtual</p>
-            </div>
-            <a
-              href="https://meet.google.com/vgf-nqyd-pjn"
-              target="_blank" rel="noopener noreferrer"
-              className="bg-kp-gold text-black font-bold px-5 py-2.5 rounded-lg text-sm no-underline hover:opacity-90 transition-opacity shrink-0"
-            >
-              Join Google Meet
-            </a>
-          </div>
-          <p className="text-gray-500 text-xs mt-3">
-            Dial-in: +1 678-801-8110 · PIN: 725 458 954#
-          </p>
-        </div>
-
-        {/* Photo gallery strip */}
+        {/* Photo strip */}
         <div className="grid grid-cols-2 gap-3">
           {[
             { src: '/images/stpats-group.jpg', alt: 'St. Pats group' },
@@ -114,6 +235,9 @@ export default function EventsPage() {
             />
           ))}
         </div>
+
+        {/* Past events — collapsed */}
+        {past.length > 0 && <PastEventsToggle events={past} />}
 
         {/* Social */}
         <div className="bg-kp-blue rounded-2xl p-5 flex flex-wrap items-center gap-4">

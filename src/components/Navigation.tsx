@@ -21,6 +21,7 @@ type NavUser = {
   email: string
   firstName?: string
   isAdmin: boolean
+  adminPendingCount?: number
 }
 
 export default function Navigation({ navUser }: { navUser: NavUser | null }) {
@@ -72,14 +73,19 @@ export default function Navigation({ navUser }: { navUser: NavUser | null }) {
             <>
               {navUser.isAdmin && (
                 <Link
-                  href="/admin/users"
-                  className={`px-3 py-1.5 rounded-md text-sm font-medium no-underline transition-colors ${
+                  href="/admin"
+                  className={`relative px-3 py-1.5 rounded-md text-sm font-medium no-underline transition-colors ${
                     isActive('/admin')
                       ? 'bg-kp-gold text-black'
                       : 'text-blue-100 hover:bg-kp-blue-light hover:text-white'
                   }`}
                 >
                   Admin
+                  {(navUser.adminPendingCount ?? 0) > 0 && (
+                    <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] flex items-center justify-center rounded-full bg-amber-500 text-black text-[10px] font-bold px-1 leading-none">
+                      {navUser.adminPendingCount}
+                    </span>
+                  )}
                 </Link>
               )}
               <Link
@@ -152,15 +158,20 @@ export default function Navigation({ navUser }: { navUser: NavUser | null }) {
               <>
                 {navUser.isAdmin && (
                   <Link
-                    href="/admin/users"
+                    href="/admin"
                     onClick={() => setOpen(false)}
-                    className={`px-3 py-2.5 rounded-md text-sm font-medium no-underline transition-colors ${
+                    className={`relative px-3 py-2.5 rounded-md text-sm font-medium no-underline transition-colors ${
                       isActive('/admin')
                         ? 'bg-kp-gold text-black'
                         : 'text-blue-100 hover:bg-kp-blue-light hover:text-white'
                     }`}
                   >
                     Admin
+                    {(navUser.adminPendingCount ?? 0) > 0 && (
+                      <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] flex items-center justify-center rounded-full bg-amber-500 text-black text-[10px] font-bold px-1 leading-none">
+                        {navUser.adminPendingCount}
+                      </span>
+                    )}
                   </Link>
                 )}
                 <Link
