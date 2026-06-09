@@ -7,7 +7,11 @@ import EternalForm from '../EternalForm'
 
 export const metadata = { title: 'Add Memorial Entry' }
 
-export default async function NewEternalPage() {
+export default async function NewEternalPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ member_id?: string }>
+}) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
@@ -15,6 +19,13 @@ export default async function NewEternalPage() {
   const admin = createAdminClient()
   const { data: profile } = await admin.from('profiles').select('role').eq('id', user.id).single()
   if (profile?.role !== 'admin') redirect('/portal')
+
+  const { member_id: preselectedId } = await searchParams
+
+  const { data: allMembers } = await admin
+    .from('members')
+    .select('id, title, first_name, last_name, badge_number, pledge_class, initiation_date, passing_date')
+    .order('last_name')
 
   return (
     <div className="bg-kp-dark min-h-screen">
@@ -31,7 +42,12 @@ export default async function NewEternalPage() {
 
       <div className="max-w-3xl mx-auto px-4 py-8">
         <div className="bg-kp-surface border border-kp-border rounded-2xl p-8">
-          <EternalForm action={createEternalEntry} />
+          <EternalForm
+            mode="create"
+            allMembers={allMembers ?? []}
+            preselectedId={preselectedId}
+            action={createEternalEntry}
+          />
         </div>
       </div>
     </div>

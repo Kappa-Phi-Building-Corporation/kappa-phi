@@ -1,7 +1,12 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import dynamic from 'next/dynamic'
 import Link from 'next/link'
+import type { GeoMember } from './AlumniMap'
+
+// Leaflet uses window — must be client-only, no SSR
+const AlumniMap = dynamic(() => import('./AlumniMap'), { ssr: false })
 
 export type DirectoryMember = {
   id: string
@@ -33,6 +38,8 @@ export type DirectoryMember = {
   is_missing: boolean | null
   hide_entry: boolean | null
   updated_at: string | null
+  lat: number | null
+  lng: number | null
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -210,9 +217,16 @@ export default function AlumniDirectory({
   members: DirectoryMember[]
   isAdmin: boolean
 }) {
+  const [view, setView] = useState<'list' | 'map'>('list')
   const [search, setSearch] = useState('')
   const [page, setPage] = useState(0)
   const [selected, setSelected] = useState<DirectoryMember | null>(null)
+
+  // Members with geocoded coordinates for the map view
+  const geoMembers = useMemo(
+    () => members.filter((m): m is GeoMember => m.lat != null && m.lng != null),
+    [members]
+  )
 
   // Sort by badge number numerically ascending
   const sorted = useMemo(() =>
@@ -253,28 +267,71 @@ export default function AlumniDirectory({
   return (
     <div className="flex h-full">
 
-      {/* ── List panel ───────────────────────────────────────────────────── */}
+      {/* ── Left panel: list OR map ──────────────────────────────────────── */}
       <div className={`
         flex flex-col border-r border-kp-border bg-kp-dark
         ${selected ? 'hidden lg:flex lg:w-2/5' : 'flex w-full lg:w-2/5'}
       `}>
-        {/* Search */}
+        {/* Search + view toggle */}
         <div className="p-4 border-b border-kp-border shrink-0">
-          <input
-            type="search"
-            placeholder="Search name, badge, city…"
-            value={search}
-            onChange={e => handleSearch(e.target.value)}
-            className="w-full bg-kp-card border border-kp-border rounded-lg px-3 py-2 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-kp-blue focus:ring-1 focus:ring-kp-blue transition-colors"
-          />
-          <p className="text-xs text-gray-600 mt-1.5">
-            {filtered.length} member{filtered.length !== 1 ? 's' : ''}
-            {pageCount > 1 && ` · page ${page + 1} of ${pageCount}`}
+          <div className="flex gap-2 mb-2">
+            <input
+              type="search"
+              placeholder="Search name, badge, city…"
+              value={search}
+              onChange={e => handleSearch(e.target.value)}
+              className="flex-1 bg-kp-card border border-kp-border rounded-lg px-3 py-2 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-kp-blue focus:ring-1 focus:ring-kp-blue transition-colors"
+            />
+            {/* List / Map toggle */}
+            <div className="flex shrink-0 rounded-lg border border-kp-border overflow-hidden">
+              <button
+                onClick={() => setView('list')}
+                className={`px-3 py-2 text-xs font-semibold transition-colors ${
+                  view === 'list'
+                    ? 'bg-kp-gold text-black'
+                    : 'bg-kp-card text-gray-400 hover:text-kp-gold'
+                }`}
+              >
+                List
+              </button>
+              <button
+                onClick={() => setView('map')}
+                className={`px-3 py-2 text-xs font-semibold border-l border-kp-border transition-colors ${
+                  view === 'map'
+                    ? 'bg-kp-gold text-black'
+                    : 'bg-kp-card text-gray-400 hover:text-kp-gold'
+                }`}
+              >
+                Map
+              </button>
+            </div>
+          </div>
+          <p className="text-xs text-gray-600">
+            {view === 'list'
+              ? <>
+                  {filtered.length} member{filtered.length !== 1 ? 's' : ''}
+                  {pageCount > 1 && ` · page ${page + 1} of ${pageCount}`}
+                </>
+              : <>
+                  {geoMembers.length} of {members.length} member{members.length !== 1 ? 's' : ''} on map
+                </>
+            }
           </p>
         </div>
 
-        {/* Table */}
-        <div className="overflow-y-auto flex-1 min-h-0">
+        {/* Map view */}
+        {view === 'map' && (
+          <div className="flex-1 min-h-0 relative">
+            <AlumniMap
+              members={geoMembers}
+              selected={selected}
+              onSelect={m => setSelected(m)}
+            />
+          </div>
+        )}
+
+        {/* List view — table */}
+        {view === 'list' && <div className="overflow-y-auto flex-1 min-h-0">
           <table className="w-full text-sm">
             <thead className="sticky top-0 bg-kp-surface z-10">
               <tr className="border-b border-kp-border">
@@ -336,10 +393,10 @@ export default function AlumniDirectory({
               )}
             </tbody>
           </table>
-        </div>
+        </div>}
 
-        {/* Pagination */}
-        {pageCount > 1 && (
+        {/* Pagination — list mode only */}
+        {view === 'list' && pageCount > 1 && (
           <div className="shrink-0 px-4 py-3 border-t border-kp-border flex items-center justify-between gap-2">
             <button
               onClick={() => setPage(p => Math.max(0, p - 1))}

@@ -43,6 +43,7 @@ export type MemberRow = {
   past_member_advisory: boolean | null
   is_deceased: boolean | null
   is_missing: boolean | null
+  initiation_date: string | null
 }
 
 export type AccountData = {
@@ -189,6 +190,11 @@ export default function ProfileForm({
           <ReadRow label="Nickname" value={member?.nickname} />
           <ReadRow label="Badge Number" value={member?.badge_number} />
           <ReadRow label="Pledge Class" value={member?.pledge_class} />
+          <ReadRow label="Initiation Date" value={
+            member?.initiation_date
+              ? new Date(member.initiation_date + 'T12:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+              : null
+          } />
           <ReadRow label="Big Brother" value={bigBrotherName ? `${bigBrotherName.first_name ?? ''} ${bigBrotherName.last_name ?? ''}`.trim() : null} />
           <ReadRow label="Graduation Year" value={member?.graduation_year} />
           <ReadRow label="Mobile Phone" value={member?.mobile_phone ?? member?.phone} />
@@ -393,6 +399,7 @@ export default function ProfileForm({
               <F   label="Badge Number"    name="badge_number"    value={member?.badge_number} />
               <F   label="Pledge Class"    name="pledge_class"    value={member?.pledge_class} />
               <Sel label="Big Brother"     name="big_brother_id"  value={member?.big_brother_id} options={bigBrotherOpts} />
+              <F   label="Initiation Date" name="initiation_date" value={member?.initiation_date} type="date" />
             </>
           )}
           <F   label="Graduation Year"              name="graduation_year"        value={member?.graduation_year} type="number" placeholder="2005" />

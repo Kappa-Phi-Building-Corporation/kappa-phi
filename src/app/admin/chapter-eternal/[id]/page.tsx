@@ -2,9 +2,8 @@ import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { updateEternalEntry, deleteEternalEntry } from '../actions'
+import { updateEternalEntry } from '../actions'
 import EternalForm from '../EternalForm'
-import DeleteEternalButton from '../DeleteEternalButton'
 
 export const metadata = { title: 'Edit Memorial Entry' }
 
@@ -26,14 +25,13 @@ export default async function EditEternalPage({
 
   const { data: member } = await admin
     .from('members')
-    .select('first_name, last_name, title, badge_number, pledge_class, initiation_date, passing_date, memorial_link_url, photo_url')
+    .select('first_name, last_name, title, badge_number, pledge_class, initiation_date, passing_date, memorial_link_url, photo_url, hide_entry')
     .eq('id', id)
     .single()
   if (!member) notFound()
 
   const { success, error } = await searchParams
   const updateThis = updateEternalEntry.bind(null, id)
-  const deleteThis = deleteEternalEntry.bind(null, id)
 
   return (
     <div className="bg-kp-dark min-h-screen">
@@ -64,15 +62,13 @@ export default async function EditEternalPage({
         )}
 
         <div className="bg-kp-surface border border-kp-border rounded-2xl p-8">
-          <EternalForm action={updateThis} member={member} />
+          <EternalForm mode="edit" action={updateThis} member={member} />
         </div>
 
-        <div className="bg-kp-surface border border-red-900/40 rounded-2xl p-6">
-          <h3 className="text-sm font-bold text-red-400 mb-1">Remove from Memorial</h3>
-          <p className="text-gray-500 text-xs mb-4">
-            Permanently deletes this entry and its photo. This cannot be undone.
-          </p>
-          <DeleteEternalButton action={deleteThis} />
+        <div className="bg-kp-card border border-kp-border rounded-xl px-5 py-4 text-xs text-gray-500">
+          To permanently remove someone from the memorial, uncheck &ldquo;Show on public memorial page&rdquo; above
+          and mark their member record as not deceased in{' '}
+          <Link href="/admin/members" className="text-kp-gold hover:underline">Member Records</Link>.
         </div>
       </div>
     </div>

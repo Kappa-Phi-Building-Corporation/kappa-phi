@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { geocodeFallback } from '@/lib/geocode'
 import AlumniDirectory from './AlumniDirectory'
 
 export const metadata = { title: 'Alumni Directory' }
@@ -32,7 +33,8 @@ export default async function AlumniDirectoryPage() {
       address_street, address_city, address_state, address_zip,
       employer, occupation,
       member_kpbc, member_advisory, past_member_advisory,
-      is_deceased, is_missing, hide_entry, updated_at
+      is_deceased, is_missing, hide_entry, updated_at,
+      lat, lng
     `)
     .not('first_name', 'is', null)
     .not('badge_number', 'is', null)
@@ -42,9 +44,17 @@ export default async function AlumniDirectoryPage() {
     query = query.or('hide_entry.is.null,hide_entry.eq.false')
   }
 
-  const { data: members } = await query
+  const { data: raw } = await query
 
-  const count = members?.length ?? 0
+  // Use DB-stored coordinates (precise, geocoded when address was last saved).
+  // Fall back to local zip/city lookup for members not yet geocoded.
+  const members = (raw ?? []).map(m => {
+    if (m.lat != null && m.lng != null) return m
+    const fallback = geocodeFallback(m)
+    return { ...m, lat: fallback?.lat ?? null, lng: fallback?.lng ?? null }
+  })
+
+  const count = members.length
 
   return (
     <div className="bg-kp-dark flex flex-col h-[calc(100vh-4rem)]">

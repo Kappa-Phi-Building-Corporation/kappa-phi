@@ -24,6 +24,7 @@ export default async function AdminDashboardPage() {
     { count: totalMembers },
     { count: upcomingEvents },
     { count: eternalCount },
+    { count: eternalPending },
     { count: boardCount },
     { count: propertyCount },
   ] = await Promise.all([
@@ -42,9 +43,16 @@ export default async function AdminDashboardPage() {
       .select('*', { count: 'exact', head: true })
       .eq('is_published', true)
       .gte('start_date', today),
+    // Deceased members who have a chapter eternal entry
     admin.from('members')
       .select('*', { count: 'exact', head: true })
-      .eq('is_deceased', true),
+      .eq('is_deceased', true)
+      .not('passing_date', 'is', null),
+    // Deceased members who still need a chapter eternal entry
+    admin.from('members')
+      .select('*', { count: 'exact', head: true })
+      .eq('is_deceased', true)
+      .is('passing_date', null),
     admin.from('board_members')
       .select('*', { count: 'exact', head: true })
       .eq('is_active', true),
@@ -127,8 +135,8 @@ export default async function AdminDashboardPage() {
       title: 'Chapter Eternal',
       href: '/admin/chapter-eternal',
       description: 'Manage the memorial page for brothers who have passed to Chapter Eternal.',
-      pending: 0,
-      pendingLabel: '',
+      pending: eternalPending ?? 0,
+      pendingLabel: 'need entry',
       total: eternalCount ?? 0,
       totalLabel: 'entries',
       icon: (
@@ -170,7 +178,7 @@ export default async function AdminDashboardPage() {
     },
   ]
 
-  const totalPending = (pendingUsers ?? 0) + (pendingLinks ?? 0) + (pendingChanges ?? 0)
+  const totalPending = (pendingUsers ?? 0) + (pendingLinks ?? 0) + (pendingChanges ?? 0) + (eternalPending ?? 0)
 
   return (
     <div className="bg-kp-dark min-h-screen">

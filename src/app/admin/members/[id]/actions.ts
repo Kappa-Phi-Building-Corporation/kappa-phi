@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { requireAdmin } from '../../users/actions'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { geocodeMemberFull } from '@/lib/geocode'
 
 function str(v: FormDataEntryValue | null) { return (v as string) || null }
 function bool(v: FormDataEntryValue | null) { return v === 'on' }
@@ -47,8 +48,23 @@ function memberPayload(formData: FormData) {
     past_member_advisory:    bool(formData.get('past_member_advisory')),
     is_deceased:             bool(formData.get('is_deceased')),
     is_missing:              bool(formData.get('is_missing')),
+    initiation_date:         str(formData.get('initiation_date')) || null,
     updated_at:              new Date().toISOString(),
   }
+}
+
+// Extract address fields from form and geocode, storing result in DB.
+// Priority: full street address → zip code → city/state.
+async function geocodeAndStore(admin: ReturnType<typeof createAdminClient>, memberId: string, formData: FormData) {
+  const addr = {
+    address_street: str(formData.get('address_street')),
+    address_city:   str(formData.get('address_city')),
+    address_state:  str(formData.get('address_state')),
+    address_zip:    str(formData.get('address_zip')),
+  }
+  const hasAddress = !!(addr.address_street || addr.address_city || addr.address_zip)
+  const coords = hasAddress ? await geocodeMemberFull(addr) : null
+  await admin.from('members').update({ lat: coords?.lat ?? null, lng: coords?.lng ?? null }).eq('id', memberId)
 }
 
 export async function createMember(formData: FormData) {
@@ -62,6 +78,9 @@ export async function createMember(formData: FormData) {
     .single()
 
   if (error) redirect(`/admin/members/new?error=${encodeURIComponent(error.message)}`)
+
+  // Geocode after insert (non-blocking redirect if this takes a moment)
+  await geocodeAndStore(admin, newMember.id, formData)
 
   revalidatePath('/admin/members')
   redirect(`/admin/members/${newMember.id}?saved=1`)
@@ -80,6 +99,9 @@ export async function updateMemberById(formData: FormData) {
     .eq('id', memberId)
 
   if (error) redirect(`/admin/members/${memberId}?error=${encodeURIComponent(error.message)}`)
+
+  // Re-geocode with updated address (street → zip → city/state priority)
+  await geocodeAndStore(admin, memberId, formData)
 
   revalidatePath(`/admin/members/${memberId}`)
   revalidatePath('/admin/members')
