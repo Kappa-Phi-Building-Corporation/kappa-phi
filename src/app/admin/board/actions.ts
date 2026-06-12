@@ -1,4 +1,4 @@
-'use server'
+﻿'use server'
 
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
@@ -13,7 +13,7 @@ async function assertAdmin() {
   if (!user) redirect('/login')
   const admin = createAdminClient()
   const { data: profile } = await admin.from('profiles').select('role').eq('id', user.id).single()
-  if (profile?.role !== 'admin') redirect('/portal')
+  if (profile?.role !== 'admin' && profile?.role !== 'website_admin') redirect('/portal')
   return admin
 }
 

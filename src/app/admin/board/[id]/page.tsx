@@ -1,4 +1,4 @@
-import { redirect, notFound } from 'next/navigation'
+﻿import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
@@ -22,7 +22,7 @@ export default async function EditBoardMemberPage({
 
   const admin = createAdminClient()
   const { data: profile } = await admin.from('profiles').select('role').eq('id', user.id).single()
-  if (profile?.role !== 'admin') redirect('/portal')
+  if (profile?.role !== 'admin' && profile?.role !== 'website_admin') redirect('/portal')
 
   const { data: member } = await admin
     .from('board_members')
@@ -41,7 +41,7 @@ export default async function EditBoardMemberPage({
         <div className="max-w-3xl mx-auto px-4 py-8">
           <Link href="/admin/board"
             className="text-gray-500 text-sm hover:text-kp-gold transition-colors mb-3 inline-block no-underline">
-            ← Back to Board Members
+            â† Back to Board Members
           </Link>
           <div className="text-kp-gold text-xs font-bold uppercase tracking-widest mb-1">Administration</div>
           <h1 className="text-3xl font-black text-white">Edit Board Member</h1>

@@ -89,7 +89,7 @@ export default function DonationsPage() {
         </div>
 
         {/* Scholarship */}
-        <div className="bg-kp-blue rounded-2xl p-8">
+        <div className="bg-kp-blue-dark rounded-2xl p-8">
           <h2 className="text-kp-gold font-black text-2xl mb-2">Byron N. Vermillion Memorial Scholarship Fund</h2>
           <p className="text-blue-100 leading-relaxed mb-6">
             Donations to the Vermillion Scholarship Fund are <strong className="text-white">tax deductible</strong>.

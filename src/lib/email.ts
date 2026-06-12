@@ -54,3 +54,66 @@ export async function sendAdminNewUserEmail(userName: string, userEmail: string)
     console.error('[email] Failed to send admin notification:', await res.text())
   }
 }
+
+function escapeHtml(value: string) {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+}
+
+export async function sendPropertyIssueEmail(report: {
+  name: string
+  email: string
+  phone: string
+  message: string
+}) {
+  const apiKey = process.env.RESEND_API_KEY
+  if (!apiKey) {
+    console.warn('[email] RESEND_API_KEY not set — skipping property issue notification')
+    return false
+  }
+
+  const to = process.env.PROPERTY_ISSUE_EMAIL || ADMIN_EMAIL
+
+  const html = `
+    <div style="font-family:sans-serif;max-width:560px;margin:0 auto;color:#1a1a2e">
+      <div style="background:#1a3a6b;padding:24px 32px;border-radius:8px 8px 0 0">
+        <span style="color:#c9a227;font-weight:900;font-size:22px">ΔΤΔ Kappa Phi BC</span>
+      </div>
+      <div style="background:#f9f9f9;padding:32px;border-radius:0 0 8px 8px;border:1px solid #e0e0e0">
+        <h2 style="margin-top:0">Property Issue Reported</h2>
+        <p><strong>Name:</strong> ${escapeHtml(report.name)}</p>
+        <p><strong>Email:</strong> ${escapeHtml(report.email)}</p>
+        <p><strong>Phone:</strong> ${escapeHtml(report.phone)}</p>
+        <p><strong>Description:</strong></p>
+        <p style="white-space:pre-wrap">${escapeHtml(report.message)}</p>
+        <p style="margin-top:32px;font-size:13px;color:#666">
+          Kappa Phi Building Corporation · Epsilon Nu Chapter · Missouri S&amp;T
+        </p>
+      </div>
+    </div>
+  `
+
+  const res = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      from: FROM,
+      to: [to],
+      reply_to: report.email,
+      subject: `Property Issue Report: ${report.name}`,
+      html,
+    }),
+  })
+
+  if (!res.ok) {
+    console.error('[email] Failed to send property issue notification:', await res.text())
+    return false
+  }
+  return true
+}

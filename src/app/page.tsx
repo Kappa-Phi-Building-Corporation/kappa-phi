@@ -69,10 +69,15 @@ export default async function Home() {
               Epsilon Nu · Delta Tau Delta · Missouri S&T
             </div>
 
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-black text-white leading-[1.05] mb-5">
-              Kappa Phi<br />
-              <span className="text-kp-gold">Building Corp.</span>
-            </h1>
+            <div className="flex items-center gap-5 mb-5">
+              <div className="w-24 h-24 md:w-32 md:h-32 bg-white rounded-2xl shadow-lg shadow-black/30 p-2 flex items-center justify-center shrink-0">
+                <img src="/images/coat-of-arms.png" alt="Kappa Phi coat of arms" className="w-full h-full object-contain" />
+              </div>
+              <h1 className="text-5xl md:text-6xl lg:text-7xl font-black text-white leading-[1.05]">
+                Kappa Phi<br />
+                <span className="text-kp-gold">Building Corp.</span>
+              </h1>
+            </div>
 
             <p className="text-gray-200 text-xl mb-8 leading-relaxed max-w-lg">
               Supporting brotherhood, housing, and alumni engagement at Missouri University of Science &amp; Technology since 1963.
@@ -103,7 +108,7 @@ export default async function Home() {
       </section>
 
       {/* ── Stats Bar ── */}
-      <section className="bg-kp-blue border-y-2 border-kp-gold py-7">
+      <section className="bg-kp-blue-dark border-y-2 border-kp-gold py-7">
         <div className="max-w-7xl mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
             {stats.map(s => (

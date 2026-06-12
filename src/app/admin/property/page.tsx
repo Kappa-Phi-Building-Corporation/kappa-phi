@@ -1,4 +1,4 @@
-import { redirect } from 'next/navigation'
+﻿import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
@@ -24,7 +24,7 @@ export default async function AdminPropertyPage({
 
   const admin = createAdminClient()
   const { data: profile } = await admin.from('profiles').select('role').eq('id', user.id).single()
-  if (profile?.role !== 'admin') redirect('/portal')
+  if (profile?.role !== 'admin' && profile?.role !== 'website_admin') redirect('/portal')
 
   // Planned and recent sorted by sort_order; archive sorted by updated_at DESC (newest-archived first)
   const [{ data: activeProjects }, { data: archiveProjects }] = await Promise.all([
@@ -54,7 +54,7 @@ export default async function AdminPropertyPage({
         <div className="max-w-5xl mx-auto px-4 py-10 flex items-end justify-between gap-4">
           <div>
             <Link href="/admin" className="text-gray-500 text-sm hover:text-kp-gold transition-colors mb-3 inline-block no-underline">
-              ← Admin Dashboard
+              â† Admin Dashboard
             </Link>
             <div className="text-kp-gold text-xs font-bold uppercase tracking-widest mb-2">Administration</div>
             <h1 className="text-4xl font-black text-white">Property Management</h1>
@@ -101,7 +101,7 @@ export default async function AdminPropertyPage({
                           <div className="text-gray-500 text-xs mt-0.5">
                             {p.scheduled_date && `Scheduled: ${p.scheduled_date}`}
                             {p.completed_date && `Completed: ${p.completed_date}`}
-                            {p.cost && ` · ${p.cost}`}
+                            {p.cost && ` Â· ${p.cost}`}
                           </div>
                         </div>
 

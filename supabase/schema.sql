@@ -60,7 +60,7 @@ CREATE TABLE public.profiles (
   id          UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   member_id   UUID REFERENCES public.members(id) ON DELETE SET NULL,
   is_approved BOOLEAN NOT NULL DEFAULT FALSE,
-  role        TEXT    NOT NULL DEFAULT 'member' CHECK (role IN ('member', 'admin')),
+  role        TEXT    NOT NULL DEFAULT 'member' CHECK (role IN ('member', 'admin', 'website_admin')),
   created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );

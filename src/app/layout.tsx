@@ -29,6 +29,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
     const meta = (user.user_metadata ?? {}) as Record<string, string>
     const isAdmin = profile?.role === 'admin'
+    const isWebsiteAdmin = profile?.role === 'website_admin'
 
     let adminPendingCount: number | undefined
     if (isAdmin) {
@@ -36,18 +37,26 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         { count: pendingUsers },
         { count: pendingLinks },
         { count: pendingChanges },
+        { count: eternalPending },
       ] = await Promise.all([
         admin.from('profiles').select('*', { count: 'exact', head: true }).eq('is_approved', false),
         admin.from('profiles').select('*', { count: 'exact', head: true }).in('link_request_status', ['pending', 'conflict']),
         admin.from('member_change_requests').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
+        admin.from('members').select('*', { count: 'exact', head: true }).eq('is_deceased', true).is('passing_date', null),
       ])
-      adminPendingCount = (pendingUsers ?? 0) + (pendingLinks ?? 0) + (pendingChanges ?? 0)
+      adminPendingCount = (pendingUsers ?? 0) + (pendingLinks ?? 0) + (pendingChanges ?? 0) + (eternalPending ?? 0)
+    } else if (isWebsiteAdmin) {
+      const { count: eternalPending } = await admin.from('members')
+        .select('*', { count: 'exact', head: true })
+        .eq('is_deceased', true)
+        .is('passing_date', null)
+      adminPendingCount = eternalPending ?? 0
     }
 
     navUser = {
       email: user.email ?? '',
       firstName: meta.first_name || undefined,
-      isAdmin,
+      isAdmin: isAdmin || isWebsiteAdmin,
       adminPendingCount,
     }
   }

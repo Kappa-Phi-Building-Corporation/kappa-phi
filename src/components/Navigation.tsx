@@ -41,8 +41,8 @@ export default function Navigation({ navUser }: { navUser: NavUser | null }) {
           onClick={() => setOpen(false)}
           className="flex items-center gap-3 no-underline shrink-0"
         >
-          <div className="w-9 h-9 bg-kp-gold rounded-lg flex items-center justify-center">
-            <span className="text-black font-black text-sm tracking-tight">ΔΤΔ</span>
+          <div className="w-9 h-9 bg-white rounded-lg p-1 flex items-center justify-center shrink-0">
+            <img src="/images/coat-of-arms.png" alt="Kappa Phi coat of arms" className="w-full h-full object-contain" />
           </div>
           <div className="leading-tight hidden sm:block">
             <div className="text-kp-gold font-bold text-sm">Kappa Phi BC</div>

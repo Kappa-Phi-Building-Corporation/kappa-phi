@@ -202,9 +202,13 @@ export default async function PropertyPage() {
 
       <div className="max-w-7xl mx-auto px-4 py-12 space-y-14">
 
-        {/* Intro + awards photo */}
-        <div className="flex flex-col md:flex-row gap-5 items-stretch">
-          <div className="bg-kp-surface border border-kp-border rounded-2xl p-6 md:p-8 flex-1">
+        {/* Intro + house photo */}
+        <div className="space-y-5">
+          <div
+            className="w-full aspect-[927/280] rounded-2xl bg-kp-card"
+            style={{ backgroundImage: "url('/images/EN-house-front.jpg')", backgroundSize: 'cover', backgroundPosition: 'center' }}
+          />
+          <div className="bg-kp-surface border border-kp-border rounded-2xl p-6 md:p-8">
             <p className="text-gray-300 text-sm leading-relaxed">
               The amenities we provide the men of Epsilon Nu allow them to concentrate on the fundamentals
               of the Fraternity — as demonstrated by the 5 Court of Honor and 3 Hugh Shields Awards won in the
@@ -216,10 +220,6 @@ export default async function PropertyPage() {
               <a href="mailto:kappaphi@kappa-phi.org" className="text-kp-gold">VP of Property Management</a>.
             </p>
           </div>
-          <div
-            className="w-full md:w-72 min-h-48 rounded-2xl bg-kp-card shrink-0"
-            style={{ backgroundImage: "url('/images/awards-wall.jpg')", backgroundSize: 'cover', backgroundPosition: 'center' }}
-          />
         </div>
 
         {/* Planned */}

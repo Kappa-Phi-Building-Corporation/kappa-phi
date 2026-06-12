@@ -133,7 +133,7 @@ function ReadRow({ label, value }: { label: string; value?: string | number | nu
 
 const TITLES  = [{ v:'Mr.',l:'Mr.'},{v:'Mrs.',l:'Mrs.'},{v:'Ms.',l:'Ms.'},{v:'Dr.',l:'Dr.'},{v:'Rev.',l:'Rev.'},{v:'Prof.',l:'Prof.'}]
 const MARITAL = [{ v:'Single',l:'Single'},{v:'Married',l:'Married'},{v:'Divorced',l:'Divorced'},{v:'Widowed',l:'Widowed'}]
-const ROLES   = [{ v:'member',l:'Member'},{v:'admin',l:'Admin'}]
+const ROLES   = [{ v:'member',l:'Member'},{v:'website_admin',l:'Website Admin'},{v:'admin',l:'Admin'}]
 
 // ── Main component ────────────────────────────────────────────────────────────
 export default function ProfileForm({

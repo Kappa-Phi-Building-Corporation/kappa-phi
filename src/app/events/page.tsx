@@ -240,7 +240,7 @@ export default async function EventsPage() {
         {past.length > 0 && <PastEventsToggle events={past} />}
 
         {/* Social */}
-        <div className="bg-kp-blue rounded-2xl p-5 flex flex-wrap items-center gap-4">
+        <div className="bg-kp-blue-dark rounded-2xl p-5 flex flex-wrap items-center gap-4">
           <p className="text-blue-100 text-sm flex-1">Stay up to date — follow the chapter on social media</p>
           <div className="flex gap-3">
             <a href="https://www.facebook.com/endelts" target="_blank" rel="noopener noreferrer"

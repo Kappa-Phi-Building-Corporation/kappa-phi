@@ -1,4 +1,4 @@
-import { redirect, notFound } from 'next/navigation'
+﻿import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
@@ -22,7 +22,7 @@ export default async function EditProjectPage({
 
   const admin = createAdminClient()
   const { data: profile } = await admin.from('profiles').select('role').eq('id', user.id).single()
-  if (profile?.role !== 'admin') redirect('/portal')
+  if (profile?.role !== 'admin' && profile?.role !== 'website_admin') redirect('/portal')
 
   const [{ data: project }, { data: photos }] = await Promise.all([
     admin
@@ -56,7 +56,7 @@ export default async function EditProjectPage({
         <div className="max-w-3xl mx-auto px-4 py-8">
           <Link href="/admin/property"
             className="text-gray-500 text-sm hover:text-kp-gold transition-colors mb-3 inline-block no-underline">
-            ← Back to Property Management
+            â† Back to Property Management
           </Link>
           <div className="text-kp-gold text-xs font-bold uppercase tracking-widest mb-1">Administration</div>
           <h1 className="text-3xl font-black text-white">Edit Project</h1>
@@ -102,7 +102,7 @@ export default async function EditProjectPage({
                         title="Remove photo"
                         className="w-7 h-7 rounded-full bg-black/80 border border-red-700 text-red-400 hover:bg-red-900 transition-colors flex items-center justify-center text-xs font-bold"
                       >
-                        ✕
+                        âœ•
                       </button>
                     </form>
                   </div>

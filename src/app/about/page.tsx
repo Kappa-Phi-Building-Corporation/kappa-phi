@@ -1,6 +1,8 @@
 import Link from 'next/link'
+import { createAdminClient } from '@/lib/supabase/admin'
 
 export const metadata = { title: 'About Kappa Phi' }
+export const revalidate = 3600
 
 // ─── Founders ─────────────────────────────────────────────────────
 
@@ -79,211 +81,6 @@ const historyChapters = [
   },
 ]
 
-// ─── Honor Rolls ──────────────────────────────────────────────────
-
-const studentKnights = [
-  { year: '1965', name: 'Gary M. Woodard' },
-  { year: '1966', name: 'David Smith' },
-  { year: '1967', name: 'James C. Cowles, Jr.' },
-  { year: '1968', name: 'Walter D. Dietrich' },
-  { year: '1969', name: 'Virgil A. Deshazer' },
-  { year: '1970', name: 'Richard Campen' },
-  { year: '1971', name: 'James W. Walker' },
-  { year: '1972', name: 'Roy B. Woods' },
-  { year: '1973', name: 'Paul E. Erlandson' },
-  { year: '1974', name: 'William L. Morley' },
-  { year: '1975', name: 'David L. Lyon' },
-  { year: '1976', name: 'Merle Dillow' },
-  { year: '1977', name: 'William J. Tierney' },
-  { year: '1978', name: 'Eddie H. Doss' },
-  { year: '1979', name: 'Thomas H. Schmitt' },
-  { year: '1980', name: 'David K. Hall' },
-  { year: '1981', name: 'David E. Dubois' },
-  { year: '1982', name: 'Clarence Miller' },
-  { year: '1983', name: 'David A. Robben' },
-  { year: '1984', name: 'Christopher S. Greenwood' },
-  { year: '1985', name: 'Steven M. Bretzke' },
-  { year: '1986', name: 'Terry T. Palisch' },
-  { year: '1987', name: 'Craig A. Thomas' },
-  { year: '1988', name: 'Frederick T. Miller' },
-  { year: '1989', name: 'Andrew P. Jones' },
-  { year: '1990', name: 'Charles M. Pulay' },
-  { year: '1991', name: 'John D. Pulay' },
-  { year: '1992', name: 'Timothy A. Stelljes' },
-  { year: '1993', name: 'Brian K. Verman' },
-  { year: '1995', name: 'Matthew L. Leap' },
-  { year: '1996', name: 'Keith R. Dandurand' },
-  { year: '1997', name: 'Samuel D. Erter' },
-  { year: '1998', name: 'Liem D. T. Nguyen' },
-  { year: '1999', name: 'Jeff Heckman' },
-  { year: '2000', name: 'Gary Roberts' },
-  { year: '2001', name: 'Daniel Woodcock' },
-  { year: '2002', name: 'Daniel Maddex' },
-  { year: '2003', name: 'James Henken' },
-  { year: '2004', name: 'Corey Ernst' },
-  { year: '2005', name: 'Brian Schwegal' },
-  { year: '2006', name: 'Mike Scherr' },
-  { year: '2007', name: 'Bryan Madson' },
-  { year: '2008', name: 'Marshall King' },
-]
-
-const highestGPA: { term: string; names: string[] }[] = [
-  { term: "Fall '65", names: ['Bob McDavid'] },
-  { term: "Spg '66", names: ['Gerald Miller'] },
-  { term: "Spg '68", names: ['Charles Parks'] },
-  { term: "Fall '68", names: ['David Holdener'] },
-  { term: "Fall '69", names: ['Richard Smith'] },
-  { term: "Fall '70", names: ['John Morrissey'] },
-  { term: "Spg '71", names: ['Sandy Cambell'] },
-  { term: "Fall '71", names: ['Bob Jones'] },
-  { term: "Fall '73", names: ['Bill Van Veghte III'] },
-  { term: "Spg '74", names: ['Ed Doss'] },
-  { term: "Fall '74", names: ['Marc Bunz'] },
-  { term: "Fall '75", names: ['John Trousdale'] },
-  { term: "Fall '76", names: ['Jeff Sheets'] },
-  { term: "Fall '77", names: ['Tim Heath'] },
-  { term: "Fall '78", names: ['Dave Anderson'] },
-  { term: "Spg '79", names: ['John Alles'] },
-  { term: "Fall '79", names: ['Dave Kniepkamp'] },
-  { term: "Fall '80", names: ['Scott Niewoehner'] },
-  { term: "Fall '81", names: ['Dennis Card'] },
-  { term: "Fall '82", names: ['Terrence'] },
-  { term: "Fall '83", names: ['Robert Carden'] },
-  { term: "Fall '84", names: ['Andrew Jones'] },
-  { term: "Fall '85", names: ['Tom Sovar'] },
-  { term: "Fall '86", names: ['James McDaniel'] },
-  { term: "Fall '87", names: ['John Winkler'] },
-  { term: "Fall '88", names: ['Perry Mar'] },
-  { term: "Fall '89", names: ['Josh Chandler'] },
-  { term: "Fall '90", names: ['Brian Verman'] },
-  { term: "Fall '91", names: ['Dan Ludwig'] },
-  { term: "Fall '92", names: ['Gary Greene'] },
-  { term: "Fall '93", names: ['Brad Butler'] },
-  { term: "Fall '94", names: ['Jeff Heckman'] },
-  { term: "Fall '95", names: ['Phillip Courtney', 'Preston Kramer', 'Brian Miller'] },
-  { term: "Fall '96", names: ['Ben Braker'] },
-  { term: "Fall '97", names: ['Jason Bodson'] },
-  { term: "Spg '98", names: ['Minjie Xu'] },
-  { term: "Fall '98", names: ['James Henken'] },
-  { term: "Spg '99", names: ['Jason Bridges'] },
-  { term: "Fall '99", names: ['Eugene Shoykhet'] },
-  { term: "Fall '00", names: ['James Kramer'] },
-  { term: "Fall '01", names: ['Brian Schwegal'] },
-  { term: "Fall '02", names: ['Nathan Wilke'] },
-  { term: "Spg '03", names: ['Mike Scherr'] },
-  { term: "Fall '04", names: ['Kurt Bloch', 'Ryan Seman'] },
-  { term: "Spg '05", names: ['Zach Nelson'] },
-  { term: "Fall '05", names: ['Jason Hartman'] },
-  { term: "Spg '06", names: ['Nicholas Russo'] },
-  { term: "Fall '06", names: ['Austin Thompson'] },
-]
-
-const ifcReps = [
-  { year: '1964', name: 'Harwell Schutty' },
-  { year: '1965', name: 'Jerry Fortner' },
-  { year: '1966', name: 'Eric Aschinger, Tom Fritzinger' },
-  { year: '1967', name: 'Peter Dunkailo' },
-  { year: '1968', name: 'Robert Cramner' },
-  { year: '1969', name: 'Gary Wicke' },
-  { year: '1970', name: 'Gary Shanklin' },
-  { year: '1971', name: 'Donald Power' },
-  { year: '1972', name: 'William Morley' },
-  { year: '1973', name: 'Jeff Wassilak' },
-  { year: '1974', name: 'Mike Hauser' },
-  { year: '1975', name: 'Hillis Pratt' },
-  { year: '1976', name: 'Tom Schmitt' },
-  { year: '1977', name: 'Johnie Trousdale' },
-  { year: '1978', name: 'Jeff Sheets' },
-  { year: '1979', name: 'Nick Dungey' },
-  { year: '1980', name: 'Clarence Miller' },
-  { year: '1981', name: 'Richard Weber' },
-  { year: '1982', name: 'Steve Bretzke' },
-  { year: '1983', name: 'Lew Westermeyer' },
-  { year: '1984', name: 'Terry Palisch' },
-  { year: '1985', name: 'Rob Brown' },
-  { year: '1986', name: 'John Fox III' },
-  { year: '1987', name: 'Sean McKessy' },
-  { year: '1988', name: 'Kenneth Johnson' },
-  { year: '1989', name: 'Noel Gibler' },
-  { year: '1990', name: 'Josh Chandler' },
-  { year: '1991', name: 'Matt Leap' },
-  { year: '1992', name: 'Keith Dandurand' },
-  { year: '1993', name: 'Jim Schrock' },
-  { year: '1995', name: 'Sean Teitelbaum' },
-  { year: '1996', name: 'Clint Napton' },
-  { year: '1997', name: 'Frank Koch' },
-  { year: '1998', name: 'Doug Chappell' },
-  { year: '1999', name: 'Tim Thomason' },
-  { year: '2000', name: 'M. Daniel McGhee' },
-  { year: '2001', name: 'Matt Wolken' },
-  { year: '2002', name: 'Kraig Kelley' },
-  { year: '2003', name: 'Ryan Kelly' },
-  { year: '2004', name: 'Joe Brunner' },
-  { year: '2005', name: 'David Baugher' },
-  { year: '2006', name: 'Greg Bates' },
-  { year: '2007', name: 'Kevin Butler' },
-  { year: '2008', name: "Trevor O'Brien" },
-  { year: '2009', name: 'Josh Parks' },
-]
-
-const stPatsBoard = [
-  { name: 'Michael J. Schreiner', position: "'69" },
-  { name: 'Sammy Hopper', position: "'70" },
-  { name: 'Jack Higgins', position: "'71" },
-  { name: 'Kenneth Kifer', position: "'72" },
-  { name: 'Lloyd Reynolds', position: "'73" },
-  { name: 'Donald Dierker', position: "'74" },
-  { name: 'Craig Thomson', position: "'75" },
-  { name: 'Edward Haberstroh', position: "'76" },
-  { name: 'Gary Underwood', position: "'77 Masterguard · '79 St. Pat" },
-  { name: 'Joseph Morales', position: "'78" },
-  { name: 'Kevin Hauser', position: "'80" },
-  { name: 'Clifton Dodson', position: "'81" },
-  { name: 'Keith Markway', position: "'82 Trumpeteer" },
-  { name: 'Scott Niewoehner', position: "'83 Guard" },
-  { name: 'Scott Muskopf', position: "'84 Masterguard" },
-  { name: 'Robert Carden', position: "'85 Guard" },
-  { name: 'David Hettenhausen', position: "'86 St. Pat" },
-  { name: 'Scott McReynolds', position: "'87 Trumpeteer" },
-  { name: 'Brian Johnson', position: "'00 Herald" },
-  { name: 'Dan Maddex', position: "'01 Masterguard" },
-  { name: 'Allyn Perigin', position: "'04" },
-  { name: 'Winston Carr', position: "'07" },
-  { name: 'Caleb Nelson', position: "'17" },
-]
-
-const chapterPresidents = [
-  'Mike Conway', 'Tom Lillie', 'Jerry Fortner', 'Ronald Smith', 'Dale Ricks',
-  'Eric Aschinger', 'Anthony Mack', 'Gary Wicke', 'Donald Power', 'Gary Shanklin',
-  'William Morley', 'Dave Lyon', 'Edward Haberstroh', 'Kelly McGrath', 'Michael Hauser',
-  'Warren Greenwalt', 'Jeff Sheets', 'Clarence Miller', 'Nick Dungey', 'Dave Anderson',
-  'Christopher Greenwood', 'Craig Thomas', 'Steve Bretzke', 'John Powell (2 terms)',
-  'Rob Brown', 'Matt King', 'Kirk McMenamin', 'Charlie Pulay', 'John Pulay',
-  'Jim Hill', 'John Goethe', 'Daniel Ludwig', 'Jason Carter', 'Samuel Erter',
-  'Clint Napton', 'Jeff Heckman', 'Ben Braker', 'Matt Chesebrough', 'Doug Chappell',
-  'Chris Kelly', 'Matt Wolken', 'Brian Schwegal', 'Ryan Kelly', 'Joseph Brunner',
-  'Greg Eike', 'Nicholas Russo', 'Austin Thompson', 'Joshua Parks', 'Derek Dixon',
-  'Gabriel Ellis', 'Matthew Vogel', 'Joseph Collum', 'Ian Flannigan', 'Tyler Hembrock',
-  'Richard Braun',
-]
-
-const mascots = [
-  { years: '1969', name: 'Studley' },
-  { years: '1972–1974', name: 'Seymour' },
-  { years: '1975–1977', name: 'Zeke' },
-  { years: '1975–1979', name: 'Heidi' },
-  { years: '1978–1987', name: 'Astro' },
-  { years: '1981–1982', name: 'Beouregard' },
-  { years: '1982–1983', name: 'Gonzo' },
-  { years: '1986–1991', name: 'Jake' },
-  { years: '1988–1990', name: 'Thor' },
-  { years: '1992–1996', name: 'Kooter' },
-  { years: '1996–2012', name: 'April' },
-  { years: '1998–1999', name: 'Hindippens' },
-  { years: '2009–Present', name: 'Reagan' },
-  { years: '2012', name: 'Sasha' },
-]
-
 const milestones = [
   { year: '1963', event: 'Kappa Phi Fraternity founded at University of Missouri School of Mines (Dec. 5)' },
   { year: '1964', event: 'Constitution adopted; first house purchased on eight acres along Vienna Road' },
@@ -297,6 +94,28 @@ const milestones = [
   { year: '2006', event: 'Third Hugh Shields Award for Chapter Excellence' },
   { year: '2016', event: '50th anniversary as Epsilon Nu Chapter of Delta Tau Delta' },
 ]
+
+// ─── Honor roll sorting helpers ────────────────────────────────────
+
+// Pulls a 4-digit year, or a 2-digit year (e.g. "'77") normalized to 19xx/20xx.
+function parseYear(label: string | null): number {
+  if (!label) return 9999
+  const m4 = label.match(/(\d{4})/)
+  if (m4) return parseInt(m4[1], 10)
+  const m2 = label.match(/(\d{2})/)
+  if (m2) {
+    const yy = parseInt(m2[1], 10)
+    return yy >= 50 ? 1900 + yy : 2000 + yy
+  }
+  return 9999
+}
+
+function seasonOrder(label: string): number {
+  if (/spg|spring/i.test(label)) return 0
+  if (/summer/i.test(label)) return 1
+  if (/fall/i.test(label)) return 2
+  return 1
+}
 
 // ─── Chevron icon ─────────────────────────────────────────────────
 
@@ -314,18 +133,73 @@ function Chevron() {
 
 // ─── Page ─────────────────────────────────────────────────────────
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const admin = createAdminClient()
+
+  const [{ data: honorRows }, { data: mascotRows }] = await Promise.all([
+    admin
+      .from('chapter_honors')
+      .select('category, display_name, year_label, title, sort_order'),
+    admin
+      .from('chapter_mascots')
+      .select('name, start_year, end_year, photo_url, sort_order')
+      .eq('is_published', true)
+      .order('sort_order', { ascending: true }),
+  ])
+
+  const honors = honorRows ?? []
+  const mascots = mascotRows ?? []
+  const byCategory = (cat: string) => honors.filter(h => h.category === cat)
+
+  const studentKnights = byCategory('student_knight')
+    .sort((a, b) => parseYear(a.year_label) - parseYear(b.year_label) || a.sort_order - b.sort_order)
+
+  const ifcReps = byCategory('ifc_rep')
+    .sort((a, b) => parseYear(a.year_label) - parseYear(b.year_label) || a.sort_order - b.sort_order)
+
+  const chapterPresidents = byCategory('chapter_president')
+    .sort((a, b) => a.sort_order - b.sort_order)
+
+  const highestGPARaw = byCategory('highest_gpa')
+    .sort((a, b) =>
+      parseYear(a.year_label) - parseYear(b.year_label) ||
+      seasonOrder(a.year_label ?? '') - seasonOrder(b.year_label ?? '') ||
+      a.sort_order - b.sort_order
+    )
+  const highestGPA: { term: string; names: string[] }[] = []
+  for (const row of highestGPARaw) {
+    const term = row.year_label ?? ''
+    const last = highestGPA[highestGPA.length - 1]
+    if (last && last.term === term) last.names.push(row.display_name)
+    else highestGPA.push({ term, names: [row.display_name] })
+  }
+
+  const stPatsRaw = byCategory('st_pats_board')
+    .sort((a, b) => parseYear(a.year_label) - parseYear(b.year_label) || a.sort_order - b.sort_order)
+  const stPatsBoard: { name: string; positions: string[] }[] = []
+  for (const row of stPatsRaw) {
+    const position = [row.year_label, row.title].filter(Boolean).join(' ')
+    const existing = stPatsBoard.find(g => g.name === row.display_name)
+    if (existing) existing.positions.push(position)
+    else stPatsBoard.push({ name: row.display_name, positions: [position] })
+  }
+
   return (
     <div className="bg-kp-dark min-h-screen">
 
       {/* Hero */}
       <div className="bg-kp-crimson-dark border-b border-kp-border">
-        <div className="max-w-7xl mx-auto px-4 py-12">
-          <div className="text-kp-gold text-xs font-bold uppercase tracking-widest mb-3">History &amp; Heritage</div>
-          <h1 className="text-4xl md:text-5xl font-black text-white mb-4">About Kappa Phi</h1>
-          <p className="text-gray-300 text-lg max-w-2xl leading-relaxed">
-            Over 60 years of brotherhood, excellence, and service at Missouri University of Science &amp; Technology.
-          </p>
+        <div className="max-w-7xl mx-auto px-4 py-12 flex flex-col sm:flex-row sm:items-center gap-6">
+          <div className="w-20 h-20 md:w-24 md:h-24 bg-white rounded-2xl shadow-lg shadow-black/30 p-2 flex items-center justify-center shrink-0">
+            <img src="/images/coat-of-arms.png" alt="Kappa Phi coat of arms" className="w-full h-full object-contain" />
+          </div>
+          <div>
+            <div className="text-kp-gold text-xs font-bold uppercase tracking-widest mb-3">History &amp; Heritage</div>
+            <h1 className="text-4xl md:text-5xl font-black text-white mb-4">About Kappa Phi</h1>
+            <p className="text-gray-300 text-lg max-w-2xl leading-relaxed">
+              Over 60 years of brotherhood, excellence, and service at Missouri University of Science &amp; Technology.
+            </p>
+          </div>
         </div>
       </div>
 
@@ -444,10 +318,10 @@ export default function AboutPage() {
               <div className="px-6 py-5 border-t border-kp-border">
                 <p className="text-gray-400 text-xs mb-4">Annual honor recognizing outstanding active brothers.</p>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
-                  {studentKnights.map(e => (
-                    <div key={e.year + e.name} className="flex gap-2 items-baseline">
-                      <span className="text-kp-gold text-xs font-black shrink-0 tabular-nums">{e.year}</span>
-                      <span className="text-gray-300 text-xs">{e.name}</span>
+                  {studentKnights.map((e, i) => (
+                    <div key={i} className="flex gap-2 items-baseline">
+                      <span className="text-kp-gold text-xs font-black shrink-0 tabular-nums">{e.year_label}</span>
+                      <span className="text-gray-300 text-xs">{e.display_name}</span>
                     </div>
                   ))}
                 </div>
@@ -462,8 +336,8 @@ export default function AboutPage() {
               </summary>
               <div className="px-6 py-5 border-t border-kp-border">
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
-                  {highestGPA.map(e => (
-                    <div key={e.term} className="flex gap-2 items-start">
+                  {highestGPA.map((e, i) => (
+                    <div key={i} className="flex gap-2 items-start">
                       <span className="text-kp-gold text-xs font-black shrink-0 tabular-nums w-16">{e.term}</span>
                       <span className="text-gray-300 text-xs">{e.names.join(', ')}</span>
                     </div>
@@ -480,10 +354,10 @@ export default function AboutPage() {
               </summary>
               <div className="px-6 py-5 border-t border-kp-border">
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
-                  {ifcReps.map(e => (
-                    <div key={e.year} className="flex gap-2 items-baseline">
-                      <span className="text-kp-gold text-xs font-black shrink-0 tabular-nums">{e.year}</span>
-                      <span className="text-gray-300 text-xs">{e.name}</span>
+                  {ifcReps.map((e, i) => (
+                    <div key={i} className="flex gap-2 items-baseline">
+                      <span className="text-kp-gold text-xs font-black shrink-0 tabular-nums">{e.year_label}</span>
+                      <span className="text-gray-300 text-xs">{e.display_name}</span>
                     </div>
                   ))}
                 </div>
@@ -498,11 +372,11 @@ export default function AboutPage() {
               </summary>
               <div className="px-6 py-5 border-t border-kp-border">
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                  {stPatsBoard.map(e => (
-                    <div key={e.name} className="flex gap-3 items-start">
+                  {stPatsBoard.map((e, i) => (
+                    <div key={i} className="flex gap-3 items-start">
                       <div className="min-w-0">
                         <div className="text-gray-200 text-xs">{e.name}</div>
-                        <div className="text-kp-gold text-xs font-semibold">{e.position}</div>
+                        <div className="text-kp-gold text-xs font-semibold">{e.positions.join(' · ')}</div>
                       </div>
                     </div>
                   ))}
@@ -519,10 +393,10 @@ export default function AboutPage() {
               <div className="px-6 py-5 border-t border-kp-border">
                 <p className="text-gray-400 text-xs mb-4">Listed in chronological order from 1964 to present.</p>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
-                  {chapterPresidents.map((name, i) => (
+                  {chapterPresidents.map((e, i) => (
                     <div key={i} className="flex gap-2 items-baseline">
                       <span className="text-kp-gold text-xs font-black shrink-0">{i + 1}.</span>
-                      <span className="text-gray-300 text-xs">{name}</span>
+                      <span className="text-gray-300 text-xs">{e.display_name}</span>
                     </div>
                   ))}
                 </div>
@@ -537,12 +411,22 @@ export default function AboutPage() {
               </summary>
               <div className="px-6 py-5 border-t border-kp-border">
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                  {mascots.map(m => (
-                    <div key={m.name} className="bg-kp-card border border-kp-border rounded-xl px-3 py-2.5">
-                      <div className="text-kp-gold font-bold text-sm">{m.name}</div>
-                      <div className="text-gray-400 text-xs mt-0.5">{m.years}</div>
-                    </div>
-                  ))}
+                  {mascots.map((m, i) => {
+                    const years = m.start_year === m.end_year
+                      ? `${m.start_year ?? ''}`
+                      : `${m.start_year ?? ''}–${m.end_year ?? 'Present'}`
+                    return (
+                      <div key={i} className="bg-kp-card border border-kp-border rounded-xl overflow-hidden">
+                        {m.photo_url && (
+                          <img src={m.photo_url} alt={m.name} className="w-full h-24 object-cover" />
+                        )}
+                        <div className="px-3 py-2.5">
+                          <div className="text-kp-gold font-bold text-sm">{m.name}</div>
+                          <div className="text-gray-400 text-xs mt-0.5">{years}</div>
+                        </div>
+                      </div>
+                    )
+                  })}
                 </div>
               </div>
             </details>

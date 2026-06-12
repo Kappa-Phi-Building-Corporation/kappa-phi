@@ -70,6 +70,7 @@ export default async function AdminUsersPage() {
     if (!row.emailConfirmed)           return <span className="px-2 py-0.5 rounded-full text-xs bg-gray-800 text-gray-400">Unconfirmed</span>
     if (!row.profile?.is_approved)     return <span className="px-2 py-0.5 rounded-full text-xs bg-yellow-900/60 text-yellow-400">Pending</span>
     if (row.profile?.role === 'admin') return <span className="px-2 py-0.5 rounded-full text-xs bg-kp-blue text-kp-gold">Admin</span>
+    if (row.profile?.role === 'website_admin') return <span className="px-2 py-0.5 rounded-full text-xs bg-kp-blue text-kp-gold">Website Admin</span>
     return <span className="px-2 py-0.5 rounded-full text-xs bg-green-900/60 text-green-400">Approved</span>
   }
 
@@ -114,6 +115,16 @@ export default async function AdminUsersPage() {
             {p?.is_approved && p.role === 'admin' && row.id !== currentUser?.id && (
               <form action={setRole.bind(null, row.id, 'member')}>
                 <button className="px-3 py-1 text-xs rounded-lg border border-kp-border text-gray-400 hover:border-red-500 hover:text-red-400 transition-colors">Remove Admin</button>
+              </form>
+            )}
+            {p?.is_approved && p.role === 'member' && row.id !== currentUser?.id && (
+              <form action={setRole.bind(null, row.id, 'website_admin')}>
+                <button className="px-3 py-1 text-xs rounded-lg border border-kp-border text-gray-400 hover:border-kp-gold hover:text-kp-gold transition-colors">Make Website Admin</button>
+              </form>
+            )}
+            {p?.is_approved && p.role === 'website_admin' && row.id !== currentUser?.id && (
+              <form action={setRole.bind(null, row.id, 'member')}>
+                <button className="px-3 py-1 text-xs rounded-lg border border-kp-border text-gray-400 hover:border-red-500 hover:text-red-400 transition-colors">Remove Website Admin</button>
               </form>
             )}
           </div>

@@ -47,9 +47,10 @@ export async function denyUser(userId: string) {
   revalidatePath('/admin/users')
 }
 
-export async function setRole(userId: string, role: 'member' | 'admin') {
+export async function setRole(userId: string, role: 'member' | 'admin' | 'website_admin') {
   await requireAdmin()
   const admin = createAdminClient()
-  await admin.from('profiles').update({ role }).eq('id', userId)
+  const { error } = await admin.from('profiles').update({ role }).eq('id', userId)
+  if (error) throw new Error(error.message)
   revalidatePath('/admin/users')
 }

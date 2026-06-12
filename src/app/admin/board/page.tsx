@@ -1,4 +1,4 @@
-import { redirect } from 'next/navigation'
+﻿import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
@@ -16,12 +16,12 @@ export default async function AdminBoardPage({
 
   const admin = createAdminClient()
   const { data: profile } = await admin.from('profiles').select('role').eq('id', user.id).single()
-  if (profile?.role !== 'admin') redirect('/portal')
+  if (profile?.role !== 'admin' && profile?.role !== 'website_admin') redirect('/portal')
 
   const { data: members } = await admin
     .from('board_members')
     .select('id, name, role, category, is_active, photo_url, sort_order')
-    .order('category', { ascending: true })  // 'director' < 'officer' alphabetically — we'll sort in JS
+    .order('category', { ascending: true })  // 'director' < 'officer' alphabetically â€” we'll sort in JS
     .order('sort_order', { ascending: true })
 
   const rows = members ?? []
@@ -64,12 +64,12 @@ export default async function AdminBoardPage({
         <div className="max-w-4xl mx-auto px-4 py-10 flex items-end justify-between gap-4">
           <div>
             <Link href="/admin" className="text-gray-500 text-sm hover:text-kp-gold transition-colors mb-3 inline-block no-underline">
-              ← Admin Dashboard
+              â† Admin Dashboard
             </Link>
             <div className="text-kp-gold text-xs font-bold uppercase tracking-widest mb-2">Administration</div>
             <h1 className="text-4xl font-black text-white">Board Members</h1>
             <p className="text-gray-400 mt-1 text-sm">
-              {officers.length} officer{officers.length !== 1 ? 's' : ''} · {directors.length} director{directors.length !== 1 ? 's' : ''}
+              {officers.length} officer{officers.length !== 1 ? 's' : ''} Â· {directors.length} director{directors.length !== 1 ? 's' : ''}
             </p>
           </div>
           <Link
