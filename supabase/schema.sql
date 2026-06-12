@@ -26,6 +26,8 @@ CREATE TABLE public.members (
   address_city            TEXT,
   address_state           TEXT,
   address_zip             TEXT,
+  address_updated_at      TIMESTAMPTZ,
+  address_updated_by      TEXT,
   -- Professional
   employer                TEXT,
   occupation              TEXT,

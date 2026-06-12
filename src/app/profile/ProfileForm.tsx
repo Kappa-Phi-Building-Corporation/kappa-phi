@@ -44,6 +44,8 @@ export type MemberRow = {
   is_deceased: boolean | null
   is_missing: boolean | null
   initiation_date: string | null
+  address_updated_at: string | null
+  address_updated_by: string | null
 }
 
 export type AccountData = {
@@ -392,6 +394,11 @@ export default function ProfileForm({
             <F label="State" name="address_state" value={member?.address_state} placeholder="MO" />
             <F label="ZIP"   name="address_zip"   value={member?.address_zip} />
           </div>
+          {member?.address_updated_at && (
+            <p className="text-xs text-gray-500 -mt-2">
+              Last updated {new Date(member.address_updated_at).toLocaleDateString()} by {member.address_updated_by}
+            </p>
+          )}
 
           <SHead title="Chapter" />
           {isAdmin && (

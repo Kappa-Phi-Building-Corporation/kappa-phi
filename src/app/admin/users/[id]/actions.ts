@@ -4,6 +4,8 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { requireAdmin } from '../actions'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { createClient } from '@/lib/supabase/server'
+import { getAddressStamp } from '@/lib/addressTracking'
 
 function str(v: FormDataEntryValue | null) { return (v as string) || null }
 function bool(v: FormDataEntryValue | null) { return v === 'on' }
@@ -71,12 +73,35 @@ export async function updateUserAdmin(formData: FormData) {
     redirect(`/admin/users/${targetProfileId}?error=${encodeURIComponent(profileError.message)}`)
   }
 
+  // Determine the acting admin's identity for the address audit trail
+  const supabase = await createClient()
+  const { data: { user: actingUser } } = await supabase.auth.getUser()
+  const { data: actingProfile } = await admin
+    .from('profiles')
+    .select('role, member_id')
+    .eq('id', actingUser!.id)
+    .single()
+  const actingMeta = (actingUser!.user_metadata ?? {}) as Record<string, string>
+  const actor = {
+    role: actingProfile?.role ?? 'admin',
+    memberId: actingProfile?.member_id ?? null,
+    name: `${actingMeta.first_name ?? ''} ${actingMeta.last_name ?? ''}`.trim() || (actingUser!.email ?? 'Admin'),
+  }
+  const newAddr = {
+    address_street: payload.address_street,
+    address_city:   payload.address_city,
+    address_state:  payload.address_state,
+    address_zip:    payload.address_zip,
+  }
+
   if (targetMemberId) {
     // Update existing member record
+    Object.assign(payload, await getAddressStamp(admin, targetMemberId, newAddr, actor))
     const { error } = await admin.from('members').update(payload).eq('id', targetMemberId)
     if (error) redirect(`/admin/users/${targetProfileId}?error=${encodeURIComponent(error.message)}`)
   } else {
     // Create new member record and link it
+    Object.assign(payload, await getAddressStamp(admin, null, newAddr, actor))
     const { data: newMember, error } = await admin.from('members').insert(payload).select('id').single()
     if (error) redirect(`/admin/users/${targetProfileId}?error=${encodeURIComponent(error.message)}`)
     if (newMember) {

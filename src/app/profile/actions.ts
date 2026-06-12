@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { getAddressStamp } from '@/lib/addressTracking'
 
 function str(v: FormDataEntryValue | null) { return (v as string) || null }
 function bool(v: FormDataEntryValue | null) { return v === 'on' }
@@ -206,6 +207,20 @@ export async function updateProfile(
     }
   }
 
+  const meta = (user.user_metadata ?? {}) as Record<string, string>
+  const actor = {
+    role: profile?.role ?? 'member',
+    memberId: profile?.member_id ?? null,
+    name: `${meta.first_name ?? ''} ${meta.last_name ?? ''}`.trim() || (user.email ?? 'Member'),
+  }
+  const addressStamp = await getAddressStamp(admin, profile?.member_id ?? null, {
+    address_street: payload.address_street,
+    address_city:   payload.address_city,
+    address_state:  payload.address_state,
+    address_zip:    payload.address_zip,
+  }, actor)
+  Object.assign(payload, addressStamp)
+
   if (profile?.member_id) {
     const { error } = await admin.from('members').update(payload).eq('id', profile.member_id)
     if (error) return { type: 'error', message: error.message }
@@ -221,7 +236,6 @@ export async function updateProfile(
   const newFirst = payload.first_name ?? ''
   const newLast  = payload.last_name  ?? ''
   const newEmail = payload.email      ?? ''
-  const meta = (user.user_metadata ?? {}) as Record<string, string>
   const authFirst = meta.first_name ?? ''
   const authLast  = meta.last_name  ?? ''
   const authEmail = user.email ?? ''

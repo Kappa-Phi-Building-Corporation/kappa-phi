@@ -4,7 +4,9 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { requireAdmin } from '../../users/actions'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { createClient } from '@/lib/supabase/server'
 import { geocodeMemberFull } from '@/lib/geocode'
+import { getAddressStamp, type AddressActor } from '@/lib/addressTracking'
 
 function str(v: FormDataEntryValue | null) { return (v as string) || null }
 function bool(v: FormDataEntryValue | null) { return v === 'on' }
@@ -53,6 +55,32 @@ function memberPayload(formData: FormData) {
   }
 }
 
+// Identify the acting admin for the address audit trail
+async function getActor(admin: ReturnType<typeof createAdminClient>): Promise<AddressActor> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  const { data: profile } = await admin
+    .from('profiles')
+    .select('role, member_id')
+    .eq('id', user!.id)
+    .single()
+  const meta = (user!.user_metadata ?? {}) as Record<string, string>
+  return {
+    role: profile?.role ?? 'admin',
+    memberId: profile?.member_id ?? null,
+    name: `${meta.first_name ?? ''} ${meta.last_name ?? ''}`.trim() || (user!.email ?? 'Admin'),
+  }
+}
+
+function addrFromForm(formData: FormData) {
+  return {
+    address_street: str(formData.get('address_street')),
+    address_city:   str(formData.get('address_city')),
+    address_state:  str(formData.get('address_state')),
+    address_zip:    str(formData.get('address_zip')),
+  }
+}
+
 // Extract address fields from form and geocode, storing result in DB.
 // Priority: full street address → zip code → city/state.
 async function geocodeAndStore(admin: ReturnType<typeof createAdminClient>, memberId: string, formData: FormData) {
@@ -71,9 +99,12 @@ export async function createMember(formData: FormData) {
   await requireAdmin()
 
   const admin = createAdminClient()
+  const payload = memberPayload(formData)
+  Object.assign(payload, await getAddressStamp(admin, null, addrFromForm(formData), await getActor(admin)))
+
   const { data: newMember, error } = await admin
     .from('members')
-    .insert(memberPayload(formData))
+    .insert(payload)
     .select('id')
     .single()
 
@@ -93,9 +124,12 @@ export async function updateMemberById(formData: FormData) {
   if (!memberId) redirect('/admin/members')
 
   const admin = createAdminClient()
+  const payload = memberPayload(formData)
+  Object.assign(payload, await getAddressStamp(admin, memberId, addrFromForm(formData), await getActor(admin)))
+
   const { error } = await admin
     .from('members')
-    .update(memberPayload(formData))
+    .update(payload)
     .eq('id', memberId)
 
   if (error) redirect(`/admin/members/${memberId}?error=${encodeURIComponent(error.message)}`)
