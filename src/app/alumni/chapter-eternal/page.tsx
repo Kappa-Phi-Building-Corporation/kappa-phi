@@ -33,7 +33,7 @@ export default async function ChapterEternalPage() {
     .from('members')
     .select('id, first_name, last_name, title, badge_number, pledge_class, initiation_date, passing_date, photo_url, memorial_link_url, updated_at')
     .eq('is_deceased', true)
-    .eq('hide_entry', false)
+    .eq('memorial_hide_entry', false)
     .not('passing_date', 'is', null)
 
   const rows = (members ?? []).sort((a, b) => {

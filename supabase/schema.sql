@@ -51,6 +51,7 @@ CREATE TABLE public.members (
   do_not_mail             BOOLEAN NOT NULL DEFAULT FALSE,
   dnm_reason              TEXT,
   hide_entry              BOOLEAN NOT NULL DEFAULT FALSE,
+  memorial_hide_entry     BOOLEAN NOT NULL DEFAULT FALSE,
   is_deceased             BOOLEAN NOT NULL DEFAULT FALSE,
   is_missing              BOOLEAN NOT NULL DEFAULT FALSE,
   admin_notes             TEXT,

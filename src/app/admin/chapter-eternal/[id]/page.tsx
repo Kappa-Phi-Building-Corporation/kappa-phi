@@ -25,7 +25,7 @@ export default async function EditEternalPage({
 
   const { data: member } = await admin
     .from('members')
-    .select('first_name, last_name, title, badge_number, pledge_class, initiation_date, passing_date, memorial_link_url, photo_url, hide_entry')
+    .select('first_name, last_name, title, badge_number, pledge_class, initiation_date, passing_date, memorial_link_url, photo_url, memorial_hide_entry')
     .eq('id', id)
     .single()
   if (!member) notFound()

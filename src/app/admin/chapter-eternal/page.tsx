@@ -41,7 +41,7 @@ export default async function AdminChapterEternalPage({
   const [{ data: entryRows }, { data: pendingRows }] = await Promise.all([
     admin
       .from('members')
-      .select('id, first_name, last_name, title, badge_number, pledge_class, passing_date, photo_url, hide_entry')
+      .select('id, first_name, last_name, title, badge_number, pledge_class, passing_date, photo_url, memorial_hide_entry')
       .eq('is_deceased', true)
       .not('passing_date', 'is', null),
     admin
@@ -158,7 +158,7 @@ export default async function AdminChapterEternalPage({
                           {m.passing_date && ` · Eternal ${fmtDate(m.passing_date)}`}
                         </div>
                       </div>
-                      <VisibilityButton isHidden={!!m.hide_entry} showAction={showThis} hideAction={hideThis} />
+                      <VisibilityButton isHidden={!!m.memorial_hide_entry} showAction={showThis} hideAction={hideThis} />
                       <Link
                         href={`/admin/chapter-eternal/${m.id}`}
                         className="shrink-0 px-3 py-1.5 text-xs rounded-lg border border-kp-border text-gray-300 hover:border-kp-gold hover:text-kp-gold transition-colors no-underline">

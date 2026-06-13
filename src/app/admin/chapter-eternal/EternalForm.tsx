@@ -23,7 +23,7 @@ export type EternalMember = {
   passing_date: string | null
   memorial_link_url: string | null
   photo_url: string | null
-  hide_entry: boolean | null
+  memorial_hide_entry: boolean | null
 }
 
 type CreateProps = {
@@ -193,7 +193,7 @@ export default function EternalForm(props: Props) {
           type="checkbox"
           id="show_on_memorial"
           name="show_on_memorial"
-          defaultChecked={!member?.hide_entry}
+          defaultChecked={!member?.memorial_hide_entry}
           className="mt-0.5 h-4 w-4 rounded border-kp-border bg-kp-card accent-kp-gold cursor-pointer shrink-0"
         />
         <label htmlFor="show_on_memorial" className="text-sm text-white cursor-pointer leading-snug">

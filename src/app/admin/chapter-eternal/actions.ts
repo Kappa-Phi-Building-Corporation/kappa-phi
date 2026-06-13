@@ -42,7 +42,7 @@ export async function createEternalEntry(formData: FormData) {
     is_deceased: true,
     passing_date: (formData.get('passing_date') as string) || null,
     memorial_link_url: (formData.get('memorial_link_url') as string)?.trim() || null,
-    hide_entry: formData.get('show_on_memorial') !== 'on',
+    memorial_hide_entry: formData.get('show_on_memorial') !== 'on',
   }
 
   const photo = formData.get('photo') as File | null
@@ -64,7 +64,7 @@ export async function updateEternalEntry(id: string, formData: FormData) {
   const payload: Record<string, unknown> = {
     passing_date: (formData.get('passing_date') as string) || null,
     memorial_link_url: (formData.get('memorial_link_url') as string)?.trim() || null,
-    hide_entry: formData.get('show_on_memorial') !== 'on',
+    memorial_hide_entry: formData.get('show_on_memorial') !== 'on',
   }
 
   const photo = formData.get('photo') as File | null
@@ -82,14 +82,14 @@ export async function updateEternalEntry(id: string, formData: FormData) {
 
 export async function showEternalEntry(id: string) {
   const admin = await assertAdmin()
-  await admin.from('members').update({ hide_entry: false }).eq('id', id)
+  await admin.from('members').update({ memorial_hide_entry: false }).eq('id', id)
   revalidatePath('/alumni/chapter-eternal')
   redirect('/admin/chapter-eternal')
 }
 
 export async function hideEternalEntry(id: string) {
   const admin = await assertAdmin()
-  await admin.from('members').update({ hide_entry: true }).eq('id', id)
+  await admin.from('members').update({ memorial_hide_entry: true }).eq('id', id)
   revalidatePath('/alumni/chapter-eternal')
   redirect('/admin/chapter-eternal')
 }
