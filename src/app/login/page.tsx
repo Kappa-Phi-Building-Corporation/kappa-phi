@@ -22,6 +22,14 @@ export default async function LoginPage({
           </p>
         </div>
 
+        <div className="bg-kp-blue/20 border border-kp-blue text-blue-200 px-4 py-3 rounded-xl mb-5 text-sm flex gap-2">
+          <span>ℹ</span>
+          <span>
+            This is our new website. If you had an account on the old site, you&apos;ll need to{' '}
+            <Link href="/register" className="text-kp-gold underline hover:opacity-80">create a new account</Link> here.
+          </span>
+        </div>
+
         {error && (
           <div className="bg-red-900/40 border border-red-700 text-red-300 px-4 py-3 rounded-xl mb-5 text-sm flex gap-2">
             <span>⚠</span> {error}

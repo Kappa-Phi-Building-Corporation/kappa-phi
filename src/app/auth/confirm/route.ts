@@ -13,6 +13,7 @@ export async function GET(request: NextRequest) {
   const supabase = await createClient()
   let userId: string | null = null
   let userEmail: string | null = null
+  let userMeta: Record<string, string> = {}
   let success = false
 
   if (code) {
@@ -20,6 +21,7 @@ export async function GET(request: NextRequest) {
     if (!error && data.user) {
       userId = data.user.id
       userEmail = data.user.email ?? null
+      userMeta = (data.user.user_metadata ?? {}) as Record<string, string>
       success = true
     }
   } else if (token_hash && type) {
@@ -27,6 +29,7 @@ export async function GET(request: NextRequest) {
     if (!error && data.user) {
       userId = data.user.id
       userEmail = data.user.email ?? null
+      userMeta = (data.user.user_metadata ?? {}) as Record<string, string>
       success = true
     }
   }
@@ -35,27 +38,30 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(new URL('/auth/email-confirmed?error=expired', origin))
   }
 
-  // Fetch member name for admin notification
+  // Prefer the name the user signed up with; fall back to a linked member record, then email.
   const admin = createAdminClient()
-  const { data: profile } = await admin
-    .from('profiles')
-    .select('member_id')
-    .eq('id', userId)
-    .single()
+  let userName = `${userMeta.first_name ?? ''} ${userMeta.last_name ?? ''}`.trim()
 
-  let userName = userEmail ?? 'Unknown'
-  if (profile?.member_id) {
-    const { data: member } = await admin
-      .from('members')
-      .select('first_name, last_name')
-      .eq('id', profile.member_id)
+  if (!userName) {
+    const { data: profile } = await admin
+      .from('profiles')
+      .select('member_id')
+      .eq('id', userId)
       .single()
-    if (member?.first_name) {
-      userName = `${member.first_name} ${member.last_name ?? ''}`.trim()
+
+    if (profile?.member_id) {
+      const { data: member } = await admin
+        .from('members')
+        .select('first_name, last_name')
+        .eq('id', profile.member_id)
+        .single()
+      if (member?.first_name) {
+        userName = `${member.first_name} ${member.last_name ?? ''}`.trim()
+      }
     }
   }
 
-  sendAdminNewUserEmail(userName, userEmail ?? '').catch(console.error)
+  sendAdminNewUserEmail(userName || userEmail || 'Unknown', userEmail ?? '').catch(console.error)
 
   await supabase.auth.signOut()
   return NextResponse.redirect(new URL('/auth/email-confirmed', origin))
