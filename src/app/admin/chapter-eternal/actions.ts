@@ -32,7 +32,7 @@ async function uploadPhoto(admin: ReturnType<typeof createAdminClient>, memberId
 
 // Creates a chapter eternal entry by updating an existing member record.
 // Member info (name, badge, etc.) is already in the record; we only set
-// the chapter-eternal-specific fields. Entry is hidden until admin publishes it.
+// the chapter-eternal-specific fields.
 export async function createEternalEntry(formData: FormData) {
   const admin = await assertAdmin()
   const memberId = (formData.get('member_id') as string)?.trim()
@@ -42,7 +42,7 @@ export async function createEternalEntry(formData: FormData) {
     is_deceased: true,
     passing_date: (formData.get('passing_date') as string) || null,
     memorial_link_url: (formData.get('memorial_link_url') as string)?.trim() || null,
-    hide_entry: true,
+    hide_entry: false,
   }
 
   const photo = formData.get('photo') as File | null
