@@ -74,6 +74,40 @@ export async function register(formData: FormData) {
   redirect('/auth/check-email')
 }
 
+export async function requestPasswordReset(formData: FormData) {
+  const supabase = await createClient()
+  const email = formData.get('email') as string
+
+  await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? ''}/auth/confirm?next=/auth/update-password`,
+  })
+
+  // Always show the same confirmation, whether or not the email is registered.
+  redirect('/auth/reset-password-sent')
+}
+
+export async function updatePassword(formData: FormData) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
+
+  const password = formData.get('password') as string
+  const confirmPassword = formData.get('confirmPassword') as string
+
+  if (password !== confirmPassword) {
+    redirect('/auth/update-password?error=' + encodeURIComponent('Passwords do not match'))
+  }
+
+  const { error } = await supabase.auth.updateUser({ password })
+  if (error) {
+    redirect('/auth/update-password?error=' + encodeURIComponent(error.message))
+  }
+
+  await supabase.auth.signOut()
+  revalidatePath('/', 'layout')
+  redirect('/login?reset=1')
+}
+
 export async function logout() {
   const supabase = await createClient()
   await supabase.auth.signOut()

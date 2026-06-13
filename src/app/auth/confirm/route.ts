@@ -9,6 +9,7 @@ export async function GET(request: NextRequest) {
   const code       = searchParams.get('code')
   const token_hash = searchParams.get('token_hash')
   const type       = searchParams.get('type') as EmailOtpType | null
+  const next       = searchParams.get('next')
 
   const supabase = await createClient()
   let userId: string | null = null
@@ -36,6 +37,11 @@ export async function GET(request: NextRequest) {
 
   if (!success || !userId) {
     return NextResponse.redirect(new URL('/auth/email-confirmed?error=expired', origin))
+  }
+
+  // Password reset (and similar) flows keep the session active and continue elsewhere.
+  if (next) {
+    return NextResponse.redirect(new URL(next, origin))
   }
 
   // Prefer the name the user signed up with; fall back to a linked member record, then email.
