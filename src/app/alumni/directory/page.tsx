@@ -38,6 +38,7 @@ export default async function AlumniDirectoryPage() {
     `)
     .not('first_name', 'is', null)
     .not('badge_number', 'is', null)
+    .neq('member_status', 'expelled_other')
 
   // Non-admins never see hidden members
   if (!isAdmin) {

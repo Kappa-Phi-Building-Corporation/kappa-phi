@@ -6,6 +6,7 @@ import { requireAdmin } from '../actions'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
 import { getAddressStamp } from '@/lib/addressTracking'
+import { applyMemberStatusRules } from '@/lib/memberStatus'
 
 function str(v: FormDataEntryValue | null) { return (v as string) || null }
 function bool(v: FormDataEntryValue | null) { return v === 'on' }
@@ -49,6 +50,8 @@ function memberPayload(formData: FormData) {
     past_member_advisory:    bool(formData.get('past_member_advisory')),
     is_deceased:             bool(formData.get('is_deceased')),
     is_missing:              bool(formData.get('is_missing')),
+    member_status:           str(formData.get('member_status')) ?? 'alumni',
+    admin_notes:             str(formData.get('admin_notes')),
     updated_at:              new Date().toISOString(),
   }
 }
@@ -61,7 +64,7 @@ export async function updateUserAdmin(formData: FormData) {
   if (!targetProfileId) redirect('/admin/users')
 
   const admin = createAdminClient()
-  const payload = memberPayload(formData)
+  const payload = applyMemberStatusRules(memberPayload(formData))
 
   // Update profile account fields
   const { error: profileError } = await admin.from('profiles').update({

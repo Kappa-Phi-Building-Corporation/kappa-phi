@@ -7,6 +7,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
 import { geocodeMemberFull } from '@/lib/geocode'
 import { getAddressStamp, type AddressActor } from '@/lib/addressTracking'
+import { applyMemberStatusRules } from '@/lib/memberStatus'
 
 function str(v: FormDataEntryValue | null) { return (v as string) || null }
 function bool(v: FormDataEntryValue | null) { return v === 'on' }
@@ -50,6 +51,8 @@ function memberPayload(formData: FormData) {
     past_member_advisory:    bool(formData.get('past_member_advisory')),
     is_deceased:             bool(formData.get('is_deceased')),
     is_missing:              bool(formData.get('is_missing')),
+    member_status:           str(formData.get('member_status')) ?? 'alumni',
+    admin_notes:             str(formData.get('admin_notes')),
     initiation_date:         str(formData.get('initiation_date')) || null,
     updated_at:              new Date().toISOString(),
   }
@@ -99,7 +102,7 @@ export async function createMember(formData: FormData) {
   await requireAdmin()
 
   const admin = createAdminClient()
-  const payload = memberPayload(formData)
+  const payload = applyMemberStatusRules(memberPayload(formData))
   Object.assign(payload, await getAddressStamp(admin, null, addrFromForm(formData), await getActor(admin)))
 
   const { data: newMember, error } = await admin
@@ -124,7 +127,7 @@ export async function updateMemberById(formData: FormData) {
   if (!memberId) redirect('/admin/members')
 
   const admin = createAdminClient()
-  const payload = memberPayload(formData)
+  const payload = applyMemberStatusRules(memberPayload(formData))
   Object.assign(payload, await getAddressStamp(admin, memberId, addrFromForm(formData), await getActor(admin)))
 
   const { error } = await admin

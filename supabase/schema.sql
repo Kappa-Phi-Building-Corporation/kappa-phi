@@ -45,11 +45,14 @@ CREATE TABLE public.members (
   past_member_kpbc        BOOLEAN NOT NULL DEFAULT FALSE,
   past_member_advisory    BOOLEAN NOT NULL DEFAULT FALSE,
   -- Admin flags
+  member_status           TEXT NOT NULL DEFAULT 'alumni'
+    CHECK (member_status IN ('active_ug', 'alumni', 'expelled_other')),
   do_not_mail             BOOLEAN NOT NULL DEFAULT FALSE,
   dnm_reason              TEXT,
   hide_entry              BOOLEAN NOT NULL DEFAULT FALSE,
   is_deceased             BOOLEAN NOT NULL DEFAULT FALSE,
   is_missing              BOOLEAN NOT NULL DEFAULT FALSE,
+  admin_notes             TEXT,
   created_at              TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at              TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
