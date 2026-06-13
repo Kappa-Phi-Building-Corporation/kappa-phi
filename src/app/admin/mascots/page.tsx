@@ -32,7 +32,7 @@ export default async function AdminMascotsPage({
         <div className="max-w-4xl mx-auto px-4 py-10 flex items-end justify-between gap-4">
           <div>
             <Link href="/admin" className="text-gray-500 text-sm hover:text-kp-gold transition-colors mb-3 inline-block no-underline">
-              â† Admin Dashboard
+              ← Admin Dashboard
             </Link>
             <div className="text-kp-gold text-xs font-bold uppercase tracking-widest mb-2">Administration</div>
             <h1 className="text-4xl font-black text-white">Chapter Mascots</h1>
@@ -79,7 +79,7 @@ export default async function AdminMascotsPage({
                   <div className="flex-1 min-w-0">
                     <div className="text-white text-sm font-semibold truncate">{m.name}</div>
                     <div className="text-gray-500 text-xs mt-0.5">
-                      {m.start_year ?? 'â€”'}â€“{m.end_year ?? 'Present'}
+                      {m.start_year ?? '—'}–{m.end_year ?? 'Present'}
                       {!m.is_published && <span className="ml-2 text-gray-600">(hidden)</span>}
                     </div>
                   </div>

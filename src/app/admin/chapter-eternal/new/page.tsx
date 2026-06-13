@@ -33,7 +33,7 @@ export default async function NewEternalPage({
         <div className="max-w-3xl mx-auto px-4 py-8">
           <Link href="/admin/chapter-eternal"
             className="text-gray-500 text-sm hover:text-kp-gold transition-colors mb-3 inline-block no-underline">
-            â† Back to Memorial
+            ← Back to Memorial
           </Link>
           <div className="text-kp-gold text-xs font-bold uppercase tracking-widest mb-1">Administration</div>
           <h1 className="text-3xl font-black text-white">Add Memorial Entry</h1>

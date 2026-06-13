@@ -21,7 +21,7 @@ export default async function AdminBoardPage({
   const { data: members } = await admin
     .from('board_members')
     .select('id, name, role, category, is_active, photo_url, sort_order')
-    .order('category', { ascending: true })  // 'director' < 'officer' alphabetically â€” we'll sort in JS
+    .order('category', { ascending: true })  // 'director' < 'officer' alphabetically — we'll sort in JS
     .order('sort_order', { ascending: true })
 
   const rows = members ?? []
@@ -64,7 +64,7 @@ export default async function AdminBoardPage({
         <div className="max-w-4xl mx-auto px-4 py-10 flex items-end justify-between gap-4">
           <div>
             <Link href="/admin" className="text-gray-500 text-sm hover:text-kp-gold transition-colors mb-3 inline-block no-underline">
-              â† Admin Dashboard
+              ← Admin Dashboard
             </Link>
             <div className="text-kp-gold text-xs font-bold uppercase tracking-widest mb-2">Administration</div>
             <h1 className="text-4xl font-black text-white">Board Members</h1>

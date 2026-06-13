@@ -25,7 +25,7 @@ function formatTime(t: string | null): string | null {
 function formatTimeRange(start: string | null, end: string | null): string | null {
   const s = formatTime(start)
   const e = formatTime(end)
-  if (s && e) return `${s} â€“ ${e}`
+  if (s && e) return `${s} – ${e}`
   return s ?? e ?? null
 }
 
@@ -61,7 +61,7 @@ export default async function AdminEventsPage({
         <div className="max-w-5xl mx-auto px-4 py-10 flex items-end justify-between gap-4">
           <div>
             <Link href="/admin" className="text-gray-500 text-sm hover:text-kp-gold transition-colors mb-3 inline-block no-underline">
-              â† Admin Dashboard
+              ← Admin Dashboard
             </Link>
             <div className="text-kp-gold text-xs font-bold uppercase tracking-widest mb-2">Administration</div>
             <h1 className="text-4xl font-black text-white">Events</h1>
@@ -102,7 +102,7 @@ export default async function AdminEventsPage({
                     </div>
                     <div className="text-gray-500 text-xs mt-0.5">
                       {formatDate(event.start_date)}
-                      {event.end_date && event.end_date !== event.start_date && ` â€“ ${formatDate(event.end_date)}`}
+                      {event.end_date && event.end_date !== event.start_date && ` – ${formatDate(event.end_date)}`}
                       {formatTimeRange(event.start_time, event.end_time) && ` Â· ${formatTimeRange(event.start_time, event.end_time)}`}
                       {event.location && ` Â· ${event.location}`}
                     </div>

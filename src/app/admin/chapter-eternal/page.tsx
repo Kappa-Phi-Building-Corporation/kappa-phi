@@ -62,7 +62,7 @@ export default async function AdminChapterEternalPage({
         <div className="max-w-5xl mx-auto px-4 py-10 flex items-end justify-between gap-4">
           <div>
             <Link href="/admin" className="text-gray-500 text-sm hover:text-kp-gold transition-colors mb-3 inline-block no-underline">
-              â† Admin Dashboard
+              ← Admin Dashboard
             </Link>
             <div className="text-kp-gold text-xs font-bold uppercase tracking-widest mb-2">Administration</div>
             <h1 className="text-4xl font-black text-white">Chapter Eternal Memorial</h1>
@@ -88,12 +88,12 @@ export default async function AdminChapterEternalPage({
           </div>
         )}
 
-        {/* Pending â€” deceased members without a chapter eternal entry yet */}
+        {/* Pending — deceased members without a chapter eternal entry yet */}
         {pending.length > 0 && (
           <div>
             <div className="flex items-center gap-3 mb-3">
               <div className="text-amber-400 text-xs font-bold uppercase tracking-widest">Pending</div>
-              <span className="text-gray-600 text-xs">Marked deceased â€” no chapter eternal entry yet</span>
+              <span className="text-gray-600 text-xs">Marked deceased — no chapter eternal entry yet</span>
             </div>
             <div className="bg-amber-950/20 border border-amber-800/40 rounded-2xl overflow-hidden">
               <div className="divide-y divide-kp-border">
@@ -111,7 +111,7 @@ export default async function AdminChapterEternalPage({
                     <Link
                       href={`/admin/chapter-eternal/new?member_id=${m.id}`}
                       className="shrink-0 px-3 py-1.5 text-xs rounded-lg bg-amber-500/20 border border-amber-600/40 text-amber-400 hover:bg-amber-500/30 transition-colors no-underline">
-                      Create Entry â†’
+                      Create Entry ←’
                     </Link>
                   </div>
                 ))}

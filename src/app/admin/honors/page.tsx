@@ -40,7 +40,7 @@ export default async function AdminHonorsPage({
         <div className="max-w-4xl mx-auto px-4 py-10 flex items-end justify-between gap-4">
           <div>
             <Link href="/admin" className="text-gray-500 text-sm hover:text-kp-gold transition-colors mb-3 inline-block no-underline">
-              â† Admin Dashboard
+              ← Admin Dashboard
             </Link>
             <div className="text-kp-gold text-xs font-bold uppercase tracking-widest mb-2">Administration</div>
             <h1 className="text-4xl font-black text-white">Honor Rolls</h1>
@@ -82,7 +82,7 @@ export default async function AdminHonorsPage({
                   <div className="divide-y divide-kp-border">
                     {items.map(r => (
                       <div key={r.id} className="flex items-center gap-4 px-5 py-4 hover:bg-kp-card/40 transition-colors">
-                        <span className="text-gray-500 text-xs font-mono w-12 shrink-0">{r.year_label ?? 'â€”'}</span>
+                        <span className="text-gray-500 text-xs font-mono w-12 shrink-0">{r.year_label ?? '—'}</span>
                         <div className="flex-1 min-w-0">
                           <div className="text-white text-sm font-semibold truncate">{r.display_name}</div>
                           {r.title && <div className="text-gray-500 text-xs mt-0.5 truncate">{r.title}</div>}

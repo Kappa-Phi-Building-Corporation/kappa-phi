@@ -32,7 +32,7 @@ export default async function AdminPortalPage({
         <div className="max-w-4xl mx-auto px-4 py-10 flex items-end justify-between gap-4">
           <div>
             <Link href="/admin" className="text-gray-500 text-sm hover:text-kp-gold transition-colors mb-3 inline-block no-underline">
-              â† Admin Dashboard
+              ← Admin Dashboard
             </Link>
             <div className="text-kp-gold text-xs font-bold uppercase tracking-widest mb-2">Administration</div>
             <h1 className="text-4xl font-black text-white">Portal Resources</h1>
@@ -72,7 +72,7 @@ export default async function AdminPortalPage({
                     <div className="text-white text-sm font-semibold truncate">{r.label}</div>
                     <div className="text-gray-500 text-xs mt-0.5 truncate">
                       {r.href}
-                      {r.is_external && <span className="ml-2">â†— external</span>}
+                      {r.is_external && <span className="ml-2">←— external</span>}
                       {r.requires_auth && <span className="ml-2 text-amber-400">login required</span>}
                       {!r.is_published && <span className="ml-2 text-gray-600">(hidden)</span>}
                     </div>
