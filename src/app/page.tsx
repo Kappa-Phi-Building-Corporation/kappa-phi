@@ -137,6 +137,26 @@ export default async function Home() {
         </div>
       </section>
 
+      {/* ── The Shelter ── */}
+      <section className="bg-kp-dark border-b border-kp-border py-14">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="text-center mb-10">
+            <div className="text-kp-gold text-xs font-bold uppercase tracking-widest mb-2">Home Sweet Home</div>
+            <h2 className="text-white text-3xl font-bold">The Epsilon Nu Shelter</h2>
+          </div>
+          <div
+            className="relative aspect-[16/9] md:aspect-[21/9] rounded-2xl overflow-hidden bg-kp-card"
+            style={{
+              backgroundImage: "url('/images/EN-house-front.png')",
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+            }}
+            role="img"
+            aria-label="The Epsilon Nu chapter house"
+          />
+        </div>
+      </section>
+
       {/* ── Feature Banners ── */}
       <section className="bg-kp-dark border-b border-kp-border py-14">
         <div className="max-w-7xl mx-auto px-4">
