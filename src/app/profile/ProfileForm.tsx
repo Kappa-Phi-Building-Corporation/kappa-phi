@@ -187,6 +187,10 @@ export default function ProfileForm({
       setDoNotMail(true)
       setHideEntry(true)
       setDnmReason('Expelled / Other')
+    } else if (v === 'active_ug') {
+      setDoNotMail(true)
+      setHideEntry(true)
+      setDnmReason('Active')
     }
   }
 

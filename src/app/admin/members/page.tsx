@@ -131,8 +131,8 @@ export default async function AdminMembersPage({
                           const cls = status === 'expelled_other'
                             ? 'bg-red-900/40 text-red-400'
                             : status === 'active_ug'
-                              ? 'bg-green-900/40 text-green-400'
-                              : 'bg-blue-900/40 text-blue-400'
+                              ? 'bg-blue-900/40 text-blue-400'
+                              : 'bg-green-900/40 text-green-400'
                           return (
                             <span className={`px-2 py-0.5 rounded-full text-xs ${cls}`}>
                               {MEMBER_STATUS_LABELS[status] ?? status}
