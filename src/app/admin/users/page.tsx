@@ -54,13 +54,17 @@ export default async function AdminUsersPage() {
     ((profiles ?? []) as ProfileRow[]).map((p: ProfileRow) => [p.id, p])
   )
 
-  const rows = authUsers.map(au => ({
-    id:             au.id,
-    authEmail:      au.email ?? '',
-    emailConfirmed: !!au.email_confirmed_at,
-    createdAt:      au.created_at,
-    profile:        profileMap.get(au.id),
-  }))
+  const rows = authUsers.map(au => {
+    const meta = (au.user_metadata ?? {}) as Record<string, string>
+    return {
+      id:             au.id,
+      authEmail:      au.email ?? '',
+      authName:       `${meta.first_name ?? ''} ${meta.last_name ?? ''}`.trim(),
+      emailConfirmed: !!au.email_confirmed_at,
+      createdAt:      au.created_at,
+      profile:        profileMap.get(au.id),
+    }
+  })
 
   const pending     = rows.filter(r => r.profile && !r.profile.is_approved && r.emailConfirmed)
   const approved    = rows.filter(r => r.profile?.is_approved)
@@ -77,13 +81,14 @@ export default async function AdminUsersPage() {
   function UserRow({ row }: { row: typeof rows[0] }) {
     const p = row.profile
     const m = p?.member_id ? (memberMap.get(p.member_id) ?? null) : null
-    const displayName = m ? `${m.first_name ?? ''} ${m.last_name ?? ''}`.trim() || '—' : '—'
+    const memberName = m ? `${m.first_name ?? ''} ${m.last_name ?? ''}`.trim() || '—' : '—'
     return (
       <tr className="border-b border-kp-border hover:bg-kp-card/50 transition-colors">
         <td className="px-4 py-3">
-          <div className="font-medium text-white text-sm">{displayName}</div>
+          <div className="font-medium text-white text-sm">{row.authName || '—'}</div>
           <div className="text-gray-500 text-xs">{row.authEmail}</div>
         </td>
+        <td className="px-4 py-3 text-gray-300 text-xs">{memberName}</td>
         <td className="px-4 py-3 text-gray-400 text-xs hidden sm:table-cell">{m?.badge_number ?? '—'}</td>
         <td className="px-4 py-3 text-gray-400 text-xs hidden md:table-cell">
           {new Date(row.createdAt).toLocaleDateString()}
@@ -145,7 +150,8 @@ export default async function AdminUsersPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-kp-border">
-                <th className="px-4 py-2 text-left text-xs text-gray-500 uppercase tracking-wider">Name / Email</th>
+                <th className="px-4 py-2 text-left text-xs text-gray-500 uppercase tracking-wider">Username / Email</th>
+                <th className="px-4 py-2 text-left text-xs text-gray-500 uppercase tracking-wider">Member</th>
                 <th className="px-4 py-2 text-left text-xs text-gray-500 uppercase tracking-wider hidden sm:table-cell">Badge</th>
                 <th className="px-4 py-2 text-left text-xs text-gray-500 uppercase tracking-wider hidden md:table-cell">Registered</th>
                 <th className="px-4 py-2 text-left text-xs text-gray-500 uppercase tracking-wider">Status</th>
