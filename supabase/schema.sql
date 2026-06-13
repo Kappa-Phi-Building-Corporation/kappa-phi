@@ -12,6 +12,7 @@ CREATE TABLE public.members (
   badge_number            TEXT,
   pledge_class            TEXT,
   graduation_year         INT,
+  degrees                 TEXT,
   big_brother_id          UUID REFERENCES public.members(id) ON DELETE SET NULL,
   -- Contact
   home_phone              TEXT,

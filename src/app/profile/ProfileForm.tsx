@@ -15,6 +15,7 @@ export type MemberRow = {
   pledge_class: string | null
   big_brother_id: string | null
   graduation_year: number | null
+  degrees: string | null
   completed_undergraduate: boolean | null
   completed_graduate: boolean | null
   email: string | null
@@ -85,10 +86,11 @@ function SHead({ title }: { title: string }) {
   )
 }
 
-function F({ label, name, value, onChange, type = 'text', placeholder, full, disabled }: {
+function F({ label, name, value, onChange, type = 'text', placeholder, full, disabled, inputMode, pattern, maxLength }: {
   label: string; name: string; value?: string | number | null
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void
   type?: string; placeholder?: string; full?: boolean; disabled?: boolean
+  inputMode?: React.HTMLAttributes<HTMLInputElement>['inputMode']; pattern?: string; maxLength?: number
 }) {
   const valueProps = onChange
     ? { value: value ?? '' }
@@ -97,6 +99,7 @@ function F({ label, name, value, onChange, type = 'text', placeholder, full, dis
     <div className={full ? 'col-span-2 md:col-span-3' : ''}>
       <label className={lbl}>{label}</label>
       <input name={name} type={type} {...valueProps} onChange={onChange} placeholder={placeholder} disabled={disabled}
+        inputMode={inputMode} pattern={pattern} maxLength={maxLength}
         className={`${inp} ${disabled ? 'opacity-60 cursor-not-allowed' : ''}`} />
     </div>
   )
@@ -241,6 +244,7 @@ export default function ProfileForm({
           } />
           <ReadRow label="Big Brother" value={bigBrotherName ? `${bigBrotherName.first_name ?? ''} ${bigBrotherName.last_name ?? ''}`.trim() : null} />
           <ReadRow label="Graduation Year" value={member?.graduation_year} />
+          <ReadRow label="Degrees" value={member?.degrees} />
           <ReadRow label="Mobile Phone" value={member?.mobile_phone ?? member?.phone} />
           <ReadRow label="Home Phone" value={member?.home_phone} />
           <ReadRow label="Email" value={member?.email} />
@@ -451,7 +455,9 @@ export default function ProfileForm({
               <F   label="Initiation Date" name="initiation_date" value={member?.initiation_date} type="date" />
             </>
           )}
-          <F label="Graduation Year" name="graduation_year" value={member?.graduation_year} type="number" placeholder="2005" />
+          <F label="Graduation Year" name="graduation_year" value={member?.graduation_year}
+            type="text" inputMode="numeric" pattern="[0-9]{4}" maxLength={4} placeholder="2005" />
+          <F label="Degrees" name="degrees" value={member?.degrees} placeholder="B.S. Mechanical Engineering" />
           <div className="col-span-2 md:col-span-3 flex flex-wrap gap-x-8 gap-y-2">
             <Chk label="Completed Undergraduate Degree" name="completed_undergraduate" checked={member?.completed_undergraduate} />
             <Chk label="Completed Graduate Degree"      name="completed_graduate"      checked={member?.completed_graduate} />

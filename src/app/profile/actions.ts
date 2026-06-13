@@ -34,6 +34,7 @@ function memberPayload(formData: FormData) {
     pledge_class:            str(formData.get('pledge_class')),
     big_brother_id:          str(formData.get('big_brother_id')),
     graduation_year:         num(formData.get('graduation_year')),
+    degrees:                 str(formData.get('degrees')),
     completed_undergraduate: bool(formData.get('completed_undergraduate')),
     completed_graduate:      bool(formData.get('completed_graduate')),
     employer:                str(formData.get('employer')),
