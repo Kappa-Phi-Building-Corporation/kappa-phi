@@ -32,7 +32,7 @@ export default async function AdminMembersPage({
     )
   }
 
-  const { data: members } = await query.limit(500)
+  const { data: members } = await query.limit(2000)
 
   // Sort numerically — badge_number is TEXT so lexicographic DB sort is wrong
   const rows = (members ?? []).sort((a, b) => {
