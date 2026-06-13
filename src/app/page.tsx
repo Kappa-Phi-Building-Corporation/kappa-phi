@@ -145,11 +145,12 @@ export default async function Home() {
             <h2 className="text-white text-3xl font-bold">The Epsilon Nu Shelter</h2>
           </div>
           <div
-            className="relative aspect-[16/9] md:aspect-[21/9] rounded-2xl overflow-hidden bg-kp-card"
+            className="relative aspect-[3/1] rounded-2xl overflow-hidden bg-kp-card"
             style={{
               backgroundImage: "url('/images/EN-house-front.png')",
-              backgroundSize: 'cover',
+              backgroundSize: 'contain',
               backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat',
             }}
             role="img"
             aria-label="The Epsilon Nu chapter house"
