@@ -206,7 +206,7 @@ export default async function PropertyPage() {
         <div className="space-y-5">
           <div
             className="w-full aspect-[927/280] rounded-2xl bg-kp-card"
-            style={{ backgroundImage: "url('/images/EN-house-front.jpg')", backgroundSize: 'cover', backgroundPosition: 'center' }}
+            style={{ backgroundImage: "url('/images/EN-house-front.png')", backgroundSize: 'cover', backgroundPosition: 'center' }}
           />
           <div className="bg-kp-surface border border-kp-border rounded-2xl p-6 md:p-8">
             <p className="text-gray-300 text-sm leading-relaxed">
