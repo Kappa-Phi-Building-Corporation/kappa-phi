@@ -85,17 +85,18 @@ function SHead({ title }: { title: string }) {
   )
 }
 
-function F({ label, name, value, type = 'text', placeholder, full, disabled, forceValue }: {
+function F({ label, name, value, onChange, type = 'text', placeholder, full, disabled }: {
   label: string; name: string; value?: string | number | null
-  type?: string; placeholder?: string; full?: boolean; disabled?: boolean; forceValue?: string
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void
+  type?: string; placeholder?: string; full?: boolean; disabled?: boolean
 }) {
-  const valueProps = disabled && forceValue !== undefined
-    ? { value: forceValue }
+  const valueProps = onChange
+    ? { value: value ?? '' }
     : { defaultValue: value ?? '' }
   return (
     <div className={full ? 'col-span-2 md:col-span-3' : ''}>
       <label className={lbl}>{label}</label>
-      <input name={name} type={type} {...valueProps} placeholder={placeholder} disabled={disabled}
+      <input name={name} type={type} {...valueProps} onChange={onChange} placeholder={placeholder} disabled={disabled}
         className={`${inp} ${disabled ? 'opacity-60 cursor-not-allowed' : ''}`} />
     </div>
   )
@@ -116,13 +117,13 @@ function Sel({ label, name, value, options, full }: {
   )
 }
 
-function Chk({ label, name, checked, note, full, disabled, forceChecked, onChange }: {
+function Chk({ label, name, checked, note, full, disabled, onChange }: {
   label: string; name: string; checked?: boolean | null; note?: string; full?: boolean
-  disabled?: boolean; forceChecked?: boolean
+  disabled?: boolean
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void
 }) {
-  const checkedProps = disabled
-    ? { checked: forceChecked ?? !!checked }
+  const checkedProps = onChange
+    ? { checked: !!checked }
     : { defaultChecked: !!checked }
   return (
     <div className={`flex items-start gap-3 ${full ? 'col-span-2 md:col-span-3' : ''} ${disabled ? 'opacity-60' : ''}`}>
@@ -174,9 +175,29 @@ export default function ProfileForm({
   const [showChangeForm, setShowChangeForm] = useState(false)
   const [memberStatus, setMemberStatus] = useState(member?.member_status ?? 'alumni')
   const [isDeceased, setIsDeceased] = useState(!!member?.is_deceased)
+  const [doNotMail, setDoNotMail] = useState(!!member?.do_not_mail)
+  const [hideEntry, setHideEntry] = useState(!!member?.hide_entry)
+  const [dnmReason, setDnmReason] = useState(member?.dnm_reason ?? '')
 
   const forceHidden = memberStatus === 'expelled_other' || isDeceased
-  const forcedReason = memberStatus === 'expelled_other' ? 'Expelled / Other' : isDeceased ? 'Deceased' : ''
+
+  function handleStatusChange(v: string) {
+    setMemberStatus(v)
+    if (v === 'expelled_other') {
+      setDoNotMail(true)
+      setHideEntry(true)
+      setDnmReason('Expelled / Other')
+    }
+  }
+
+  function handleDeceasedChange(checked: boolean) {
+    setIsDeceased(checked)
+    if (checked) {
+      setDoNotMail(true)
+      setHideEntry(true)
+      setDnmReason('Deceased')
+    }
+  }
 
   const selfMemberId = targetMemberId ?? member?.id
   const bigBrotherOpts = members
@@ -458,8 +479,8 @@ export default function ProfileForm({
                       id={`member_status_${o.v}`}
                       name="member_status"
                       value={o.v}
-                      defaultChecked={(member?.member_status ?? 'alumni') === o.v}
-                      onChange={() => setMemberStatus(o.v)}
+                      checked={memberStatus === o.v}
+                      onChange={() => handleStatusChange(o.v)}
                       className="h-4 w-4 accent-kp-gold cursor-pointer"
                     />
                     {o.l}
@@ -467,8 +488,8 @@ export default function ProfileForm({
                 ))}
               </div>
               <div className="col-span-2 md:col-span-3 flex flex-wrap gap-x-8 gap-y-2">
-                <Chk label="Deceased" name="is_deceased" checked={member?.is_deceased}
-                  onChange={e => setIsDeceased(e.target.checked)} />
+                <Chk label="Deceased" name="is_deceased" checked={isDeceased}
+                  onChange={e => handleDeceasedChange(e.target.checked)} />
                 <Chk label="Missing / Lost Contact" name="is_missing" checked={member?.is_missing} />
               </div>
               <p className="col-span-2 md:col-span-3 text-xs text-gray-500">
@@ -476,12 +497,12 @@ export default function ProfileForm({
               </p>
 
               <SHead title="Mailing" />
-              <Chk label="Do Not Mail" name="do_not_mail" checked={member?.do_not_mail}
-                disabled={forceHidden} forceChecked />
-              <Chk label="Hide Entry"  name="hide_entry"  checked={member?.hide_entry}
-                note="Hides member from alumni directory" disabled={forceHidden} forceChecked />
-              <F label="DNM Reason" name="dnm_reason" value={member?.dnm_reason} full
-                disabled={forceHidden} forceValue={forcedReason} />
+              <Chk label="Do Not Mail" name="do_not_mail" checked={doNotMail}
+                disabled={forceHidden} onChange={e => setDoNotMail(e.target.checked)} />
+              <Chk label="Hide Entry"  name="hide_entry"  checked={hideEntry}
+                note="Hides member from alumni directory" disabled={forceHidden} onChange={e => setHideEntry(e.target.checked)} />
+              <F label="DNM Reason" name="dnm_reason" value={dnmReason} full
+                onChange={e => setDnmReason(e.target.value)} />
 
               <SHead title="Chapter Involvement" />
               <Chk label="Member of Kappa Phi Building Corp"  name="member_kpbc"        checked={member?.member_kpbc} />

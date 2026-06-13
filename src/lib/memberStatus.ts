@@ -10,8 +10,8 @@ export const MEMBER_STATUS_LABELS: Record<string, string> = {
   expelled_other: 'Expelled / Other',
 }
 
-// If a member is Expelled/Other or Deceased, force Do Not Mail + Hide Entry,
-// with the DNM reason set to match why.
+// If a member is Expelled/Other or Deceased, force Do Not Mail + Hide Entry.
+// The DNM reason is left as submitted — the form prepopulates it but allows edits.
 export function applyMemberStatusRules<T extends {
   member_status?: string | null
   is_deceased?: boolean | null
@@ -19,13 +19,8 @@ export function applyMemberStatusRules<T extends {
   dnm_reason?: string | null
   hide_entry?: boolean | null
 }>(payload: T): T {
-  if (payload.member_status === 'expelled_other') {
+  if (payload.member_status === 'expelled_other' || payload.is_deceased) {
     payload.do_not_mail = true
-    payload.dnm_reason  = 'Expelled / Other'
-    payload.hide_entry  = true
-  } else if (payload.is_deceased) {
-    payload.do_not_mail = true
-    payload.dnm_reason  = 'Deceased'
     payload.hide_entry  = true
   }
   return payload
