@@ -116,12 +116,11 @@ export default async function AdminEditUserPage({
               <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
                 Relink to existing member
               </label>
-              <select name="memberId"
+              <select name="memberId" defaultValue={profile.member_id ?? ''}
                 className="w-full bg-kp-card border border-kp-border rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-kp-blue">
                 <option value="">— None (unlink) —</option>
                 {allMembers.map(m => (
-                  <option key={m.id} value={m.id}
-                    selected={m.id === profile.member_id}>
+                  <option key={m.id} value={m.id}>
                     {m.last_name}, {m.first_name}{m.badge_number ? ` (#${m.badge_number})` : ''}
                   </option>
                 ))}
