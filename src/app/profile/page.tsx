@@ -64,7 +64,7 @@ export default async function ProfilePage({
 
   return (
     <div className="bg-kp-dark min-h-[calc(100vh-4rem)]">
-      <div className="max-w-3xl mx-auto px-4 py-10">
+      <div className="max-w-5xl mx-auto px-4 py-10">
 
         {/* Page header */}
         <div className="flex justify-between items-start mb-8">

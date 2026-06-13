@@ -44,7 +44,7 @@ export default async function AdminEditMemberPage({
   return (
     <div className="bg-kp-dark min-h-screen">
       <div className="bg-kp-crimson-dark border-b border-kp-border">
-        <div className="max-w-3xl mx-auto px-4 py-8">
+        <div className="max-w-5xl mx-auto px-4 py-8">
           <Link href="/admin/members"
             className="text-gray-500 text-sm hover:text-kp-gold transition-colors mb-3 inline-block no-underline">
             ← Back to Members
@@ -57,7 +57,7 @@ export default async function AdminEditMemberPage({
         </div>
       </div>
 
-      <div className="max-w-3xl mx-auto px-4 py-8 space-y-6">
+      <div className="max-w-5xl mx-auto px-4 py-8 space-y-6">
         {saved && (
           <div className="bg-green-900/40 border border-green-700 text-green-300 px-4 py-3 rounded-xl text-sm flex gap-2">
             <span>✓</span> Member record saved.

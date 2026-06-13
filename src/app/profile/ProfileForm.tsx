@@ -76,7 +76,7 @@ const lbl = 'block text-xs font-semibold text-kp-gold uppercase tracking-wider m
 // ── UI helpers ────────────────────────────────────────────────────────────────
 function SHead({ title }: { title: string }) {
   return (
-    <div className="col-span-2 border-b border-kp-border pb-1.5 mt-3 first:mt-0">
+    <div className="col-span-2 md:col-span-3 border-b border-kp-border pb-1.5 mt-3 first:mt-0">
       <span className="text-xs font-bold text-kp-gold uppercase tracking-widest">{title}</span>
     </div>
   )
@@ -87,7 +87,7 @@ function F({ label, name, value, type = 'text', placeholder, full }: {
   type?: string; placeholder?: string; full?: boolean
 }) {
   return (
-    <div className={full ? 'col-span-2' : ''}>
+    <div className={full ? 'col-span-2 md:col-span-3' : ''}>
       <label className={lbl}>{label}</label>
       <input name={name} type={type} defaultValue={value ?? ''} placeholder={placeholder} className={inp} />
     </div>
@@ -99,7 +99,7 @@ function Sel({ label, name, value, options, full }: {
   options: { v: string; l: string }[]; full?: boolean
 }) {
   return (
-    <div className={full ? 'col-span-2' : ''}>
+    <div className={full ? 'col-span-2 md:col-span-3' : ''}>
       <label className={lbl}>{label}</label>
       <select name={name} defaultValue={value ?? ''} className={inp}>
         <option value="">— None —</option>
@@ -113,7 +113,7 @@ function Chk({ label, name, checked, note, full }: {
   label: string; name: string; checked?: boolean | null; note?: string; full?: boolean
 }) {
   return (
-    <div className={`flex items-start gap-3 ${full ? 'col-span-2' : ''}`}>
+    <div className={`flex items-start gap-3 ${full ? 'col-span-2 md:col-span-3' : ''}`}>
       <input type="checkbox" id={name} name={name} defaultChecked={!!checked}
         className="mt-0.5 h-4 w-4 rounded border-kp-border bg-kp-card accent-kp-gold cursor-pointer shrink-0" />
       <label htmlFor={name} className="text-sm text-white cursor-pointer leading-snug">
@@ -365,7 +365,7 @@ export default function ProfileForm({
           </>
         )}
 
-        <div className="grid grid-cols-2 gap-x-4 gap-y-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-4">
 
           <SHead title="Personal Information" />
           <Sel label="Title" name="title" value={member?.title} options={TITLES} />
@@ -409,9 +409,11 @@ export default function ProfileForm({
               <F   label="Initiation Date" name="initiation_date" value={member?.initiation_date} type="date" />
             </>
           )}
-          <F   label="Graduation Year"              name="graduation_year"        value={member?.graduation_year} type="number" placeholder="2005" />
-          <Chk label="Completed Undergraduate Degree" name="completed_undergraduate" checked={member?.completed_undergraduate} />
-          <Chk label="Completed Graduate Degree"      name="completed_graduate"      checked={member?.completed_graduate} />
+          <F label="Graduation Year" name="graduation_year" value={member?.graduation_year} type="number" placeholder="2005" />
+          <div className="col-span-2 md:col-span-3 flex flex-wrap gap-x-8 gap-y-2">
+            <Chk label="Completed Undergraduate Degree" name="completed_undergraduate" checked={member?.completed_undergraduate} />
+            <Chk label="Completed Graduate Degree"      name="completed_graduate"      checked={member?.completed_graduate} />
+          </div>
 
           <SHead title="Professional" />
           <F label="Employer"           name="employer"   value={member?.employer} />
@@ -429,7 +431,7 @@ export default function ProfileForm({
         {isAdmin && (
           <div className="border border-amber-800/50 rounded-xl p-5 space-y-5 bg-amber-950/20">
             <div className="text-xs font-bold text-amber-400 uppercase tracking-widest">Administration</div>
-            <div className="grid grid-cols-2 gap-x-4 gap-y-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-4">
               <SHead title="Mailing" />
               <Chk label="Do Not Mail" name="do_not_mail" checked={member?.do_not_mail} />
               <Chk label="Hide Entry"  name="hide_entry"  checked={member?.hide_entry}
