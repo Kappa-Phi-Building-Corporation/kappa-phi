@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { MEMBER_STATUS_LABELS } from '@/lib/memberStatus'
 
 export const metadata = { title: 'Member Records' }
 
@@ -23,7 +24,7 @@ export default async function AdminMembersPage({
 
   let query = admin
     .from('members')
-    .select('id, first_name, last_name, badge_number, pledge_class, email, is_deceased, is_missing, hide_entry')
+    .select('id, first_name, last_name, badge_number, pledge_class, email, is_deceased, is_missing, hide_entry, member_status')
 
   if (q) {
     query = query.or(
@@ -125,6 +126,19 @@ export default async function AdminMembersPage({
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex flex-wrap gap-1">
+                        {(() => {
+                          const status = m.member_status ?? 'alumni'
+                          const cls = status === 'expelled_other'
+                            ? 'bg-red-900/40 text-red-400'
+                            : status === 'active_ug'
+                              ? 'bg-green-900/40 text-green-400'
+                              : 'bg-blue-900/40 text-blue-400'
+                          return (
+                            <span className={`px-2 py-0.5 rounded-full text-xs ${cls}`}>
+                              {MEMBER_STATUS_LABELS[status] ?? status}
+                            </span>
+                          )
+                        })()}
                         {m.is_deceased && (
                           <span className="px-2 py-0.5 rounded-full text-xs bg-gray-800 text-gray-400">Deceased</span>
                         )}
@@ -132,10 +146,7 @@ export default async function AdminMembersPage({
                           <span className="px-2 py-0.5 rounded-full text-xs bg-yellow-900/60 text-yellow-400">Missing</span>
                         )}
                         {m.hide_entry && (
-                          <span className="px-2 py-0.5 rounded-full text-xs bg-red-900/40 text-red-400">Hidden</span>
-                        )}
-                        {!m.is_deceased && !m.is_missing && !m.hide_entry && (
-                          <span className="px-2 py-0.5 rounded-full text-xs bg-green-900/40 text-green-400">Active</span>
+                          <span className="px-2 py-0.5 rounded-full text-xs bg-gray-700 text-gray-300">Hidden</span>
                         )}
                       </div>
                     </td>
