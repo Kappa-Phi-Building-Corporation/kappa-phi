@@ -101,7 +101,7 @@ export default async function AdminPropertyPage({
                           <div className="text-gray-500 text-xs mt-0.5">
                             {p.scheduled_date && `Scheduled: ${p.scheduled_date}`}
                             {p.completed_date && `Completed: ${p.completed_date}`}
-                            {p.cost && ` Â· ${p.cost}`}
+                            {p.cost && ` · ${p.cost}`}
                           </div>
                         </div>
 

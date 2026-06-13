@@ -69,7 +69,7 @@ export default async function AdminBoardPage({
             <div className="text-kp-gold text-xs font-bold uppercase tracking-widest mb-2">Administration</div>
             <h1 className="text-4xl font-black text-white">Board Members</h1>
             <p className="text-gray-400 mt-1 text-sm">
-              {officers.length} officer{officers.length !== 1 ? 's' : ''} Â· {directors.length} director{directors.length !== 1 ? 's' : ''}
+              {officers.length} officer{officers.length !== 1 ? 's' : ''} · {directors.length} director{directors.length !== 1 ? 's' : ''}
             </p>
           </div>
           <Link

@@ -103,8 +103,8 @@ export default async function AdminEventsPage({
                     <div className="text-gray-500 text-xs mt-0.5">
                       {formatDate(event.start_date)}
                       {event.end_date && event.end_date !== event.start_date && ` – ${formatDate(event.end_date)}`}
-                      {formatTimeRange(event.start_time, event.end_time) && ` Â· ${formatTimeRange(event.start_time, event.end_time)}`}
-                      {event.location && ` Â· ${event.location}`}
+                      {formatTimeRange(event.start_time, event.end_time) && ` · ${formatTimeRange(event.start_time, event.end_time)}`}
+                      {event.location && ` · ${event.location}`}
                     </div>
                   </div>
                   <Link

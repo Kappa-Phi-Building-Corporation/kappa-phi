@@ -69,7 +69,7 @@ export default async function AdminChapterEternalPage({
             <p className="text-gray-400 mt-1 text-sm">
               {entries.length} entr{entries.length !== 1 ? 'ies' : 'y'}
               {pending.length > 0 && (
-                <span className="text-amber-400 ml-2">Â· {pending.length} pending</span>
+                <span className="text-amber-400 ml-2">· {pending.length} pending</span>
               )}
             </p>
           </div>
@@ -105,13 +105,13 @@ export default async function AdminChapterEternalPage({
                       </div>
                       <div className="text-gray-500 text-xs mt-0.5">
                         {[m.pledge_class, m.badge_number ? `Badge ${m.badge_number}` : null]
-                          .filter(Boolean).join(' Â· ')}
+                          .filter(Boolean).join(' · ')}
                       </div>
                     </div>
                     <Link
                       href={`/admin/chapter-eternal/new?member_id=${m.id}`}
                       className="shrink-0 px-3 py-1.5 text-xs rounded-lg bg-amber-500/20 border border-amber-600/40 text-amber-400 hover:bg-amber-500/30 transition-colors no-underline">
-                      Create Entry ←’
+                      Create Entry →
                     </Link>
                   </div>
                 ))}
@@ -154,8 +154,8 @@ export default async function AdminChapterEternalPage({
                         </div>
                         <div className="text-gray-500 text-xs mt-0.5">
                           {[m.pledge_class, m.badge_number ? `Badge ${m.badge_number}` : null]
-                            .filter(Boolean).join(' Â· ')}
-                          {m.passing_date && ` Â· Eternal ${fmtDate(m.passing_date)}`}
+                            .filter(Boolean).join(' · ')}
+                          {m.passing_date && ` · Eternal ${fmtDate(m.passing_date)}`}
                         </div>
                       </div>
                       <VisibilityButton isHidden={!!m.hide_entry} showAction={showThis} hideAction={hideThis} />
