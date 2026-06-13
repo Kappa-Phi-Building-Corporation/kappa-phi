@@ -42,7 +42,7 @@ export async function createEternalEntry(formData: FormData) {
     is_deceased: true,
     passing_date: (formData.get('passing_date') as string) || null,
     memorial_link_url: (formData.get('memorial_link_url') as string)?.trim() || null,
-    hide_entry: false,
+    hide_entry: formData.get('show_on_memorial') !== 'on',
   }
 
   const photo = formData.get('photo') as File | null

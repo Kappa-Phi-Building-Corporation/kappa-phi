@@ -187,32 +187,22 @@ export default function EternalForm(props: Props) {
         </p>
       </div>
 
-      {/* ── Visibility toggle (edit mode only) ─── */}
-      {isEdit && (
-        <div className="flex items-start gap-3">
-          <input
-            type="checkbox"
-            id="show_on_memorial"
-            name="show_on_memorial"
-            defaultChecked={!member?.hide_entry}
-            className="mt-0.5 h-4 w-4 rounded border-kp-border bg-kp-card accent-kp-gold cursor-pointer shrink-0"
-          />
-          <label htmlFor="show_on_memorial" className="text-sm text-white cursor-pointer leading-snug">
-            Show on public memorial page
-            <span className="block text-xs text-gray-500 mt-0.5">
-              When unchecked, the entry is saved but not visible to visitors.
-            </span>
-          </label>
-        </div>
-      )}
-
-      {/* ── Hidden-by-default notice (create mode only) ─── */}
-      {!isEdit && (
-        <div className="bg-kp-card border border-kp-border rounded-xl px-4 py-3 text-xs text-gray-500">
-          New entries are hidden from the public memorial page until you publish them.
-          You can toggle visibility after saving.
-        </div>
-      )}
+      {/* ── Visibility toggle ─── */}
+      <div className="flex items-start gap-3">
+        <input
+          type="checkbox"
+          id="show_on_memorial"
+          name="show_on_memorial"
+          defaultChecked={!member?.hide_entry}
+          className="mt-0.5 h-4 w-4 rounded border-kp-border bg-kp-card accent-kp-gold cursor-pointer shrink-0"
+        />
+        <label htmlFor="show_on_memorial" className="text-sm text-white cursor-pointer leading-snug">
+          Show on public memorial page
+          <span className="block text-xs text-gray-500 mt-0.5">
+            When unchecked, the entry is saved but not visible to visitors.
+          </span>
+        </label>
+      </div>
 
       <div className="flex justify-end pt-2 border-t border-kp-border">
         <button
