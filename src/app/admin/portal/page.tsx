@@ -72,7 +72,7 @@ export default async function AdminPortalPage({
                     <div className="text-white text-sm font-semibold truncate">{r.label}</div>
                     <div className="text-gray-500 text-xs mt-0.5 truncate">
                       {r.href}
-                      {r.is_external && <span className="ml-2">←— external</span>}
+                      {r.is_external && <span className="ml-2">↗ external</span>}
                       {r.requires_auth && <span className="ml-2 text-amber-400">login required</span>}
                       {!r.is_published && <span className="ml-2 text-gray-600">(hidden)</span>}
                     </div>
