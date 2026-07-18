@@ -5,7 +5,7 @@ const stats = [
   { number: '500+', label: 'Brothers Initiated' },
   { number: '440+', label: 'Living Alumni' },
   { number: '60+', label: 'Years of Brotherhood' },
-  { number: '3×', label: 'Hugh Shields Award' },
+  { number: '5×', label: 'Hugh Shields Award' },
 ]
 
 const banners = [

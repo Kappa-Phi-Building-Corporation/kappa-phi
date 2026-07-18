@@ -211,8 +211,8 @@ export default async function PropertyPage() {
           <div className="bg-kp-surface border border-kp-border rounded-2xl p-6 md:p-8">
             <p className="text-gray-300 text-sm leading-relaxed">
               The amenities we provide the men of Epsilon Nu allow them to concentrate on the fundamentals
-              of the Fraternity — as demonstrated by the 5 Court of Honor and 3 Hugh Shields Awards won in the
-              last 15 years. This page summarizes major projects the Building Corporation has undertaken and
+              of the Fraternity — as demonstrated by the 5 Court of Honor and 5 Hugh Shields Awards the chapter
+              has earned. This page summarizes major projects the Building Corporation has undertaken and
               showcases what is planned next.
             </p>
             <p className="text-gray-500 text-xs mt-4">

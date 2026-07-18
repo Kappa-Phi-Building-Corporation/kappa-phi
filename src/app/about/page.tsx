@@ -76,7 +76,7 @@ const historyChapters = [
     paragraphs: [
       'Epsilon Nu has received various awards from Delta Tau Delta nationally for programs, including awards for excellence in website design, exceeding the All Men\'s/All Fraternity Average GPA, excellent Honor Board practices, and outstanding Undergraduate Manual.',
       'Epsilon Nu\'s brightest moments include 1991, when it received the Court of Honor award from the Arch Chapter for its overall performance in 1990. This award placed EN Chapter in the top 24 chapters of 124 Delt chapters in the United States and Canada at the time — the first time EN Chapter had received this award since the Court of Honor program was begun. Since then, the chapter has received a total of 5 Court of Honor awards.',
-      'In 2000, Epsilon Nu received the highest award given to any chapter: the Hugh Shields Award for Chapter Excellence. This award is reserved for only those who are "first among equals," and only 10 are given every year. Epsilon Nu has taken the Hugh Shields flag home three times — in 2000, 2004, and 2006.',
+      'In 2000, Epsilon Nu received the highest award given to any chapter: the Hugh Shields Award for Chapter Excellence. This award is reserved for only those who are "first among equals," and only 10 are given every year. Epsilon Nu has taken the Hugh Shields flag home five times — in 2000, 2004, 2006, 2021, and 2022 — with the fourth and fifth awards coming in back-to-back years.',
     ],
   },
 ]
@@ -93,6 +93,8 @@ const milestones = [
   { year: '2004', event: 'Second Hugh Shields Award for Chapter Excellence' },
   { year: '2006', event: 'Third Hugh Shields Award for Chapter Excellence' },
   { year: '2016', event: '50th anniversary as Epsilon Nu Chapter of Delta Tau Delta' },
+  { year: '2021', event: 'Fourth Hugh Shields Award for Chapter Excellence' },
+  { year: '2022', event: 'Fifth Hugh Shields Award for Chapter Excellence' },
 ]
 
 // ─── Honor roll sorting helpers ────────────────────────────────────
@@ -211,7 +213,7 @@ export default async function AboutPage() {
             { n: '1963', l: 'Founded' },
             { n: '500+', l: 'Brothers Initiated' },
             { n: '440+', l: 'Living Alumni' },
-            { n: '3×', l: 'Hugh Shields Award' },
+            { n: '5×', l: 'Hugh Shields Award' },
           ].map(s => (
             <div key={s.l} className="bg-kp-surface border border-kp-border rounded-2xl p-5 text-center">
               <div className="text-kp-gold text-3xl font-black">{s.n}</div>
