@@ -61,6 +61,17 @@ export default async function EditPortalResourcePage({
           </div>
         )}
 
+        {resource.href === '/portal/pats-guide' && (
+          <div className="bg-amber-950/20 border border-amber-800/50 rounded-2xl p-5 text-sm text-amber-200">
+            This link points at the in-house St. Pat&apos;s guide page. To edit its actual content
+            (text, photos), go to{' '}
+            <Link href="/admin/portal/pats-guide" className="text-kp-gold hover:underline">
+              Booth&apos;s Guide to Pats
+            </Link>
+            . The form below only controls how the link itself appears on the Portal page.
+          </div>
+        )}
+
         <div className="bg-kp-surface border border-kp-border rounded-2xl p-8">
           <ResourceForm action={updateThis} resource={resource} />
         </div>
