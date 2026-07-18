@@ -31,6 +31,7 @@ export default async function AdminDashboardPage() {
     { count: portalResourceCount },
     { count: honorCount },
     { count: mascotCount },
+    { count: missingBigBrother },
   ] = await Promise.all([
     admin.from('profiles')
       .select('*', { count: 'exact', head: true })
@@ -71,6 +72,10 @@ export default async function AdminDashboardPage() {
     admin.from('chapter_mascots')
       .select('*', { count: 'exact', head: true })
       .eq('is_published', true),
+    admin.from('members')
+      .select('*', { count: 'exact', head: true })
+      .not('badge_number', 'is', null)
+      .is('big_brother_id', null),
   ])
 
   const memberSections = [
@@ -99,6 +104,21 @@ export default async function AdminDashboardPage() {
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
             d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+        </svg>
+      ),
+    },
+    {
+      title: 'Big Brother Maintenance',
+      href: '/admin/big-brother',
+      description: 'Review members missing a recorded big brother and assign one.',
+      pending: 0,
+      pendingLabel: '',
+      total: missingBigBrother ?? 0,
+      totalLabel: 'missing',
+      icon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+            d="M17 20h5v-2a4 4 0 00-5.477-3.693M9 20H4v-2a4 4 0 015.477-3.693M15 7a4 4 0 11-8 0 4 4 0 018 0zm6 4a3 3 0 11-6 0 3 3 0 016 0zM12 4v4m-2-2h4" />
         </svg>
       ),
     },
