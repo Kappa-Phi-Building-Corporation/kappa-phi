@@ -26,6 +26,17 @@ export type TreeMember = {
   pledge_class: string | null
   big_brother_id: string | null
   hide_entry: boolean | null
+  is_deceased: boolean | null
+  member_status: string | null
+}
+
+// Deceased-only members are shown in full on the tree (unlike the directory,
+// which hides them) so lineage stays visible. Expelled members — and anyone
+// else manually hidden — still render as blank boxes.
+function isTreeHidden(m: TreeMember): boolean {
+  if (!m.hide_entry) return false
+  if (m.is_deceased && m.member_status !== 'expelled_other') return false
+  return true
 }
 
 type NodeData = {
@@ -147,7 +158,7 @@ function buildFlowElements(members: TreeMember[]): { nodes: Node[], edges: Edge[
 function MemberNodeComponent({ data }: NodeProps) {
   const { member, focused, inLineage, dimmed } = data as NodeData
 
-  if (member.hide_entry) {
+  if (isTreeHidden(member)) {
     return (
       <div
         style={{ width: NODE_W, opacity: dimmed ? 0.08 : 0.35 }}
@@ -271,7 +282,7 @@ function FamilyTreeInner({ members, initialFocusId }: { members: TreeMember[]; i
     if (!search.trim()) return []
     const q = search.toLowerCase()
     return members
-      .filter(m => !m.hide_entry &&
+      .filter(m => !isTreeHidden(m) &&
         `${m.first_name} ${m.last_name} ${m.badge_number}`.toLowerCase().includes(q))
       .slice(0, 10)
   }, [search, members])
@@ -353,7 +364,7 @@ function FamilyTreeInner({ members, initialFocusId }: { members: TreeMember[]; i
           {/* Header */}
           <div className="bg-kp-gold/10 border-b border-kp-border px-4 py-3 flex items-start justify-between gap-2">
             <div>
-              {focusedMember.hide_entry ? (
+              {isTreeHidden(focusedMember) ? (
                 <h3 className="text-gray-500 italic text-sm leading-tight">Hidden member</h3>
               ) : (
                 <>
@@ -377,14 +388,14 @@ function FamilyTreeInner({ members, initialFocusId }: { members: TreeMember[]; i
 
           {/* Lineage */}
           <div className="px-4 py-3 space-y-2.5">
-            {focusedMember.hide_entry ? (
+            {isTreeHidden(focusedMember) ? (
               <p className="text-gray-600 text-xs italic">This member has requested privacy.</p>
             ) : (
               <>
                 {bigBrother ? (
                   <div>
                     <p className="text-gray-600 text-[10px] uppercase tracking-wider font-semibold mb-1">Big Brother</p>
-                    {bigBrother.hide_entry ? (
+                    {isTreeHidden(bigBrother) ? (
                       <span className="text-gray-500 text-sm italic">Hidden member</span>
                     ) : (
                       <button
@@ -407,7 +418,7 @@ function FamilyTreeInner({ members, initialFocusId }: { members: TreeMember[]; i
                     </p>
                     <div className="space-y-1">
                       {littleBrothers.map(lb => (
-                        lb.hide_entry ? (
+                        isTreeHidden(lb) ? (
                           <span key={lb.id} className="block text-gray-600 text-sm italic">Hidden member</span>
                         ) : (
                           <button

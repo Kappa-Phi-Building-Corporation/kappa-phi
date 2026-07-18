@@ -33,14 +33,14 @@ export default async function AlumniDirectoryPage() {
       address_street, address_city, address_state, address_zip,
       employer, occupation,
       member_kpbc, member_advisory, past_member_advisory,
-      is_deceased, is_missing, hide_entry, updated_at,
+      is_deceased, is_missing, hide_entry, member_status, updated_at,
       lat, lng
     `)
     .not('first_name', 'is', null)
     .not('badge_number', 'is', null)
-    .neq('member_status', 'expelled_other')
 
-  // Non-admins never see hidden members
+  // Non-admins never see hidden members (deceased and expelled are both
+  // force-hidden via hide_entry — see applyMemberStatusRules)
   if (!isAdmin) {
     query = query.or('hide_entry.is.null,hide_entry.eq.false')
   }

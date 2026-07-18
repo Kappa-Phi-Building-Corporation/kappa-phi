@@ -503,7 +503,9 @@ export default function ProfileForm({
                 <Chk label="Missing / Lost Contact" name="is_missing" checked={member?.is_missing} />
               </div>
               <p className="col-span-2 md:col-span-3 text-xs text-gray-500">
-                Members marked Expelled / Other will not appear in the Alumni Directory or Big Brother Tree.
+                Members marked Expelled / Other are hidden from the Alumni Directory and shown as a blank
+                box on the Big Brother Tree. Deceased members are hidden from the Alumni Directory but still
+                shown in full on the Big Brother Tree.
               </p>
 
               <SHead title="Mailing" />

@@ -26,9 +26,8 @@ export default async function FamilyTreePage({
 
   const { data: members } = await admin
     .from('members')
-    .select('id, first_name, last_name, badge_number, pledge_class, big_brother_id, hide_entry')
+    .select('id, first_name, last_name, badge_number, pledge_class, big_brother_id, hide_entry, is_deceased, member_status')
     .not('badge_number', 'is', null)
-    .neq('member_status', 'expelled_other')
     .order('badge_number')
 
   const count = members?.length ?? 0

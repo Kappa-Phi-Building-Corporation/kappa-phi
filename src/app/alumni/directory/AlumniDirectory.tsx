@@ -37,9 +37,18 @@ export type DirectoryMember = {
   is_deceased: boolean | null
   is_missing: boolean | null
   hide_entry: boolean | null
+  member_status: string | null
   updated_at: string | null
   lat: number | null
   lng: number | null
+}
+
+// Deceased-only members still show (unhidden) on the Big Brother tree, so the
+// "Show in Family Tree" link should stay available for them. Expelled members
+// (and anyone else manually hidden) render as blank boxes there — no link.
+function showsInTree(m: DirectoryMember): boolean {
+  if (!m.hide_entry) return true
+  return !!m.is_deceased && m.member_status !== 'expelled_other'
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -176,7 +185,7 @@ function MemberDetail({
         </div>
       </div>
 
-      {member.badge_number && !member.hide_entry && (
+      {member.badge_number && showsInTree(member) && (
         <div className="mt-6 pt-5 border-t border-kp-border">
           <Link
             href={`/alumni/tree?focus=${member.id}`}
