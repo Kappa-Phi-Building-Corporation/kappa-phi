@@ -3,7 +3,6 @@
 type Guide = {
   title: string
   intro: string | null
-  body: string
   pdf_url: string | null
 }
 
@@ -27,14 +26,6 @@ export default function PatsGuideForm({
       <div>
         <label className={labelCls}>Intro <span className="text-gray-600 font-normal">(optional, shown under the title)</span></label>
         <textarea name="intro" rows={2} defaultValue={guide.intro ?? ''} className={`${inputCls} resize-y`} />
-      </div>
-
-      <div>
-        <label className={labelCls}>Body</label>
-        <p className="text-gray-600 text-xs mb-2">
-          Separate paragraphs with a blank line. Start a line with <code className="text-kp-gold">## </code> to make it a section heading (e.g. <code className="text-kp-gold">## What to bring</code>).
-        </p>
-        <textarea name="body" required rows={28} defaultValue={guide.body} className={`${inputCls} resize-y font-mono text-xs leading-relaxed`} />
       </div>
 
       <div>

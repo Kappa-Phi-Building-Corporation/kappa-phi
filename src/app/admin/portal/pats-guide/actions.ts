@@ -19,13 +19,16 @@ async function assertAdmin() {
 
 function str(v: FormDataEntryValue | null) { return (v as string)?.trim() || null }
 
+function slugify(v: string) {
+  return v.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+}
+
 export async function updateGuide(id: string, formData: FormData) {
   const admin = await assertAdmin()
 
   const payload = {
     title:   str(formData.get('title')) ?? "Booth's Guide to Pats",
     intro:   str(formData.get('intro')),
-    body:    (formData.get('body') as string) ?? '',
     pdf_url: str(formData.get('pdf_url')),
   }
 
@@ -35,6 +38,54 @@ export async function updateGuide(id: string, formData: FormData) {
   revalidatePath('/portal/pats-guide')
   revalidatePath('/admin/portal/pats-guide')
   redirect('/admin/portal/pats-guide?success=saved')
+}
+
+export async function createSection(formData: FormData) {
+  const admin = await assertAdmin()
+
+  const title = str(formData.get('title')) ?? ''
+  const slug = str(formData.get('slug')) || slugify(title)
+  const payload = {
+    title,
+    slug,
+    body: (formData.get('body') as string) ?? '',
+    sort_order: parseInt((formData.get('sort_order') as string) ?? '0', 10) || 0,
+  }
+
+  const { error } = await admin.from('pats_guide_sections').insert(payload)
+  if (error) redirect('/admin/portal/pats-guide/sections/new?error=' + encodeURIComponent(error.message))
+
+  revalidatePath('/portal/pats-guide')
+  revalidatePath('/admin/portal/pats-guide')
+  redirect('/admin/portal/pats-guide?success=section-created')
+}
+
+export async function updateSection(id: string, formData: FormData) {
+  const admin = await assertAdmin()
+
+  const title = str(formData.get('title')) ?? ''
+  const slug = str(formData.get('slug')) || slugify(title)
+  const payload = {
+    title,
+    slug,
+    body: (formData.get('body') as string) ?? '',
+    sort_order: parseInt((formData.get('sort_order') as string) ?? '0', 10) || 0,
+  }
+
+  const { error } = await admin.from('pats_guide_sections').update(payload).eq('id', id)
+  if (error) redirect(`/admin/portal/pats-guide/sections/${id}?error=` + encodeURIComponent(error.message))
+
+  revalidatePath('/portal/pats-guide')
+  revalidatePath('/admin/portal/pats-guide')
+  redirect('/admin/portal/pats-guide?success=section-saved')
+}
+
+export async function deleteSection(id: string) {
+  const admin = await assertAdmin()
+  await admin.from('pats_guide_sections').delete().eq('id', id)
+  revalidatePath('/portal/pats-guide')
+  revalidatePath('/admin/portal/pats-guide')
+  redirect('/admin/portal/pats-guide?success=section-deleted')
 }
 
 export async function addPhoto(formData: FormData) {

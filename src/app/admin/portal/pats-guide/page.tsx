@@ -22,7 +22,7 @@ export default async function AdminPatsGuidePage({
 
   let { data: guide } = await admin
     .from('pats_guide')
-    .select('id, title, intro, body, pdf_url')
+    .select('id, title, intro, pdf_url')
     .order('created_at', { ascending: true })
     .limit(1)
     .maybeSingle()
@@ -32,11 +32,16 @@ export default async function AdminPatsGuidePage({
   if (!guide) {
     const { data: created } = await admin
       .from('pats_guide')
-      .insert({ title: "Booth's Guide to Pats", body: '' })
-      .select('id, title, intro, body, pdf_url')
+      .insert({ title: "Booth's Guide to Pats" })
+      .select('id, title, intro, pdf_url')
       .single()
     guide = created
   }
+
+  const { data: sections } = await admin
+    .from('pats_guide_sections')
+    .select('id, title, slug, sort_order')
+    .order('sort_order', { ascending: true })
 
   const { data: photos } = await admin
     .from('pats_guide_photos')
@@ -68,6 +73,9 @@ export default async function AdminPatsGuidePage({
             {success === 'saved' ? 'Changes saved.'
               : success === 'photo-added' ? 'Photo added.'
               : success === 'photo-removed' ? 'Photo removed.'
+              : success === 'section-created' ? 'Section added.'
+              : success === 'section-saved' ? 'Section saved.'
+              : success === 'section-deleted' ? 'Section removed.'
               : 'Done.'}
           </div>
         )}
@@ -79,6 +87,46 @@ export default async function AdminPatsGuidePage({
 
         <div className="bg-kp-surface border border-kp-border rounded-2xl p-6 md:p-8">
           <PatsGuideForm action={updateThis} guide={guide!} />
+        </div>
+
+        {/* Sections — the actual page content, edited one at a time */}
+        <div className="bg-kp-surface border border-kp-border rounded-2xl p-6 md:p-8 space-y-6">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <h2 className="text-white font-bold text-lg mb-1">Sections</h2>
+              <p className="text-gray-500 text-sm">
+                Rendered in order on the guide page, with a jump-to link for each in the sidebar.
+              </p>
+            </div>
+            <Link
+              href="/admin/portal/pats-guide/sections/new"
+              className="shrink-0 bg-kp-gold text-black font-bold px-4 py-2 rounded-xl text-sm hover:opacity-90 transition-opacity no-underline">
+              + Add Section
+            </Link>
+          </div>
+
+          {sections && sections.length > 0 ? (
+            <div className="divide-y divide-kp-border rounded-xl border border-kp-border overflow-hidden">
+              {sections.map(s => (
+                <Link
+                  key={s.id}
+                  href={`/admin/portal/pats-guide/sections/${s.id}`}
+                  className="flex items-center gap-4 px-4 py-3 hover:bg-kp-card/40 transition-colors no-underline"
+                >
+                  <span className="text-gray-500 text-xs font-mono w-8 shrink-0">{s.sort_order}</span>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-white text-sm font-semibold truncate">{s.title}</div>
+                    <div className="text-gray-500 text-xs mt-0.5 truncate font-mono">#{s.slug}</div>
+                  </div>
+                  <span className="text-gray-500 text-xs shrink-0">Edit →</span>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <div className="px-6 py-8 text-center text-gray-500 text-sm border border-dashed border-kp-border rounded-xl">
+              No sections yet.
+            </div>
+          )}
         </div>
 
         {/* Photo gallery — separate section, own forms, not nested inside PatsGuideForm's <form> */}
