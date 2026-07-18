@@ -7,6 +7,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
 import { getAddressStamp } from '@/lib/addressTracking'
 import { applyMemberStatusRules } from '@/lib/memberStatus'
+import { sendUserApprovedEmail } from '@/lib/email'
 
 function str(v: FormDataEntryValue | null) { return (v as string) || null }
 function bool(v: FormDataEntryValue | null) { return v === 'on' }
@@ -67,14 +68,31 @@ export async function updateUserAdmin(formData: FormData) {
   const admin = createAdminClient()
   const payload = applyMemberStatusRules(memberPayload(formData))
 
+  const { data: previousProfile } = await admin
+    .from('profiles')
+    .select('is_approved')
+    .eq('id', targetProfileId)
+    .single()
+
+  const nowApproved = bool(formData.get('is_approved'))
+
   // Update profile account fields
   const { error: profileError } = await admin.from('profiles').update({
-    is_approved: bool(formData.get('is_approved')),
+    is_approved: nowApproved,
     role:        str(formData.get('role')) ?? 'member',
   }).eq('id', targetProfileId)
 
   if (profileError) {
     redirect(`/admin/users/${targetProfileId}?error=${encodeURIComponent(profileError.message)}`)
+  }
+
+  if (nowApproved && !previousProfile?.is_approved) {
+    const { data } = await admin.auth.admin.getUserById(targetProfileId)
+    const authUser = data.user
+    if (authUser?.email) {
+      const meta = (authUser.user_metadata ?? {}) as Record<string, string>
+      await sendUserApprovedEmail(`${meta.first_name ?? ''} ${meta.last_name ?? ''}`.trim(), authUser.email)
+    }
   }
 
   // Determine the acting admin's identity for the address audit trail

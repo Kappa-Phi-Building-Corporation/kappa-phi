@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { sendUserApprovedEmail } from '@/lib/email'
 
 export async function requireAdmin() {
   const supabase = await createClient()
@@ -21,10 +22,20 @@ export async function requireAdmin() {
   return user.id
 }
 
+async function notifyUserApproved(admin: ReturnType<typeof createAdminClient>, userId: string) {
+  const { data } = await admin.auth.admin.getUserById(userId)
+  const authUser = data.user
+  if (!authUser?.email) return
+  const meta = (authUser.user_metadata ?? {}) as Record<string, string>
+  const name = `${meta.first_name ?? ''} ${meta.last_name ?? ''}`.trim()
+  await sendUserApprovedEmail(name, authUser.email)
+}
+
 export async function approveUser(userId: string) {
   await requireAdmin()
   const admin = createAdminClient()
   await admin.from('profiles').update({ is_approved: true }).eq('id', userId)
+  await notifyUserApproved(admin, userId)
   revalidatePath('/admin/users')
 }
 
@@ -35,6 +46,7 @@ export async function approveLinkUser(formData: FormData) {
   if (!userId) return
   const admin = createAdminClient()
   await admin.from('profiles').update({ is_approved: true, member_id: memberId }).eq('id', userId)
+  await notifyUserApproved(admin, userId)
   revalidatePath('/admin/users')
 }
 

@@ -55,6 +55,53 @@ export async function sendAdminNewUserEmail(userName: string, userEmail: string)
   }
 }
 
+export async function sendUserApprovedEmail(userName: string, userEmail: string) {
+  const apiKey = process.env.RESEND_API_KEY
+  if (!apiKey) {
+    console.warn('[email] RESEND_API_KEY not set — skipping approval notification')
+    return
+  }
+
+  const loginUrl = `${SITE_URL}/login`
+
+  const html = `
+    <div style="font-family:sans-serif;max-width:560px;margin:0 auto;color:#1a1a2e">
+      <div style="background:#1a3a6b;padding:24px 32px;border-radius:8px 8px 0 0">
+        <span style="color:#c9a227;font-weight:900;font-size:22px">ΔΤΔ Kappa Phi BC</span>
+      </div>
+      <div style="background:#f9f9f9;padding:32px;border-radius:0 0 8px 8px;border:1px solid #e0e0e0">
+        <h2 style="margin-top:0">Your Account Has Been Approved</h2>
+        <p>Hi ${userName || 'there'},</p>
+        <p>Your Kappa Phi Building Corporation portal account has been approved. You can now log in to access the Alumni Directory, Big Brother Tree, and other member resources.</p>
+        <a href="${loginUrl}" style="display:inline-block;background:#c9a227;color:#000;font-weight:700;padding:12px 28px;border-radius:6px;text-decoration:none;margin-top:8px">
+          Log In →
+        </a>
+        <p style="margin-top:32px;font-size:13px;color:#666">
+          Kappa Phi Building Corporation · Epsilon Nu Chapter · Missouri S&amp;T
+        </p>
+      </div>
+    </div>
+  `
+
+  const res = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      from: FROM,
+      to: [userEmail],
+      subject: 'Your Kappa Phi Portal Account Has Been Approved',
+      html,
+    }),
+  })
+
+  if (!res.ok) {
+    console.error('[email] Failed to send approval notification:', await res.text())
+  }
+}
+
 function escapeHtml(value: string) {
   return value
     .replace(/&/g, '&amp;')
