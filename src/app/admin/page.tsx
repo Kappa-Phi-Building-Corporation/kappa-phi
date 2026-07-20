@@ -148,6 +148,19 @@ export default async function AdminDashboardPage() {
         </svg>
       ),
     },
+    {
+      title: 'Member Reports',
+      href: '/admin/reports',
+      description: 'Mailing lists, email lists, and other exports — view on screen or download as CSV.',
+      pending: 0,
+      pendingLabel: '',
+      icon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+            d="M9 17v-6a2 2 0 012-2h2a2 2 0 012 2v6m-6 0h6m-6 0H5a2 2 0 01-2-2V5a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2h-2" />
+        </svg>
+      ),
+    },
   ]
 
   const websiteSections = [

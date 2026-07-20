@@ -6,12 +6,15 @@ import { MEMBER_STATUS_LABELS } from '@/lib/memberStatus'
 
 export const metadata = { title: 'Member Records' }
 
-type ViewId = 'all' | 'active' | 'missing'
+type ViewId = 'all' | 'active' | 'missing' | 'expelled' | 'suspended' | 'hidden'
 
 const VIEWS: { id: ViewId; label: string }[] = [
   { id: 'all', label: 'All' },
   { id: 'active', label: 'Active' },
   { id: 'missing', label: 'Missing' },
+  { id: 'expelled', label: 'Expelled' },
+  { id: 'suspended', label: 'Suspended' },
+  { id: 'hidden', label: 'Hidden' },
 ]
 
 export default async function AdminMembersPage({
@@ -37,6 +40,9 @@ export default async function AdminMembersPage({
 
   if (view === 'active') query = query.eq('member_status', 'active_ug')
   if (view === 'missing') query = query.eq('is_missing', true)
+  if (view === 'expelled') query = query.eq('member_status', 'expelled_other')
+  if (view === 'suspended') query = query.eq('member_status', 'suspended')
+  if (view === 'hidden') query = query.eq('hide_entry', true)
 
   if (q) {
     query = query.or(
@@ -67,7 +73,7 @@ export default async function AdminMembersPage({
   // Same as the current view's href, but with the search term dropped
   const clearSearchHref = view === 'all' ? '/admin/members' : `/admin/members?view=${view}`
 
-  const showDnmReason = view === 'missing'
+  const showDnmReason = view === 'missing' || view === 'expelled' || view === 'suspended' || view === 'hidden'
 
   return (
     <div className="bg-kp-dark min-h-screen">
