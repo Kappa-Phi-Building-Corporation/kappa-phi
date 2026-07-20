@@ -189,7 +189,7 @@ export default function ProfileForm({
     if (v === 'expelled_other') {
       setDoNotMail(true)
       setHideEntry(true)
-      setDnmReason('Expelled / Other')
+      setDnmReason('Expelled / Withdrawn')
     } else if (v === 'active_ug') {
       setDoNotMail(true)
       setHideEntry(true)
@@ -503,9 +503,9 @@ export default function ProfileForm({
                 <Chk label="Missing / Lost Contact" name="is_missing" checked={member?.is_missing} />
               </div>
               <p className="col-span-2 md:col-span-3 text-xs text-gray-500">
-                Members marked Expelled / Other are hidden from the Alumni Directory and shown as a blank
+                Members marked Expelled / Withdrawn are hidden from the Alumni Directory and shown as a blank
                 box on the Big Brother Tree. Deceased members are hidden from the Alumni Directory but still
-                shown in full on the Big Brother Tree.
+                shown in full on the Big Brother Tree. Suspended members are not hidden by default.
               </p>
 
               <SHead title="Mailing" />

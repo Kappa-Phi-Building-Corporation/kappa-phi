@@ -6,10 +6,18 @@ import { MEMBER_STATUS_LABELS } from '@/lib/memberStatus'
 
 export const metadata = { title: 'Member Records' }
 
+type ViewId = 'all' | 'active' | 'missing'
+
+const VIEWS: { id: ViewId; label: string }[] = [
+  { id: 'all', label: 'All' },
+  { id: 'active', label: 'Active' },
+  { id: 'missing', label: 'Missing' },
+]
+
 export default async function AdminMembersPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string }>
+  searchParams: Promise<{ q?: string; view?: string }>
 }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -20,11 +28,15 @@ export default async function AdminMembersPage({
     .from('profiles').select('role').eq('id', user.id).single()
   if (currentProfile?.role !== 'admin') redirect('/portal')
 
-  const { q } = await searchParams
+  const { q, view: viewParam } = await searchParams
+  const view: ViewId = VIEWS.some(v => v.id === viewParam) ? (viewParam as ViewId) : 'all'
 
   let query = admin
     .from('members')
-    .select('id, first_name, last_name, badge_number, pledge_class, email, is_deceased, is_missing, hide_entry, member_status')
+    .select('id, first_name, last_name, badge_number, pledge_class, email, is_deceased, is_missing, hide_entry, member_status, dnm_reason')
+
+  if (view === 'active') query = query.eq('member_status', 'active_ug')
+  if (view === 'missing') query = query.eq('is_missing', true)
 
   if (q) {
     query = query.or(
@@ -43,6 +55,19 @@ export default async function AdminMembersPage({
     if (isNaN(nb)) return -1
     return na - nb
   })
+
+  function viewHref(v: ViewId) {
+    const params = new URLSearchParams()
+    if (v !== 'all') params.set('view', v)
+    if (q) params.set('q', q)
+    const qs = params.toString()
+    return qs ? `/admin/members?${qs}` : '/admin/members'
+  }
+
+  // Same as the current view's href, but with the search term dropped
+  const clearSearchHref = view === 'all' ? '/admin/members' : `/admin/members?view=${view}`
+
+  const showDnmReason = view === 'missing'
 
   return (
     <div className="bg-kp-dark min-h-screen">
@@ -65,8 +90,26 @@ export default async function AdminMembersPage({
       </div>
 
       <div className="max-w-6xl mx-auto px-4 py-8 space-y-6">
+        {/* Views */}
+        <div className="flex gap-2">
+          {VIEWS.map(v => (
+            <Link
+              key={v.id}
+              href={viewHref(v.id)}
+              className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors no-underline ${
+                view === v.id
+                  ? 'bg-kp-gold text-black'
+                  : 'bg-kp-surface border border-kp-border text-gray-400 hover:text-kp-gold hover:border-kp-gold'
+              }`}
+            >
+              {v.label}
+            </Link>
+          ))}
+        </div>
+
         {/* Search */}
         <form method="GET" className="flex gap-3">
+          {view !== 'all' && <input type="hidden" name="view" value={view} />}
           <input
             name="q"
             type="search"
@@ -79,7 +122,7 @@ export default async function AdminMembersPage({
             Search
           </button>
           {q && (
-            <Link href="/admin/members"
+            <Link href={clearSearchHref}
               className="px-5 py-2.5 border border-kp-border rounded-xl text-sm text-gray-400 hover:text-white transition-colors no-underline">
               Clear
             </Link>
@@ -97,14 +140,17 @@ export default async function AdminMembersPage({
                   <th className="px-4 py-3 text-left text-xs text-gray-500 uppercase tracking-wider hidden md:table-cell">Pledge Class</th>
                   <th className="px-4 py-3 text-left text-xs text-gray-500 uppercase tracking-wider hidden lg:table-cell">Email</th>
                   <th className="px-4 py-3 text-left text-xs text-gray-500 uppercase tracking-wider">Status</th>
+                  {showDnmReason && (
+                    <th className="px-4 py-3 text-left text-xs text-gray-500 uppercase tracking-wider hidden md:table-cell">DNM Reason</th>
+                  )}
                   <th className="px-4 py-3" />
                 </tr>
               </thead>
               <tbody>
                 {rows.length === 0 && (
                   <tr>
-                    <td colSpan={6} className="px-4 py-12 text-center text-gray-500 italic">
-                      {q ? 'No members match your search.' : 'No member records yet.'}
+                    <td colSpan={showDnmReason ? 7 : 6} className="px-4 py-12 text-center text-gray-500 italic">
+                      {q ? 'No members match your search.' : 'No member records in this view.'}
                     </td>
                   </tr>
                 )}
@@ -132,7 +178,9 @@ export default async function AdminMembersPage({
                             ? 'bg-red-900/40 text-red-400'
                             : status === 'active_ug'
                               ? 'bg-blue-900/40 text-blue-400'
-                              : 'bg-green-900/40 text-green-400'
+                              : status === 'suspended'
+                                ? 'bg-orange-900/40 text-orange-400'
+                                : 'bg-green-900/40 text-green-400'
                           return (
                             <span className={`px-2 py-0.5 rounded-full text-xs ${cls}`}>
                               {MEMBER_STATUS_LABELS[status] ?? status}
@@ -150,6 +198,11 @@ export default async function AdminMembersPage({
                         )}
                       </div>
                     </td>
+                    {showDnmReason && (
+                      <td className="px-4 py-3 text-gray-400 text-xs hidden md:table-cell">
+                        {m.dnm_reason ?? '—'}
+                      </td>
+                    )}
                     <td className="px-4 py-3">
                       <Link href={`/admin/members/${m.id}`}
                         className="px-3 py-1 text-xs rounded-lg border border-kp-border text-gray-300 hover:border-kp-gold hover:text-kp-gold transition-colors no-underline">

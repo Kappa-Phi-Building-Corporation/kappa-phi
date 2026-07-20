@@ -1,16 +1,19 @@
 export const MEMBER_STATUS_OPTIONS = [
   { v: 'active_ug',      l: 'Active / UG' },
   { v: 'alumni',         l: 'Alumni' },
-  { v: 'expelled_other', l: 'Expelled / Other' },
+  { v: 'suspended',      l: 'Suspended' },
+  { v: 'expelled_other', l: 'Expelled / Withdrawn' },
 ] as const
 
 export const MEMBER_STATUS_LABELS: Record<string, string> = {
   active_ug: 'Active / UG',
   alumni: 'Alumni',
-  expelled_other: 'Expelled / Other',
+  suspended: 'Suspended',
+  expelled_other: 'Expelled / Withdrawn',
 }
 
-// If a member is Expelled/Other or Deceased, force Do Not Mail + Hide Entry.
+// If a member is Expelled/Withdrawn or Deceased, force Do Not Mail + Hide Entry.
+// Suspended members are NOT forced hidden — they stay visible by default.
 // The DNM reason is left as submitted — the form prepopulates it but allows edits.
 export function applyMemberStatusRules<T extends {
   member_status?: string | null
