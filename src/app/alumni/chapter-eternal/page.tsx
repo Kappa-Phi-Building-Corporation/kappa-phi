@@ -75,7 +75,7 @@ export default async function ChapterEternalPage() {
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
             {rows.map(m => {
-              const name = [m.title, m.first_name, m.last_name].filter(Boolean).join(' ')
+              const name = [m.title === 'Mr.' ? null : m.title, m.first_name, m.last_name].filter(Boolean).join(' ')
               return (
                 <div
                   key={m.id}
