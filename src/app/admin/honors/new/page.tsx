@@ -16,15 +16,28 @@ export default async function NewHonorPage() {
   const { data: profile } = await admin.from('profiles').select('role').eq('id', user.id).single()
   if (profile?.role !== 'admin' && profile?.role !== 'website_admin') redirect('/portal')
 
-  const { data: memberRows } = await admin
-    .from('members')
-    .select('id, first_name, last_name')
-    .order('last_name', { ascending: true })
+  const [{ data: memberRows }, { data: honorRows }] = await Promise.all([
+    admin
+      .from('members')
+      .select('id, first_name, last_name')
+      .order('last_name', { ascending: true }),
+    admin
+      .from('chapter_honors')
+      .select('category, sort_order'),
+  ])
 
   const members = (memberRows ?? []).map(m => ({
     id: m.id,
     label: `${m.first_name ?? ''} ${m.last_name ?? ''}`.trim() || '(unnamed)',
   }))
+
+  // Default new entries to the highest existing sort order in their category, plus 5 —
+  // so admins don't have to go look up where the list currently leaves off.
+  const nextSortOrderByCategory: Record<string, number> = {}
+  for (const h of honorRows ?? []) {
+    const current = nextSortOrderByCategory[h.category] ?? 0
+    nextSortOrderByCategory[h.category] = Math.max(current, h.sort_order + 5)
+  }
 
   return (
     <div className="bg-kp-dark min-h-screen">
@@ -41,7 +54,7 @@ export default async function NewHonorPage() {
 
       <div className="max-w-3xl mx-auto px-4 py-8">
         <div className="bg-kp-surface border border-kp-border rounded-2xl p-8">
-          <HonorForm action={createChapterHonor} members={members} />
+          <HonorForm action={createChapterHonor} members={members} nextSortOrderByCategory={nextSortOrderByCategory} />
         </div>
       </div>
     </div>

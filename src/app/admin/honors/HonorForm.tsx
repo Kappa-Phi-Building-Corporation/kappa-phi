@@ -36,14 +36,23 @@ export default function HonorForm({
   action,
   honor,
   members,
+  nextSortOrderByCategory = {},
 }: {
   action: (formData: FormData) => void | Promise<void>
   honor?: Honor | null
   members: MemberOption[]
+  nextSortOrderByCategory?: Record<string, number>
 }) {
   const [category, setCategory] = useState(honor?.category ?? 'student_knight')
   const [displayName, setDisplayName] = useState(honor?.display_name ?? '')
   const [memberId, setMemberId] = useState(honor?.member_id ?? '')
+  const [sortOrder, setSortOrder] = useState(honor?.sort_order ?? nextSortOrderByCategory[category] ?? 0)
+
+  function handleCategoryChange(value: string) {
+    setCategory(value)
+    // Only auto-advance the default on new entries — never override an existing one being edited.
+    if (!honor) setSortOrder(nextSortOrderByCategory[value] ?? 0)
+  }
 
   function handleMemberChange(e: React.ChangeEvent<HTMLSelectElement>) {
     const id = e.target.value
@@ -61,7 +70,7 @@ export default function HonorForm({
         <select
           name="category"
           value={category}
-          onChange={e => setCategory(e.target.value)}
+          onChange={e => handleCategoryChange(e.target.value)}
           className={inputCls}
         >
           {CATEGORIES.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
@@ -115,11 +124,14 @@ export default function HonorForm({
           name="sort_order"
           type="number"
           min="0"
-          defaultValue={honor?.sort_order ?? 0}
+          value={sortOrder}
+          onChange={e => setSortOrder(parseInt(e.target.value, 10) || 0)}
           className={inputCls + ' max-w-[200px]'}
         />
         <p className="text-gray-600 text-xs mt-1">
-          Used as a tiebreaker, and as the primary order for Chapter Presidents (when Year is blank).
+          {honor
+            ? 'Used as a tiebreaker, and as the primary order for Chapter Presidents (when Year is blank).'
+            : `Defaulted to the last ${CATEGORIES.find(c => c.value === category)?.label ?? 'category'} entry's sort order + 5, leaving room to reorder later — adjust if needed.`}
         </p>
       </div>
 
