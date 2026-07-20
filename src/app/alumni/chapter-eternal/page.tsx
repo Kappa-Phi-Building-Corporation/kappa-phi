@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import Link from 'next/link'
+import MemoryPanel from './MemoryPanel'
 
 export const metadata = { title: 'Chapter Eternal Memorial' }
 
@@ -22,7 +23,11 @@ function fmtDateLong(d: string | null) {
   })
 }
 
-export default async function ChapterEternalPage() {
+export default async function ChapterEternalPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ memory?: string }>
+}) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login?next=/alumni/chapter-eternal')
@@ -53,6 +58,25 @@ export default async function ChapterEternalPage() {
   const lastUpdatedLabel = lastUpdated
     ? new Date(lastUpdated).toLocaleDateString('en-US', { month: '2-digit', year: '2-digit' })
     : null
+
+  // Open the memory panel for the requested member, if any
+  const { memory: openMemberId } = await searchParams
+  const openMember = openMemberId ? rows.find(m => m.id === openMemberId) : undefined
+
+  let memories: { id: string; author_name: string; author_profile_id: string | null; message: string; created_at: string }[] = []
+  let isAdmin = false
+  if (openMember) {
+    const [{ data: memoryRows }, { data: profile }] = await Promise.all([
+      admin
+        .from('chapter_eternal_memories')
+        .select('id, author_name, author_profile_id, message, created_at')
+        .eq('member_id', openMember.id)
+        .order('created_at', { ascending: false }),
+      admin.from('profiles').select('role').eq('id', user.id).single(),
+    ])
+    memories = memoryRows ?? []
+    isAdmin = profile?.role === 'admin' || profile?.role === 'website_admin'
+  }
 
   return (
     <div className="bg-kp-dark min-h-screen">
@@ -137,6 +161,15 @@ export default async function ChapterEternalPage() {
                       </div>
                     )}
                   </div>
+
+                  {/* Memories */}
+                  <Link
+                    href={`/alumni/chapter-eternal?memory=${m.id}#memories`}
+                    scroll={false}
+                    className="block text-center text-gray-500 hover:text-kp-gold text-xs py-2 border-t border-kp-border transition-colors no-underline"
+                  >
+                    Memories &amp; Messages
+                  </Link>
                 </div>
               )
             })}
@@ -149,6 +182,16 @@ export default async function ChapterEternalPage() {
           </Link>
         </div>
       </div>
+
+      {openMember && (
+        <MemoryPanel
+          memberId={openMember.id}
+          memberName={[openMember.title === 'Mr.' ? null : openMember.title, openMember.first_name, openMember.last_name].filter(Boolean).join(' ')}
+          memories={memories}
+          currentUserId={user.id}
+          isAdmin={isAdmin}
+        />
+      )}
     </div>
   )
 }
