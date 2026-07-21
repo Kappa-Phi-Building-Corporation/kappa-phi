@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { notifyAdminOfNewUser } from '@/lib/notifyNewUser'
 
 export async function login(formData: FormData) {
   const supabase = await createClient()
@@ -54,9 +55,10 @@ export async function register(formData: FormData) {
     redirect(`/register?error=${encodeURIComponent(error.message)}`)
   }
 
-  if (data.user) {
+  const admin = data.user ? createAdminClient() : null
+  if (data.user && admin) {
     // Trigger handles this in normal flow; upsert here as a fallback.
-    await createAdminClient().from('profiles').upsert(
+    await admin.from('profiles').upsert(
       { id: data.user.id, member_id: null, is_approved: false, role: 'member' },
       { onConflict: 'id', ignoreDuplicates: true }
     )
@@ -64,9 +66,13 @@ export async function register(formData: FormData) {
 
   revalidatePath('/', 'layout')
 
-  // With email confirmation disabled, signUp returns a session and data.session
-  // is set — send them to the pending-approval page instead.
-  if (data.session) {
+  // With email confirmation disabled, signUp returns a session immediately —
+  // there's no confirmation link for the user to click, so /auth/confirm
+  // (which normally sends the admin notification) never runs. Notify here
+  // instead so this path isn't silently unnotified.
+  if (data.session && data.user && admin) {
+    const meta = (data.user.user_metadata ?? {}) as Record<string, string>
+    notifyAdminOfNewUser(admin, data.user.id, data.user.email ?? null, meta).catch(console.error)
     await supabase.auth.signOut()
     redirect('/auth/pending')
   }
