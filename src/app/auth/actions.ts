@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { notifyAdminOfNewUser } from '@/lib/notifyNewUser'
+import { verifyTurnstile } from '@/lib/turnstile'
 
 export async function login(formData: FormData) {
   const supabase = await createClient()
@@ -41,6 +42,12 @@ export async function register(formData: FormData) {
   const password = formData.get('password')  as string
   const firstName = formData.get('firstName') as string
   const lastName  = formData.get('lastName')  as string
+  const token     = (formData.get('cf-turnstile-response') as string) ?? ''
+
+  const verified = await verifyTurnstile(token, null)
+  if (!verified) {
+    redirect(`/register?error=${encodeURIComponent('Verification failed. Please try again.')}`)
+  }
 
   const { data, error } = await supabase.auth.signUp({
     email,
@@ -83,6 +90,12 @@ export async function register(formData: FormData) {
 export async function requestPasswordReset(formData: FormData) {
   const supabase = await createClient()
   const email = formData.get('email') as string
+  const token = (formData.get('cf-turnstile-response') as string) ?? ''
+
+  const verified = await verifyTurnstile(token, null)
+  if (!verified) {
+    redirect(`/forgot-password?error=${encodeURIComponent('Verification failed. Please try again.')}`)
+  }
 
   await supabase.auth.resetPasswordForEmail(email, {
     redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? ''}/auth/confirm?next=/auth/update-password`,

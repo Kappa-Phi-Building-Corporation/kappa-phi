@@ -1,9 +1,17 @@
 import { requestPasswordReset } from '@/app/auth/actions'
 import Link from 'next/link'
+import Script from 'next/script'
 
 export const metadata = { title: 'Forgot Password' }
 
-export default function ForgotPasswordPage() {
+export default async function ForgotPasswordPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>
+}) {
+  const { error } = await searchParams
+  const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY
+
   return (
     <div className="min-h-[calc(100vh-4rem)] bg-kp-dark flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md">
@@ -17,8 +25,15 @@ export default function ForgotPasswordPage() {
           </p>
         </div>
 
+        {error && (
+          <div className="bg-red-900/40 border border-red-700 text-red-300 px-4 py-3 rounded-xl mb-5 text-sm flex gap-2">
+            <span>⚠</span> {error}
+          </div>
+        )}
+
         <div className="bg-kp-surface border border-kp-border rounded-2xl p-8">
           <form action={requestPasswordReset} className="space-y-5">
+            {siteKey && <Script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer />}
             <div>
               <label htmlFor="email" className="block text-xs font-semibold text-kp-gold uppercase tracking-wider mb-2">
                 Email Address
@@ -33,6 +48,8 @@ export default function ForgotPasswordPage() {
                 placeholder="you@example.com"
               />
             </div>
+
+            {siteKey && <div className="cf-turnstile" data-sitekey={siteKey} />}
 
             <button
               type="submit"

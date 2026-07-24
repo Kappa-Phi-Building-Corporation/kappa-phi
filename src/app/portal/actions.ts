@@ -1,32 +1,12 @@
 'use server'
 
 import { sendPropertyIssueEmail } from '@/lib/email'
+import { verifyTurnstile } from '@/lib/turnstile'
 
 export type PropertyIssueState = {
   type: 'success' | 'error'
   message: string
 } | null
-
-async function verifyTurnstile(token: string, ip: string | null) {
-  const secretKey = process.env.TURNSTILE_SECRET_KEY
-  if (!secretKey) {
-    console.warn('[turnstile] TURNSTILE_SECRET_KEY not set — skipping verification')
-    return true
-  }
-  if (!token) return false
-
-  const body = new URLSearchParams({ secret: secretKey, response: token })
-  if (ip) body.append('remoteip', ip)
-
-  const res = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body,
-  })
-
-  const data = await res.json()
-  return data.success === true
-}
 
 export async function submitPropertyIssue(
   _prev: PropertyIssueState,

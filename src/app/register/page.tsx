@@ -1,5 +1,6 @@
 import { register } from '@/app/auth/actions'
 import Link from 'next/link'
+import Script from 'next/script'
 
 export default async function RegisterPage({
   searchParams,
@@ -7,6 +8,7 @@ export default async function RegisterPage({
   searchParams: Promise<{ error?: string }>
 }) {
   const { error } = await searchParams
+  const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY
 
   return (
     <div className="min-h-[calc(100vh-4rem)] bg-kp-dark flex items-center justify-center px-4 py-12">
@@ -30,6 +32,7 @@ export default async function RegisterPage({
 
         <div className="bg-kp-surface border border-kp-border rounded-2xl p-8">
           <form action={register} className="space-y-5">
+            {siteKey && <Script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer />}
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label htmlFor="firstName" className="block text-xs font-semibold text-kp-gold uppercase tracking-wider mb-2">
@@ -89,6 +92,8 @@ export default async function RegisterPage({
                 placeholder="Minimum 8 characters"
               />
             </div>
+
+            {siteKey && <div className="cf-turnstile" data-sitekey={siteKey} />}
 
             <button
               type="submit"
