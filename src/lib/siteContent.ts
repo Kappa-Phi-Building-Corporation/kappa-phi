@@ -13,6 +13,8 @@ export const SITE_CONTENT_DEFAULTS = {
   home_stat_4_number: '5×',
   home_stat_4_label: 'Hugh Shields Award',
   about_intro: 'Over 60 years of brotherhood, excellence, and service at Missouri University of Science & Technology.',
+  about_founded_number: '1963',
+  about_founded_label: 'Founded',
 } as const
 
 export type SiteContentKey = keyof typeof SITE_CONTENT_DEFAULTS

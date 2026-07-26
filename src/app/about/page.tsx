@@ -83,22 +83,6 @@ const historyChapters = [
   },
 ]
 
-const milestones = [
-  { year: '1963', event: 'Kappa Phi Fraternity founded at University of Missouri School of Mines (Dec. 5)' },
-  { year: '1964', event: 'Constitution adopted; first house purchased on eight acres along Vienna Road' },
-  { year: '1965', event: 'Petitioned Delta Tau Delta; recognized as official DTD colony (Apr. 10)' },
-  { year: '1966', event: 'Initiated into Delta Tau Delta as Epsilon Nu Chapter — 96th nationally (Dec. 10)' },
-  { year: '1986', event: '20th anniversary banquet & mortgage burning ceremony on Homecoming weekend' },
-  { year: '1991', event: 'First Court of Honor Award — top 24 of 124 DTD chapters nationally' },
-  { year: '1999', event: 'Major chapter house expansion completed' },
-  { year: '2000', event: 'First Hugh Shields Award for Chapter Excellence' },
-  { year: '2004', event: 'Second Hugh Shields Award for Chapter Excellence' },
-  { year: '2006', event: 'Third Hugh Shields Award for Chapter Excellence' },
-  { year: '2016', event: '50th anniversary as Epsilon Nu Chapter of Delta Tau Delta' },
-  { year: '2021', event: 'Fourth Hugh Shields Award for Chapter Excellence' },
-  { year: '2022', event: 'Fifth Hugh Shields Award for Chapter Excellence' },
-]
-
 // ─── Honor roll sorting helpers ────────────────────────────────────
 
 // Pulls a 4-digit year, or a 2-digit year (e.g. "'77") normalized to 19xx/20xx.
@@ -140,7 +124,7 @@ function Chevron() {
 export default async function AboutPage() {
   const admin = createAdminClient()
 
-  const [{ data: honorRows }, { data: mascotRows }, content] = await Promise.all([
+  const [{ data: honorRows }, { data: mascotRows }, { data: milestoneRows }, content] = await Promise.all([
     admin
       .from('chapter_honors')
       .select('category, display_name, year_label, title, sort_order'),
@@ -149,8 +133,14 @@ export default async function AboutPage() {
       .select('name, start_year, end_year, photo_url, sort_order')
       .eq('is_published', true)
       .order('sort_order', { ascending: true }),
+    admin
+      .from('chapter_milestones')
+      .select('id, year, event, sort_order')
+      .order('sort_order', { ascending: true }),
     getSiteContent(),
   ])
+
+  const milestones = milestoneRows ?? []
 
   const honors = honorRows ?? []
   const mascots = mascotRows ?? []
@@ -213,10 +203,10 @@ export default async function AboutPage() {
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
-            { n: '1963', l: 'Founded' },
-            { n: '500+', l: 'Brothers Initiated' },
-            { n: '440+', l: 'Living Alumni' },
-            { n: '5×', l: 'Hugh Shields Award' },
+            { n: content.about_founded_number, l: content.about_founded_label },
+            { n: content.home_stat_1_number, l: content.home_stat_1_label },
+            { n: content.home_stat_2_number, l: content.home_stat_2_label },
+            { n: content.home_stat_4_number, l: content.home_stat_4_label },
           ].map(s => (
             <div key={s.l} className="bg-kp-surface border border-kp-border rounded-2xl p-5 text-center">
               <div className="text-kp-gold text-3xl font-black">{s.n}</div>
@@ -239,7 +229,7 @@ export default async function AboutPage() {
             <div className="text-kp-gold text-xs font-bold uppercase tracking-widest mb-6">Key Milestones</div>
             <div className="space-y-3">
               {milestones.map(m => (
-                <div key={m.year} className="flex gap-4 items-start">
+                <div key={m.id} className="flex gap-4 items-start">
                   <div className="bg-kp-blue text-kp-gold text-xs font-black px-2.5 py-1 rounded-lg shrink-0 tabular-nums">
                     {m.year}
                   </div>

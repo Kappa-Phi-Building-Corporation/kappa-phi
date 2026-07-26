@@ -109,6 +109,7 @@ export default async function AdminDashboardPage() {
     { count: honorCount },
     { count: mascotCount },
     { count: missingBigBrother },
+    { count: milestoneCount },
   ] = await Promise.all([
     admin.from('profiles')
       .select('*', { count: 'exact', head: true })
@@ -153,6 +154,8 @@ export default async function AdminDashboardPage() {
       .select('*', { count: 'exact', head: true })
       .not('badge_number', 'is', null)
       .is('big_brother_id', null),
+    admin.from('chapter_milestones')
+      .select('*', { count: 'exact', head: true }),
   ])
 
   const memberSections = [
@@ -251,6 +254,21 @@ export default async function AdminDashboardPage() {
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
             d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0V16h4v5" />
+        </svg>
+      ),
+    },
+    {
+      title: 'Chapter Milestones',
+      href: '/admin/milestones',
+      description: 'The Key Milestones timeline on the About page.',
+      pending: 0,
+      pendingLabel: '',
+      total: milestoneCount ?? 0,
+      totalLabel: 'entries',
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2zM9 16h6" />
         </svg>
       ),
     },

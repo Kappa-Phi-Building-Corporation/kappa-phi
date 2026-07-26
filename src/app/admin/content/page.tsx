@@ -101,9 +101,35 @@ export default async function SiteContentPage({
               <label htmlFor="about_intro" className={labelCls}>Intro Paragraph</label>
               <textarea id="about_intro" name="about_intro" defaultValue={content.about_intro} rows={3} className={textareaCls} />
             </div>
+
+            <div>
+              <span className={labelCls}>Stats Row</span>
+              <p className="text-gray-500 text-xs mb-3">
+                Brothers Initiated, Living Alumni, and Hugh Shields Award are shared with the homepage stats bar above — edit them there. Founded is specific to this page.
+              </p>
+              <div className="grid grid-cols-2 gap-2 bg-kp-dark border border-kp-border rounded-xl p-3 max-w-xs">
+                <input
+                  name="about_founded_number"
+                  aria-label="Founded number"
+                  defaultValue={content.about_founded_number}
+                  placeholder="Number"
+                  className={inputCls}
+                />
+                <input
+                  name="about_founded_label"
+                  aria-label="Founded label"
+                  defaultValue={content.about_founded_label}
+                  placeholder="Label"
+                  className={inputCls}
+                />
+              </div>
+            </div>
           </div>
 
-          <div className="flex justify-end pt-2 border-t border-kp-border">
+          <div className="flex items-center justify-between pt-2 border-t border-kp-border">
+            <Link href="/admin/milestones" className="text-gray-500 text-sm hover:text-kp-gold transition-colors no-underline">
+              Manage Key Milestones timeline →
+            </Link>
             <button type="submit" className="bg-kp-gold text-black font-bold px-6 py-2.5 rounded-xl text-sm hover:opacity-90 transition-opacity">
               Save Changes
             </button>

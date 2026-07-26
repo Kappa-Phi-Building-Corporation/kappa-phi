@@ -33,6 +33,7 @@ const ENTITY_LABELS: Record<string, string> = {
   link_request: 'Link Request',
   site_content: 'Site Content',
   email_template: 'Email Template',
+  chapter_milestone: 'Chapter Milestone',
 }
 
 const ACTION_STYLES: Record<string, string> = {
