@@ -73,6 +73,17 @@ export default function Navigation({ navUser }: { navUser: NavUser | null }) {
 
         {/* Desktop right side — auth-aware */}
         <div className="hidden lg:flex items-center gap-2 ml-auto shrink-0">
+          <Link
+            href="/search"
+            aria-label="Search"
+            className={`p-2 rounded-md transition-colors ${
+              isActive('/search') ? 'bg-kp-gold text-black' : 'text-blue-100 hover:bg-kp-blue-light hover:text-white'
+            }`}
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M17 10a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </Link>
           {navUser ? (
             <>
               {navUser.isAdmin && (
@@ -157,6 +168,19 @@ export default function Navigation({ navUser }: { navUser: NavUser | null }) {
                 {item.label}
               </Link>
             ))}
+
+            <Link
+              href="/search"
+              onClick={() => setOpen(false)}
+              className={`col-span-2 flex items-center gap-2 px-3 py-2.5 rounded-md text-sm font-medium no-underline transition-colors ${
+                isActive('/search') ? 'bg-kp-gold text-black' : 'text-blue-100 hover:bg-kp-blue-light hover:text-white'
+              }`}
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M17 10a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              Search
+            </Link>
 
             {navUser ? (
               <>
