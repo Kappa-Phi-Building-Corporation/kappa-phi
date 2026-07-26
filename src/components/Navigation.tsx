@@ -45,7 +45,10 @@ export default function Navigation({ navUser }: { navUser: NavUser | null }) {
             <img src="/images/coat-of-arms.png" alt="Kappa Phi coat of arms" className="w-full h-full object-contain" />
           </div>
           <div className="leading-tight hidden sm:block">
-            <div className="text-kp-gold font-bold text-sm">Kappa Phi BC</div>
+            <div className="text-kp-gold font-bold text-sm whitespace-nowrap">
+              <span className="hidden xl:inline">Kappa Phi Building Corporation</span>
+              <span className="xl:hidden">Kappa Phi BC</span>
+            </div>
             <div className="text-blue-200 text-xs">Epsilon Nu · Missouri S&T</div>
           </div>
         </Link>
