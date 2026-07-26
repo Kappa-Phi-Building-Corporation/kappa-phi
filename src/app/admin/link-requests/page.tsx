@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import LinkRequestActions from './LinkRequestActions'
@@ -172,10 +173,10 @@ export default async function LinkRequestsPage() {
         )}
 
         <div className="flex gap-4">
-          <a href="/admin/users"
+          <Link href="/admin/users"
             className="text-gray-500 text-sm hover:text-gray-300 transition-colors no-underline">
             ← Back to User Accounts
-          </a>
+          </Link>
         </div>
       </div>
     </div>

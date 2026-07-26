@@ -186,7 +186,7 @@ export default function MemberProfileSection({
                   No — enter my info
                 </span>
                 <span className="text-gray-500 text-xs leading-snug">
-                  You're not in the directory yet. Fill in your details to create your member profile.
+                  You&apos;re not in the directory yet. Fill in your details to create your member profile.
                 </span>
               </button>
             </div>

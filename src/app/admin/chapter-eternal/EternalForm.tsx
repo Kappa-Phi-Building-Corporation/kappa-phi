@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 
 export type EternalMemberSummary = {
   id: string
@@ -125,7 +126,7 @@ export default function EternalForm(props: Props) {
           </div>
           <p className="text-gray-600 text-xs mt-2">
             To update name or chapter info, edit the{' '}
-            <a href="/admin/members" className="text-kp-gold hover:underline">member record</a>.
+            <Link href="/admin/members" className="text-kp-gold hover:underline">member record</Link>.
           </p>
         </div>
       )}

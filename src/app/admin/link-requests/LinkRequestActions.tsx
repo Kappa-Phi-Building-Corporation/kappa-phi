@@ -82,7 +82,7 @@ export default function LinkRequestActions({
           <div className="bg-kp-surface border border-kp-border rounded-2xl p-6 w-full max-w-md mx-4 shadow-2xl">
             <h3 className="text-white font-bold text-base mb-2">Link to a Different Member</h3>
             <p className="text-gray-400 text-sm mb-4">
-              Override the user's request and link their account to a different member record.
+              Override the user&apos;s request and link their account to a different member record.
             </p>
             <input
               type="text"
