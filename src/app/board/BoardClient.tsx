@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import Image from 'next/image'
 
 export type BoardMember = {
   id: string
@@ -43,10 +44,12 @@ function MemberCard({
           {initials(member.name)}
         </span>
         {member.photo_url && (
-          <img
+          <Image
             src={member.photo_url}
             alt={member.name}
-            className="absolute inset-0 w-full h-full object-cover object-center"
+            fill
+            sizes={lg ? '7rem' : '5rem'}
+            className="object-cover object-center"
             onError={e => { (e.target as HTMLImageElement).style.display = 'none' }}
           />
         )}
@@ -123,10 +126,12 @@ function Drawer({ member, onClose }: { member: BoardMember | null; onClose: () =
                   {initials(member.name)}
                 </span>
                 {member.photo_url && (
-                  <img
+                  <Image
                     src={member.photo_url}
                     alt={member.name}
-                    className="absolute inset-0 w-full h-full object-cover object-center"
+                    fill
+                    sizes="5rem"
+                    className="object-cover object-center"
                     onError={e => { (e.target as HTMLImageElement).style.display = 'none' }}
                   />
                 )}

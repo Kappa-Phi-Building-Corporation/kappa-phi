@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 
 export type EternalMemberSummary = {
   id: string
@@ -135,9 +136,9 @@ export default function EternalForm(props: Props) {
       <div>
         <label className={labelCls}>Memorial Photo <span className="text-gray-600 font-normal">(optional)</span></label>
         <div className="flex items-start gap-5">
-          <div className="w-32 h-40 rounded-xl overflow-hidden bg-kp-card border border-kp-border shrink-0 flex items-center justify-center">
+          <div className="relative w-32 h-40 rounded-xl overflow-hidden bg-kp-card border border-kp-border shrink-0 flex items-center justify-center">
             {previewUrl ? (
-              <img src={previewUrl} alt="Preview" className="w-full h-full object-cover" />
+              <Image src={previewUrl} alt="Preview" fill unoptimized className="object-cover" />
             ) : (
               <svg className="w-10 h-10 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}

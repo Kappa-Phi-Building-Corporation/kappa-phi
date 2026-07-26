@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { logActivity } from '@/lib/activityLog'
+import { compressImage } from '@/lib/imageCompress'
 
 const BUCKET = 'pats-guide-photos'
 
@@ -110,11 +111,11 @@ export async function addPhoto(formData: FormData) {
     .select('*', { count: 'exact', head: true })
   const sortOrder = count ?? 0
 
-  const ext = file.name.split('.').pop()?.toLowerCase() ?? 'jpg'
-  const path = `${crypto.randomUUID()}.${ext}`
-  const buffer = new Uint8Array(await file.arrayBuffer())
+  const path = `${crypto.randomUUID()}.jpg`
+  const raw = new Uint8Array(await file.arrayBuffer())
+  const { buffer, contentType } = await compressImage(raw)
   const { error: uploadError } = await admin.storage.from(BUCKET).upload(path, buffer, {
-    contentType: file.type || 'image/jpeg',
+    contentType,
   })
   if (uploadError) redirect('/admin/portal/pats-guide?error=' + encodeURIComponent(uploadError.message))
 

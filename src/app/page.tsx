@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { createClient } from '@/lib/supabase/server'
 
 const stats = [
@@ -71,7 +72,7 @@ export default async function Home() {
 
             <div className="flex items-center gap-5 mb-5">
               <div className="w-24 h-24 md:w-32 md:h-32 bg-white rounded-2xl shadow-lg shadow-black/30 p-2 flex items-center justify-center shrink-0">
-                <img src="/images/coat-of-arms.png" alt="Kappa Phi coat of arms" className="w-full h-full object-contain" />
+                <Image src="/images/coat-of-arms.png" alt="Kappa Phi coat of arms" width={128} height={128} priority className="w-full h-full object-contain" />
               </div>
               <h1 className="text-5xl md:text-6xl lg:text-7xl font-black text-white leading-[1.05]">
                 Kappa Phi<br />

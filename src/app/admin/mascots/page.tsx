@@ -1,5 +1,6 @@
 ﻿import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 
@@ -67,9 +68,9 @@ export default async function AdminMascotsPage({
             <div className="divide-y divide-kp-border">
               {rows.map(m => (
                 <div key={m.id} className="flex items-center gap-4 px-5 py-4 hover:bg-kp-card/40 transition-colors">
-                  <div className="w-10 h-10 rounded-xl overflow-hidden bg-kp-card shrink-0">
+                  <div className="relative w-10 h-10 rounded-xl overflow-hidden bg-kp-card shrink-0">
                     {m.photo_url ? (
-                      <img src={m.photo_url} alt="" className="w-full h-full object-cover" />
+                      <Image src={m.photo_url} alt="" fill className="object-cover" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-xs text-gray-500 font-bold">
                         {m.name.slice(0, 2)}

@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import type { Components } from 'react-markdown'
@@ -142,7 +143,9 @@ export default async function PatsGuidePage() {
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                     {photos.map(p => (
                       <figure key={p.id} className="rounded-xl overflow-hidden bg-kp-card border border-kp-border">
-                        <img src={p.photo_url} alt={p.caption ?? ''} className="w-full aspect-square object-cover" />
+                        <div className="relative w-full aspect-square">
+                          <Image src={p.photo_url} alt={p.caption ?? ''} fill sizes="(max-width: 640px) 50vw, 33vw" className="object-cover" />
+                        </div>
                         {p.caption && (
                           <figcaption className="text-gray-500 text-xs px-2 py-1.5 truncate">{p.caption}</figcaption>
                         )}

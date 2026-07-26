@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import PatsGuideForm from './PatsGuideForm'
@@ -140,8 +141,8 @@ export default async function AdminPatsGuidePage({
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               {photos.map(p => (
                 <div key={p.id} className="space-y-2">
-                  <div className="aspect-square rounded-xl overflow-hidden bg-kp-card border border-kp-border">
-                    <img src={p.photo_url} alt={p.caption ?? ''} className="w-full h-full object-cover" />
+                  <div className="relative aspect-square rounded-xl overflow-hidden bg-kp-card border border-kp-border">
+                    <Image src={p.photo_url} alt={p.caption ?? ''} fill sizes="(max-width: 640px) 50vw, 25vw" className="object-cover" />
                   </div>
                   {p.caption && <p className="text-gray-500 text-xs truncate">{p.caption}</p>}
                   <form action={deletePhoto.bind(null, p.id, p.photo_url)}>

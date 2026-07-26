@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import { createAdminClient } from '@/lib/supabase/admin'
 
 export const metadata = { title: 'Property Management' }
@@ -23,22 +24,29 @@ function PhotoStrip({ photos, alt }: { photos: Photo[]; alt: string }) {
   if (photos.length === 0) return null
   if (photos.length === 1) {
     return (
-      <img
-        src={photos[0].photo_url}
-        alt={photos[0].caption ?? alt}
-        className="w-full h-44 object-cover"
-      />
+      <div className="relative w-full h-44">
+        <Image
+          src={photos[0].photo_url}
+          alt={photos[0].caption ?? alt}
+          fill
+          sizes="(max-width: 768px) 100vw, 33vw"
+          className="object-cover"
+        />
+      </div>
     )
   }
   return (
     <div className="flex overflow-x-auto gap-1 snap-x snap-mandatory" style={{ height: '11rem' }}>
       {photos.map(p => (
-        <img
-          key={p.id}
-          src={p.photo_url}
-          alt={p.caption ?? alt}
-          className="h-full w-auto min-w-[10rem] max-w-[16rem] object-cover snap-start shrink-0"
-        />
+        <div key={p.id} className="relative h-full w-56 min-w-[10rem] max-w-[16rem] shrink-0 snap-start">
+          <Image
+            src={p.photo_url}
+            alt={p.caption ?? alt}
+            fill
+            sizes="16rem"
+            className="object-cover"
+          />
+        </div>
       ))}
     </div>
   )
@@ -124,10 +132,14 @@ function ArchiveRow({ p }: { p: Project }) {
         {p.photos.length > 0 && (
           <div className={`mb-4 rounded-xl overflow-hidden ${p.photos.length === 1 ? '' : 'flex gap-1 overflow-x-auto'}`}>
             {p.photos.length === 1 ? (
-              <img src={p.photos[0].photo_url} alt={p.photos[0].caption ?? p.name} className="w-full h-48 object-cover rounded-xl" />
+              <div className="relative w-full h-48 rounded-xl overflow-hidden">
+                <Image src={p.photos[0].photo_url} alt={p.photos[0].caption ?? p.name} fill sizes="(max-width: 768px) 100vw, 50vw" className="object-cover" />
+              </div>
             ) : (
               p.photos.map(ph => (
-                <img key={ph.id} src={ph.photo_url} alt={ph.caption ?? p.name} className="h-40 w-auto min-w-[10rem] object-cover shrink-0" />
+                <div key={ph.id} className="relative h-40 w-56 min-w-[10rem] shrink-0">
+                  <Image src={ph.photo_url} alt={ph.caption ?? p.name} fill sizes="14rem" className="object-cover" />
+                </div>
               ))
             )}
           </div>
@@ -204,10 +216,9 @@ export default async function PropertyPage() {
 
         {/* Intro + house photo */}
         <div className="space-y-5">
-          <div
-            className="w-full aspect-[927/280] rounded-2xl bg-kp-card"
-            style={{ backgroundImage: "url('/images/EN-house-front.png')", backgroundSize: 'cover', backgroundPosition: 'center' }}
-          />
+          <div className="relative w-full aspect-[927/280] rounded-2xl bg-kp-card overflow-hidden">
+            <Image src="/images/EN-house-front.png" alt="Epsilon Nu chapter house" fill priority sizes="100vw" className="object-cover" />
+          </div>
           <div className="bg-kp-surface border border-kp-border rounded-2xl p-6 md:p-8">
             <p className="text-gray-300 text-sm leading-relaxed">
               The amenities we provide the men of Epsilon Nu allow them to concentrate on the fundamentals

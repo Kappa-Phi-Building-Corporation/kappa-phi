@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 
 export const metadata = { title: 'Byron N. Vermillion Memorial Scholarship Fund' }
 
@@ -107,11 +108,15 @@ export default function ByronPage() {
 
             {/* Photo */}
             <div className="w-full md:w-56 shrink-0">
-              <img
-                src="/images/byron/byron-vermillion.jpg"
-                alt="Byron N. Vermillion"
-                className="w-full rounded-2xl object-cover object-top border border-kp-border"
-              />
+              <div className="relative w-full aspect-[4/5] rounded-2xl overflow-hidden border border-kp-border">
+                <Image
+                  src="/images/byron/byron-vermillion.jpg"
+                  alt="Byron N. Vermillion"
+                  fill
+                  sizes="(max-width: 768px) 100vw, 14rem"
+                  className="object-cover object-top"
+                />
+              </div>
               <p className="text-gray-600 text-xs text-center mt-2">Byron N. Vermillion</p>
             </div>
           </div>

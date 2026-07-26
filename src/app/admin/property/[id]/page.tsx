@@ -1,5 +1,6 @@
 ﻿import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { updateProject, deleteProject, addProjectPhotos, deleteProjectPhoto } from '../actions'
@@ -90,7 +91,7 @@ export default async function EditProjectPage({
                 const removeThis = deleteProjectPhoto.bind(null, photo.id, id)
                 return (
                   <div key={photo.id} className="relative group rounded-xl overflow-hidden aspect-[4/3] bg-kp-card">
-                    <img src={photo.photo_url} alt={photo.caption ?? ''} className="w-full h-full object-cover" />
+                    <Image src={photo.photo_url} alt={photo.caption ?? ''} fill sizes="(max-width: 640px) 50vw, 33vw" className="object-cover" />
                     {photo.caption && (
                       <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-xs px-2 py-1 truncate">
                         {photo.caption}

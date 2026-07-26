@@ -1,5 +1,6 @@
 ﻿import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 
@@ -33,9 +34,9 @@ export default async function AdminBoardPage({
   function MemberRow({ m }: { m: typeof rows[0] }) {
     return (
       <div className="flex items-center gap-4 px-5 py-4 hover:bg-kp-card/40 transition-colors">
-        <div className="w-10 h-10 rounded-xl overflow-hidden bg-kp-card shrink-0">
+        <div className="relative w-10 h-10 rounded-xl overflow-hidden bg-kp-card shrink-0">
           {m.photo_url ? (
-            <img src={m.photo_url} alt="" className="w-full h-full object-cover object-top" />
+            <Image src={m.photo_url} alt="" fill className="object-cover object-top" />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-xs text-gray-500 font-bold">
               {(m.name ?? '?').replace(/^Dr\.\s+/, '').split(' ').map((n: string) => n[0]).slice(0, 2).join('')}

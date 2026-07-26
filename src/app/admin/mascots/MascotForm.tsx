@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 
 type Mascot = {
   name: string
@@ -35,9 +36,9 @@ export default function MascotForm({
       <div>
         <label className={labelCls}>Photo <span className="text-gray-600 font-normal">(optional)</span></label>
         <div className="flex items-start gap-5">
-          <div className="w-24 h-24 rounded-2xl overflow-hidden bg-kp-card border border-kp-border shrink-0 flex items-center justify-center">
+          <div className="relative w-24 h-24 rounded-2xl overflow-hidden bg-kp-card border border-kp-border shrink-0 flex items-center justify-center">
             {previewUrl ? (
-              <img src={previewUrl} alt="Preview" className="w-full h-full object-cover" />
+              <Image src={previewUrl} alt="Preview" fill unoptimized className="object-cover" />
             ) : (
               <svg className="w-8 h-8 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}

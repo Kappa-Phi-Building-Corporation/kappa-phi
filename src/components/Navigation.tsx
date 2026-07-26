@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
 import { logout } from '@/app/auth/actions'
@@ -42,7 +43,7 @@ export default function Navigation({ navUser }: { navUser: NavUser | null }) {
           className="flex items-center gap-3 no-underline shrink-0"
         >
           <div className="w-9 h-9 bg-white rounded-lg p-1 flex items-center justify-center shrink-0">
-            <img src="/images/coat-of-arms.png" alt="Kappa Phi coat of arms" className="w-full h-full object-contain" />
+            <Image src="/images/coat-of-arms.png" alt="Kappa Phi coat of arms" width={36} height={36} priority className="w-full h-full object-contain" />
           </div>
           <div className="leading-tight hidden sm:block">
             <div className="text-kp-gold font-bold text-sm whitespace-nowrap">

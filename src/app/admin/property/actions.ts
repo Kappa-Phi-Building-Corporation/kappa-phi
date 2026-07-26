@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { logActivity } from '@/lib/activityLog'
+import { compressImage } from '@/lib/imageCompress'
 
 const BUCKET = 'property-photos'
 
@@ -113,12 +114,12 @@ export async function addProjectPhotos(projectId: string, formData: FormData) {
   for (const file of files) {
     if (!file || file.size === 0) continue
     const photoId = crypto.randomUUID()
-    const ext = file.name.split('.').pop()?.toLowerCase() ?? 'jpg'
-    const path = `${projectId}/${photoId}.${ext}`
-    const buffer = new Uint8Array(await file.arrayBuffer())
+    const path = `${projectId}/${photoId}.jpg`
+    const raw = new Uint8Array(await file.arrayBuffer())
+    const { buffer, contentType } = await compressImage(raw)
 
     const { error: uploadError } = await admin.storage.from(BUCKET).upload(path, buffer, {
-      contentType: file.type || 'image/jpeg',
+      contentType,
       upsert: false,
     })
     if (uploadError) continue

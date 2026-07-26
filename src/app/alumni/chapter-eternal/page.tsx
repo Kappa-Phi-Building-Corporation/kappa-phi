@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import Link from 'next/link'
+import Image from 'next/image'
 import MemoryPanel from './MemoryPanel'
 
 export const metadata = { title: 'Chapter Eternal Memorial' }
@@ -108,10 +109,12 @@ export default async function ChapterEternalPage({
                   {/* Photo */}
                   <div className="aspect-[3/4] bg-kp-card relative overflow-hidden">
                     {m.photo_url ? (
-                      <img
+                      <Image
                         src={m.photo_url}
                         alt={name}
-                        className="w-full h-full object-cover object-top"
+                        fill
+                        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
+                        className="object-cover object-top"
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">

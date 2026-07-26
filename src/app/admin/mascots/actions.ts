@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { logActivity } from '@/lib/activityLog'
+import { compressImage } from '@/lib/imageCompress'
 
 const BUCKET = 'mascot-photos'
 
@@ -23,11 +24,11 @@ async function uploadPhoto(
   mascotId: string,
   file: File,
 ): Promise<string | null> {
-  const ext = file.name.split('.').pop()?.toLowerCase() ?? 'jpg'
-  const path = `${mascotId}.${ext}`
-  const buffer = new Uint8Array(await file.arrayBuffer())
+  const path = `${mascotId}.jpg`
+  const raw = new Uint8Array(await file.arrayBuffer())
+  const { buffer, contentType } = await compressImage(raw)
   const { error } = await admin.storage.from(BUCKET).upload(path, buffer, {
-    contentType: file.type || 'image/jpeg',
+    contentType,
     upsert: true,
   })
   if (error) return null

@@ -1,5 +1,6 @@
 ﻿import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { showEternalEntry, hideEternalEntry } from './actions'
@@ -137,9 +138,9 @@ export default async function AdminChapterEternalPage({
                   const hideThis = hideEternalEntry.bind(null, m.id)
                   return (
                     <div key={m.id} className="flex items-center gap-4 px-5 py-4 hover:bg-kp-card/40 transition-colors">
-                      <div className="w-10 h-12 rounded-lg overflow-hidden bg-kp-card shrink-0">
+                      <div className="relative w-10 h-12 rounded-lg overflow-hidden bg-kp-card shrink-0">
                         {m.photo_url
-                          ? <img src={m.photo_url} alt="" className="w-full h-full object-cover" />
+                          ? <Image src={m.photo_url} alt="" fill className="object-cover" />
                           : <div className="w-full h-full flex items-center justify-center">
                               <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}

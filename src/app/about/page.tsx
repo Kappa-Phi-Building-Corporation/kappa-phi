@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { createAdminClient } from '@/lib/supabase/admin'
 
 export const metadata = { title: 'About Kappa Phi' }
@@ -193,7 +194,7 @@ export default async function AboutPage() {
       <div className="bg-kp-crimson-dark border-b border-kp-border">
         <div className="max-w-7xl mx-auto px-4 py-12 flex flex-col sm:flex-row sm:items-center gap-6">
           <div className="w-20 h-20 md:w-24 md:h-24 bg-white rounded-2xl shadow-lg shadow-black/30 p-2 flex items-center justify-center shrink-0">
-            <img src="/images/coat-of-arms.png" alt="Kappa Phi coat of arms" className="w-full h-full object-contain" />
+            <Image src="/images/coat-of-arms.png" alt="Kappa Phi coat of arms" width={96} height={96} className="w-full h-full object-contain" />
           </div>
           <div>
             <div className="text-kp-gold text-xs font-bold uppercase tracking-widest mb-3">History &amp; Heritage</div>
@@ -420,7 +421,9 @@ export default async function AboutPage() {
                     return (
                       <div key={i} className="bg-kp-card border border-kp-border rounded-xl overflow-hidden">
                         {m.photo_url && (
-                          <img src={m.photo_url} alt={m.name} className="w-full h-24 object-cover" />
+                          <div className="relative w-full h-24">
+                            <Image src={m.photo_url} alt={m.name} fill sizes="(max-width: 640px) 50vw, 25vw" className="object-cover" />
+                          </div>
                         )}
                         <div className="px-3 py-2.5">
                           <div className="text-kp-gold font-bold text-sm">{m.name}</div>
