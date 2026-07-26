@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { requireAdmin } from '../users/actions'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { logActivity } from '@/lib/activityLog'
 
 export async function assignBigBrothers(formData: FormData) {
   await requireAdmin()
@@ -22,6 +23,14 @@ export async function assignBigBrothers(formData: FormData) {
 
   for (const u of updates) {
     await admin.from('members').update({ big_brother_id: u.big_brother_id }).eq('id', u.id)
+  }
+
+  if (updates.length > 0) {
+    await logActivity(admin, {
+      action: 'update',
+      entityType: 'big_brother',
+      entityLabel: `Assigned big brother for ${updates.length} member${updates.length !== 1 ? 's' : ''}`,
+    })
   }
 
   revalidatePath('/admin/big-brother')

@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { logActivity } from '@/lib/activityLog'
 
 const BUCKET = 'board-photos'
 
@@ -61,6 +62,8 @@ export async function createBoardMember(formData: FormData) {
     if (url) await admin.from('board_members').update({ photo_url: url }).eq('id', data.id)
   }
 
+  await logActivity(admin, { action: 'create', entityType: 'board_member', entityId: data.id, entityLabel: payload.name ?? 'Board member' })
+
   revalidatePath('/board')
   redirect(`/admin/board/${data.id}?success=created`)
 }
@@ -78,16 +81,20 @@ export async function updateBoardMember(id: string, formData: FormData) {
   const { error } = await admin.from('board_members').update(payload).eq('id', id)
   if (error) redirect(`/admin/board/${id}?error=` + encodeURIComponent(error.message))
 
+  await logActivity(admin, { action: 'update', entityType: 'board_member', entityId: id, entityLabel: (payload.name as string) || 'Board member' })
+
   revalidatePath('/board')
   redirect(`/admin/board/${id}?success=saved`)
 }
 
 export async function deleteBoardMember(id: string) {
   const admin = await assertAdmin()
+  const { data: existing } = await admin.from('board_members').select('name').eq('id', id).single()
   for (const ext of ['jpg', 'jpeg', 'png', 'webp']) {
     await admin.storage.from(BUCKET).remove([`${id}.${ext}`])
   }
   await admin.from('board_members').delete().eq('id', id)
+  await logActivity(admin, { action: 'delete', entityType: 'board_member', entityId: id, entityLabel: existing?.name ?? 'Board member' })
   revalidatePath('/board')
   redirect('/admin/board')
 }

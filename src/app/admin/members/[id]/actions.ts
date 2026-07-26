@@ -8,6 +8,7 @@ import { createClient } from '@/lib/supabase/server'
 import { geocodeMemberFull } from '@/lib/geocode'
 import { getAddressStamp, type AddressActor } from '@/lib/addressTracking'
 import { applyMemberStatusRules } from '@/lib/memberStatus'
+import { logActivity } from '@/lib/activityLog'
 
 function str(v: FormDataEntryValue | null) { return (v as string) || null }
 function bool(v: FormDataEntryValue | null) { return v === 'on' }
@@ -117,6 +118,8 @@ export async function createMember(formData: FormData) {
   // Geocode after insert (non-blocking redirect if this takes a moment)
   await geocodeAndStore(admin, newMember.id, formData)
 
+  await logActivity(admin, { action: 'create', entityType: 'member', entityId: newMember.id, entityLabel: `${payload.first_name} ${payload.last_name}`.trim() })
+
   revalidatePath('/admin/members')
   redirect(`/admin/members/${newMember.id}?saved=1`)
 }
@@ -140,6 +143,8 @@ export async function updateMemberById(formData: FormData) {
 
   // Re-geocode with updated address (street → zip → city/state priority)
   await geocodeAndStore(admin, memberId, formData)
+
+  await logActivity(admin, { action: 'update', entityType: 'member', entityId: memberId, entityLabel: `${payload.first_name} ${payload.last_name}`.trim() })
 
   revalidatePath(`/admin/members/${memberId}`)
   revalidatePath('/admin/members')

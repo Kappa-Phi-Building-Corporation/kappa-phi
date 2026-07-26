@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { logActivity } from '@/lib/activityLog'
 
 async function assertAdmin() {
   const supabase = await createClient()
@@ -30,8 +31,10 @@ export async function createChapterHonor(formData: FormData) {
   const admin = await assertAdmin()
   const payload = buildPayload(formData)
 
-  const { error } = await admin.from('chapter_honors').insert(payload)
+  const { data, error } = await admin.from('chapter_honors').insert(payload).select('id').single()
   if (error) redirect('/admin/honors?error=' + encodeURIComponent(error.message))
+
+  await logActivity(admin, { action: 'create', entityType: 'chapter_honor', entityId: data?.id, entityLabel: payload.display_name || 'Chapter honor' })
 
   revalidatePath('/about')
   redirect('/admin/honors?success=created')
@@ -44,13 +47,17 @@ export async function updateChapterHonor(id: string, formData: FormData) {
   const { error } = await admin.from('chapter_honors').update(payload).eq('id', id)
   if (error) redirect(`/admin/honors/${id}?error=` + encodeURIComponent(error.message))
 
+  await logActivity(admin, { action: 'update', entityType: 'chapter_honor', entityId: id, entityLabel: payload.display_name || 'Chapter honor' })
+
   revalidatePath('/about')
   redirect(`/admin/honors/${id}?success=saved`)
 }
 
 export async function deleteChapterHonor(id: string) {
   const admin = await assertAdmin()
+  const { data: existing } = await admin.from('chapter_honors').select('display_name').eq('id', id).single()
   await admin.from('chapter_honors').delete().eq('id', id)
+  await logActivity(admin, { action: 'delete', entityType: 'chapter_honor', entityId: id, entityLabel: existing?.display_name ?? 'Chapter honor' })
   revalidatePath('/about')
   redirect('/admin/honors')
 }

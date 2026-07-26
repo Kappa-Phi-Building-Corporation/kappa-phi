@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { logActivity } from '@/lib/activityLog'
 
 const BUCKET = 'chapter-eternal-photos'
 
@@ -54,6 +55,14 @@ export async function createEternalEntry(formData: FormData) {
   const { error } = await admin.from('members').update(payload).eq('id', memberId)
   if (error) redirect('/admin/chapter-eternal?error=' + encodeURIComponent(error.message))
 
+  const { data: member } = await admin.from('members').select('first_name, last_name').eq('id', memberId).single()
+  await logActivity(admin, {
+    action: 'create',
+    entityType: 'chapter_eternal',
+    entityId: memberId,
+    entityLabel: member ? `${member.first_name ?? ''} ${member.last_name ?? ''}`.trim() : 'Memorial entry',
+  })
+
   revalidatePath('/alumni/chapter-eternal')
   redirect(`/admin/chapter-eternal/${memberId}?success=created`)
 }
@@ -76,6 +85,14 @@ export async function updateEternalEntry(id: string, formData: FormData) {
   const { error } = await admin.from('members').update(payload).eq('id', id)
   if (error) redirect(`/admin/chapter-eternal/${id}?error=` + encodeURIComponent(error.message))
 
+  const { data: member } = await admin.from('members').select('first_name, last_name').eq('id', id).single()
+  await logActivity(admin, {
+    action: 'update',
+    entityType: 'chapter_eternal',
+    entityId: id,
+    entityLabel: member ? `${member.first_name ?? ''} ${member.last_name ?? ''}`.trim() : 'Memorial entry',
+  })
+
   revalidatePath('/alumni/chapter-eternal')
   redirect(`/admin/chapter-eternal/${id}?success=saved`)
 }
@@ -83,6 +100,13 @@ export async function updateEternalEntry(id: string, formData: FormData) {
 export async function showEternalEntry(id: string) {
   const admin = await assertAdmin()
   await admin.from('members').update({ memorial_hide_entry: false }).eq('id', id)
+  const { data: member } = await admin.from('members').select('first_name, last_name').eq('id', id).single()
+  await logActivity(admin, {
+    action: 'update',
+    entityType: 'chapter_eternal',
+    entityId: id,
+    entityLabel: `${member ? `${member.first_name ?? ''} ${member.last_name ?? ''}`.trim() : 'Memorial entry'} (shown)`,
+  })
   revalidatePath('/alumni/chapter-eternal')
   redirect('/admin/chapter-eternal')
 }
@@ -90,6 +114,13 @@ export async function showEternalEntry(id: string) {
 export async function hideEternalEntry(id: string) {
   const admin = await assertAdmin()
   await admin.from('members').update({ memorial_hide_entry: true }).eq('id', id)
+  const { data: member } = await admin.from('members').select('first_name, last_name').eq('id', id).single()
+  await logActivity(admin, {
+    action: 'update',
+    entityType: 'chapter_eternal',
+    entityId: id,
+    entityLabel: `${member ? `${member.first_name ?? ''} ${member.last_name ?? ''}`.trim() : 'Memorial entry'} (hidden)`,
+  })
   revalidatePath('/alumni/chapter-eternal')
   redirect('/admin/chapter-eternal')
 }

@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { logActivity } from '@/lib/activityLog'
 
 const BUCKET = 'mascot-photos'
 
@@ -59,6 +60,8 @@ export async function createMascot(formData: FormData) {
     if (url) await admin.from('chapter_mascots').update({ photo_url: url }).eq('id', data.id)
   }
 
+  await logActivity(admin, { action: 'create', entityType: 'chapter_mascot', entityId: data.id, entityLabel: payload.name || 'Mascot' })
+
   revalidatePath('/about')
   redirect(`/admin/mascots/${data.id}?success=created`)
 }
@@ -76,16 +79,20 @@ export async function updateMascot(id: string, formData: FormData) {
   const { error } = await admin.from('chapter_mascots').update(payload).eq('id', id)
   if (error) redirect(`/admin/mascots/${id}?error=` + encodeURIComponent(error.message))
 
+  await logActivity(admin, { action: 'update', entityType: 'chapter_mascot', entityId: id, entityLabel: (payload.name as string) || 'Mascot' })
+
   revalidatePath('/about')
   redirect(`/admin/mascots/${id}?success=saved`)
 }
 
 export async function deleteMascot(id: string) {
   const admin = await assertAdmin()
+  const { data: existing } = await admin.from('chapter_mascots').select('name').eq('id', id).single()
   for (const ext of ['jpg', 'jpeg', 'png', 'webp']) {
     await admin.storage.from(BUCKET).remove([`${id}.${ext}`])
   }
   await admin.from('chapter_mascots').delete().eq('id', id)
+  await logActivity(admin, { action: 'delete', entityType: 'chapter_mascot', entityId: id, entityLabel: existing?.name ?? 'Mascot' })
   revalidatePath('/about')
   redirect('/admin/mascots')
 }

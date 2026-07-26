@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { logActivity } from '@/lib/activityLog'
 
 const BUCKET = 'pats-guide-photos'
 
@@ -35,6 +36,8 @@ export async function updateGuide(id: string, formData: FormData) {
   const { error } = await admin.from('pats_guide').update(payload).eq('id', id)
   if (error) redirect(`/admin/portal/pats-guide?error=${encodeURIComponent(error.message)}`)
 
+  await logActivity(admin, { action: 'update', entityType: 'pats_guide', entityId: id, entityLabel: payload.title })
+
   revalidatePath('/portal/pats-guide')
   revalidatePath('/admin/portal/pats-guide')
   redirect('/admin/portal/pats-guide?success=saved')
@@ -52,8 +55,10 @@ export async function createSection(formData: FormData) {
     sort_order: parseInt((formData.get('sort_order') as string) ?? '0', 10) || 0,
   }
 
-  const { error } = await admin.from('pats_guide_sections').insert(payload)
+  const { data, error } = await admin.from('pats_guide_sections').insert(payload).select('id').single()
   if (error) redirect('/admin/portal/pats-guide/sections/new?error=' + encodeURIComponent(error.message))
+
+  await logActivity(admin, { action: 'create', entityType: 'pats_guide_section', entityId: data?.id, entityLabel: title })
 
   revalidatePath('/portal/pats-guide')
   revalidatePath('/admin/portal/pats-guide')
@@ -75,6 +80,8 @@ export async function updateSection(id: string, formData: FormData) {
   const { error } = await admin.from('pats_guide_sections').update(payload).eq('id', id)
   if (error) redirect(`/admin/portal/pats-guide/sections/${id}?error=` + encodeURIComponent(error.message))
 
+  await logActivity(admin, { action: 'update', entityType: 'pats_guide_section', entityId: id, entityLabel: title })
+
   revalidatePath('/portal/pats-guide')
   revalidatePath('/admin/portal/pats-guide')
   redirect('/admin/portal/pats-guide?success=section-saved')
@@ -82,7 +89,9 @@ export async function updateSection(id: string, formData: FormData) {
 
 export async function deleteSection(id: string) {
   const admin = await assertAdmin()
+  const { data: existing } = await admin.from('pats_guide_sections').select('title').eq('id', id).single()
   await admin.from('pats_guide_sections').delete().eq('id', id)
+  await logActivity(admin, { action: 'delete', entityType: 'pats_guide_section', entityId: id, entityLabel: existing?.title ?? 'Section' })
   revalidatePath('/portal/pats-guide')
   revalidatePath('/admin/portal/pats-guide')
   redirect('/admin/portal/pats-guide?success=section-deleted')
@@ -112,12 +121,14 @@ export async function addPhoto(formData: FormData) {
   const { data: { publicUrl } } = admin.storage.from(BUCKET).getPublicUrl(path)
 
   const caption = str(formData.get('caption'))
-  const { error } = await admin.from('pats_guide_photos').insert({
+  const { data, error } = await admin.from('pats_guide_photos').insert({
     photo_url: publicUrl,
     caption,
     sort_order: sortOrder,
-  })
+  }).select('id').single()
   if (error) redirect('/admin/portal/pats-guide?error=' + encodeURIComponent(error.message))
+
+  await logActivity(admin, { action: 'create', entityType: 'pats_guide_photo', entityId: data?.id, entityLabel: caption || 'Photo' })
 
   revalidatePath('/portal/pats-guide')
   revalidatePath('/admin/portal/pats-guide')
@@ -131,6 +142,7 @@ export async function deletePhoto(id: string, photoUrl: string) {
   if (path) await admin.storage.from(BUCKET).remove([path])
 
   await admin.from('pats_guide_photos').delete().eq('id', id)
+  await logActivity(admin, { action: 'delete', entityType: 'pats_guide_photo', entityId: id, entityLabel: 'Photo' })
 
   revalidatePath('/portal/pats-guide')
   revalidatePath('/admin/portal/pats-guide')

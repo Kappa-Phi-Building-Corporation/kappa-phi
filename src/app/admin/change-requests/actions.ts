@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { logActivity } from '@/lib/activityLog'
 
 async function requireAdmin() {
   const supabase = await createClient()
@@ -38,6 +39,14 @@ export async function approveChangeRequest(formData: FormData) {
 
   await admin.from('member_change_requests').update({ status: 'approved' }).eq('id', requestId)
 
+  const { data: member } = await admin.from('members').select('first_name, last_name').eq('id', req.member_id).single()
+  await logActivity(admin, {
+    action: 'approve',
+    entityType: 'change_request',
+    entityId: requestId,
+    entityLabel: member ? `${member.first_name ?? ''} ${member.last_name ?? ''}`.trim() : 'Change request',
+  })
+
   revalidatePath('/admin/change-requests')
 }
 
@@ -45,7 +54,18 @@ export async function denyChangeRequest(formData: FormData) {
   const admin     = await requireAdmin()
   const requestId = formData.get('requestId') as string
 
+  const { data: req } = await admin.from('member_change_requests').select('member_id').eq('id', requestId).single()
   await admin.from('member_change_requests').update({ status: 'denied' }).eq('id', requestId)
+
+  const { data: member } = req
+    ? await admin.from('members').select('first_name, last_name').eq('id', req.member_id).single()
+    : { data: null }
+  await logActivity(admin, {
+    action: 'deny',
+    entityType: 'change_request',
+    entityId: requestId,
+    entityLabel: member ? `${member.first_name ?? ''} ${member.last_name ?? ''}`.trim() : 'Change request',
+  })
 
   revalidatePath('/admin/change-requests')
 }

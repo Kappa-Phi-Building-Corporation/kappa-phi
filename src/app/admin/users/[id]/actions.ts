@@ -8,6 +8,7 @@ import { createClient } from '@/lib/supabase/server'
 import { getAddressStamp } from '@/lib/addressTracking'
 import { applyMemberStatusRules } from '@/lib/memberStatus'
 import { sendUserApprovedEmail } from '@/lib/email'
+import { logActivity } from '@/lib/activityLog'
 
 function str(v: FormDataEntryValue | null) { return (v as string) || null }
 function bool(v: FormDataEntryValue | null) { return v === 'on' }
@@ -131,6 +132,13 @@ export async function updateUserAdmin(formData: FormData) {
     }
   }
 
+  await logActivity(admin, {
+    action: 'update',
+    entityType: 'user_account',
+    entityId: targetProfileId,
+    entityLabel: `${payload.first_name} ${payload.last_name}`.trim() || 'User account',
+  })
+
   revalidatePath(`/admin/users/${targetProfileId}`)
   revalidatePath('/admin/users')
   redirect(`/admin/users/${targetProfileId}?saved=1`)
@@ -142,10 +150,13 @@ export async function linkMember(formData: FormData) {
   const memberId        = str(formData.get('memberId'))
   if (!targetProfileId) redirect('/admin/users')
 
-  await createAdminClient()
+  const admin = createAdminClient()
+  await admin
     .from('profiles')
     .update({ member_id: memberId })
     .eq('id', targetProfileId)
+
+  await logActivity(admin, { action: 'update', entityType: 'user_account', entityId: targetProfileId, entityLabel: 'Linked member record' })
 
   revalidatePath(`/admin/users/${targetProfileId}`)
   redirect(`/admin/users/${targetProfileId}?saved=1`)

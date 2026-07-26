@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { logActivity } from '@/lib/activityLog'
 
 const BUCKET = 'property-photos'
 
@@ -42,17 +43,21 @@ export async function createProject(formData: FormData) {
     .single()
   if (error || !data) redirect('/admin/property?error=' + encodeURIComponent(error?.message ?? 'Create failed'))
 
+  await logActivity(admin, { action: 'create', entityType: 'property_project', entityId: data.id, entityLabel: payload.name ?? 'Property project' })
+
   revalidatePath('/property')
   redirect(`/admin/property/${data.id}?success=created`)
 }
 
 export async function archiveProject(id: string) {
   const admin = await assertAdmin()
+  const { data: existing } = await admin.from('property_projects').select('name').eq('id', id).single()
   const { error } = await admin
     .from('property_projects')
     .update({ status: 'archive' })
     .eq('id', id)
   if (error) redirect('/admin/property?error=' + encodeURIComponent(error.message))
+  await logActivity(admin, { action: 'update', entityType: 'property_project', entityId: id, entityLabel: `${existing?.name ?? 'Property project'} (archived)` })
   revalidatePath('/property')
   redirect('/admin/property')
 }
@@ -64,12 +69,16 @@ export async function updateProject(id: string, formData: FormData) {
   const { error } = await admin.from('property_projects').update(payload).eq('id', id)
   if (error) redirect(`/admin/property/${id}?error=` + encodeURIComponent(error.message))
 
+  await logActivity(admin, { action: 'update', entityType: 'property_project', entityId: id, entityLabel: payload.name ?? 'Property project' })
+
   revalidatePath('/property')
   redirect(`/admin/property/${id}?success=saved`)
 }
 
 export async function deleteProject(id: string) {
   const admin = await assertAdmin()
+
+  const { data: existing } = await admin.from('property_projects').select('name').eq('id', id).single()
 
   // Fetch and delete all photos from storage
   const { data: photos } = await admin
@@ -83,6 +92,7 @@ export async function deleteProject(id: string) {
   }
 
   await admin.from('property_projects').delete().eq('id', id)
+  await logActivity(admin, { action: 'delete', entityType: 'property_project', entityId: id, entityLabel: existing?.name ?? 'Property project' })
   revalidatePath('/property')
   redirect('/admin/property')
 }

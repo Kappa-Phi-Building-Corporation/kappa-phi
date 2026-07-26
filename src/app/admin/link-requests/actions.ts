@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { logActivity } from '@/lib/activityLog'
 
 async function requireAdmin() {
   const supabase = await createClient()
@@ -30,6 +31,14 @@ export async function approveLinkRequest(formData: FormData) {
     is_approved:          true,
   }).eq('id', profileId)
 
+  const { data: member } = await admin.from('members').select('first_name, last_name').eq('id', memberId).single()
+  await logActivity(admin, {
+    action: 'approve',
+    entityType: 'link_request',
+    entityId: profileId,
+    entityLabel: member ? `${member.first_name ?? ''} ${member.last_name ?? ''}`.trim() : 'Link request',
+  })
+
   revalidatePath('/admin/link-requests')
 }
 
@@ -48,6 +57,14 @@ export async function approveWithMember(formData: FormData) {
     is_approved:          true,
   }).eq('id', profileId)
 
+  const { data: member } = await admin.from('members').select('first_name, last_name').eq('id', newMemberId).single()
+  await logActivity(admin, {
+    action: 'approve',
+    entityType: 'link_request',
+    entityId: profileId,
+    entityLabel: member ? `${member.first_name ?? ''} ${member.last_name ?? ''}`.trim() : 'Link request',
+  })
+
   revalidatePath('/admin/link-requests')
 }
 
@@ -59,6 +76,8 @@ export async function denyLinkRequest(formData: FormData) {
     requested_member_id: null,
     link_request_status: 'denied',
   }).eq('id', profileId)
+
+  await logActivity(admin, { action: 'deny', entityType: 'link_request', entityId: profileId, entityLabel: 'Link request' })
 
   revalidatePath('/admin/link-requests')
 }

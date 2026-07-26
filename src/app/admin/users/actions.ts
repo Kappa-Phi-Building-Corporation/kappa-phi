@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { sendUserApprovedEmail } from '@/lib/email'
+import { logActivity } from '@/lib/activityLog'
 
 export async function requireAdmin() {
   const supabase = await createClient()
@@ -31,11 +32,21 @@ async function notifyUserApproved(admin: ReturnType<typeof createAdminClient>, u
   await sendUserApprovedEmail(name, authUser.email)
 }
 
+async function userLabel(admin: ReturnType<typeof createAdminClient>, userId: string) {
+  const { data } = await admin.auth.admin.getUserById(userId)
+  const authUser = data.user
+  if (!authUser) return 'User account'
+  const meta = (authUser.user_metadata ?? {}) as Record<string, string>
+  return `${meta.first_name ?? ''} ${meta.last_name ?? ''}`.trim() || authUser.email || 'User account'
+}
+
 export async function approveUser(userId: string) {
   await requireAdmin()
   const admin = createAdminClient()
+  const label = await userLabel(admin, userId)
   await admin.from('profiles').update({ is_approved: true }).eq('id', userId)
   await notifyUserApproved(admin, userId)
+  await logActivity(admin, { action: 'approve', entityType: 'user_account', entityId: userId, entityLabel: label })
   revalidatePath('/admin/users')
 }
 
@@ -45,24 +56,30 @@ export async function approveLinkUser(formData: FormData) {
   const memberId = (formData.get('memberId') as string) || null
   if (!userId) return
   const admin = createAdminClient()
+  const label = await userLabel(admin, userId)
   await admin.from('profiles').update({ is_approved: true, member_id: memberId }).eq('id', userId)
   await notifyUserApproved(admin, userId)
+  await logActivity(admin, { action: 'approve', entityType: 'user_account', entityId: userId, entityLabel: label })
   revalidatePath('/admin/users')
 }
 
 export async function denyUser(userId: string) {
   await requireAdmin()
   const admin = createAdminClient()
+  const label = await userLabel(admin, userId)
   // Delete only the profile (account) — the member record is preserved
   await admin.from('profiles').delete().eq('id', userId)
   await admin.auth.admin.deleteUser(userId)
+  await logActivity(admin, { action: 'deny', entityType: 'user_account', entityId: userId, entityLabel: label })
   revalidatePath('/admin/users')
 }
 
 export async function setRole(userId: string, role: 'member' | 'admin' | 'website_admin') {
   await requireAdmin()
   const admin = createAdminClient()
+  const label = await userLabel(admin, userId)
   const { error } = await admin.from('profiles').update({ role }).eq('id', userId)
   if (error) throw new Error(error.message)
+  await logActivity(admin, { action: 'update', entityType: 'user_account', entityId: userId, entityLabel: `${label} → role: ${role}` })
   revalidatePath('/admin/users')
 }

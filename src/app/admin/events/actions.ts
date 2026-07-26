@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { logActivity } from '@/lib/activityLog'
 
 async function assertAdmin() {
   const supabase = await createClient()
@@ -39,6 +40,8 @@ export async function createEvent(formData: FormData) {
   const { data, error } = await admin.from('events').insert(payload).select('id').single()
   if (error || !data) redirect('/admin/events?error=' + encodeURIComponent(error?.message ?? 'Failed to create'))
 
+  await logActivity(admin, { action: 'create', entityType: 'event', entityId: data.id, entityLabel: payload.title })
+
   revalidatePath('/events')
   redirect(`/admin/events/${data.id}?success=created`)
 }
@@ -50,13 +53,17 @@ export async function updateEvent(id: string, formData: FormData) {
   const { error } = await admin.from('events').update(payload).eq('id', id)
   if (error) redirect(`/admin/events/${id}?error=` + encodeURIComponent(error.message))
 
+  await logActivity(admin, { action: 'update', entityType: 'event', entityId: id, entityLabel: payload.title })
+
   revalidatePath('/events')
   redirect(`/admin/events/${id}?success=saved`)
 }
 
 export async function deleteEvent(id: string) {
   const admin = await assertAdmin()
+  const { data: existing } = await admin.from('events').select('title').eq('id', id).single()
   await admin.from('events').delete().eq('id', id)
+  await logActivity(admin, { action: 'delete', entityType: 'event', entityId: id, entityLabel: existing?.title ?? 'Event' })
   revalidatePath('/events')
   redirect('/admin/events')
 }
