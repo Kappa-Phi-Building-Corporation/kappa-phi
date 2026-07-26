@@ -31,6 +31,14 @@ export async function login(formData: FormData) {
     redirect('/auth/pending')
   }
 
+  const meta = (authData.user.user_metadata ?? {}) as Record<string, string>
+  const name = `${meta.first_name ?? ''} ${meta.last_name ?? ''}`.trim() || null
+  await admin.from('login_log').insert({
+    user_id: authData.user.id,
+    email: authData.user.email ?? '',
+    name,
+  })
+
   revalidatePath('/', 'layout')
   redirect('/profile')
 }
