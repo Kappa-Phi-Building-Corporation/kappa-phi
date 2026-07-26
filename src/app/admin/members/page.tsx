@@ -121,7 +121,7 @@ export default async function AdminMembersPage({
             type="search"
             defaultValue={q ?? ''}
             placeholder="Search name, badge, email…"
-            className="flex-1 bg-kp-surface border border-kp-border rounded-xl px-4 py-2.5 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-kp-blue"
+            className="flex-1 bg-kp-surface border border-kp-border rounded-xl px-4 py-2.5 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-kp-blue focus:ring-1 focus:ring-kp-blue"
           />
           <button type="submit"
             className="px-5 py-2.5 bg-kp-blue rounded-xl text-sm text-white font-medium hover:bg-kp-blue-light transition-colors">

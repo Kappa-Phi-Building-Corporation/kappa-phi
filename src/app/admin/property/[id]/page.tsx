@@ -124,7 +124,7 @@ export default async function EditProjectPage({
               multiple
               className="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border file:border-kp-border file:bg-kp-card file:text-gray-300 file:text-sm file:font-medium hover:file:border-kp-gold hover:file:text-kp-gold file:transition-colors cursor-pointer"
             />
-            <p className="text-gray-600 text-xs">Select one or more photos. JPEG, PNG, or WebP.</p>
+            <p className="text-gray-500 text-xs">Select one or more photos. JPEG, PNG, or WebP.</p>
             <div className="flex justify-end">
               <button type="submit"
                 className="bg-kp-blue hover:opacity-90 text-white font-semibold px-5 py-2 rounded-xl text-sm transition-opacity">

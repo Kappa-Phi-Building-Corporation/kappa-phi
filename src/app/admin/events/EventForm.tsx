@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 type Event = {
   title: string
@@ -14,7 +14,7 @@ type Event = {
 }
 
 const labelCls = 'block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5'
-const inputCls = 'w-full bg-kp-dark border border-kp-border rounded-xl px-4 py-2.5 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-kp-gold transition-colors'
+const inputCls = 'w-full bg-kp-dark border border-kp-border rounded-xl px-4 py-2.5 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-kp-gold focus:ring-1 focus:ring-kp-gold transition-colors'
 const dateInputCls = inputCls + ' [color-scheme:dark]'
 const textareaCls = inputCls + ' resize-y min-h-[120px]'
 
@@ -29,8 +29,9 @@ export default function EventForm({
     <form action={action} className="space-y-6">
       {/* Title */}
       <div>
-        <label className={labelCls}>Title *</label>
+        <label htmlFor="title" className={labelCls}>Title *</label>
         <input
+          id="title"
           name="title"
           required
           defaultValue={event?.title ?? ''}
@@ -42,8 +43,9 @@ export default function EventForm({
       {/* Dates */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className={labelCls}>Start Date *</label>
+          <label htmlFor="start_date" className={labelCls}>Start Date *</label>
           <input
+            id="start_date"
             name="start_date"
             type="date"
             required
@@ -52,8 +54,9 @@ export default function EventForm({
           />
         </div>
         <div>
-          <label className={labelCls}>End Date <span className="text-gray-600 font-normal">(leave blank for single day)</span></label>
+          <label htmlFor="end_date" className={labelCls}>End Date <span className="text-gray-500 font-normal">(leave blank for single day)</span></label>
           <input
+            id="end_date"
             name="end_date"
             type="date"
             defaultValue={event?.end_date ?? ''}
@@ -65,8 +68,9 @@ export default function EventForm({
       {/* Times */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className={labelCls}>Start Time <span className="text-gray-600 font-normal">(optional)</span></label>
+          <label htmlFor="start_time" className={labelCls}>Start Time <span className="text-gray-500 font-normal">(optional)</span></label>
           <input
+            id="start_time"
             name="start_time"
             type="time"
             defaultValue={event?.start_time ?? ''}
@@ -74,8 +78,9 @@ export default function EventForm({
           />
         </div>
         <div>
-          <label className={labelCls}>End Time <span className="text-gray-600 font-normal">(optional)</span></label>
+          <label htmlFor="end_time" className={labelCls}>End Time <span className="text-gray-500 font-normal">(optional)</span></label>
           <input
+            id="end_time"
             name="end_time"
             type="time"
             defaultValue={event?.end_time ?? ''}
@@ -86,8 +91,9 @@ export default function EventForm({
 
       {/* Location */}
       <div>
-        <label className={labelCls}>Location <span className="text-gray-600 font-normal">(optional)</span></label>
+        <label htmlFor="location" className={labelCls}>Location <span className="text-gray-500 font-normal">(optional)</span></label>
         <input
+          id="location"
           name="location"
           defaultValue={event?.location ?? ''}
           placeholder='e.g. Rolla, MO or Virtual'
@@ -97,22 +103,24 @@ export default function EventForm({
 
       {/* Description */}
       <div>
-        <label className={labelCls}>Description / Schedule <span className="text-gray-600 font-normal">(optional)</span></label>
+        <label htmlFor="description" className={labelCls}>Description / Schedule <span className="text-gray-500 font-normal">(optional)</span></label>
         <textarea
+          id="description"
           name="description"
           defaultValue={event?.description ?? ''}
           placeholder={'Multi-line schedule or details.\nEach line will be shown as-is.'}
           className={textareaCls}
         />
-        <p className="text-gray-600 text-xs mt-1">Displayed with line breaks preserved. Use plain text.</p>
+        <p className="text-gray-500 text-xs mt-1">Displayed with line breaks preserved. Use plain text.</p>
       </div>
 
       {/* CTA Link */}
       <div>
-        <label className={labelCls}>Call-to-Action Button <span className="text-gray-600 font-normal">(optional)</span></label>
+        <span className={labelCls}>Call-to-Action Button <span className="text-gray-500 font-normal">(optional)</span></span>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <input
             name="link_label"
+            aria-label="Call-to-action button label"
             defaultValue={event?.link_label ?? ''}
             placeholder='Button label, e.g. "Join Google Meet"'
             className={inputCls}
@@ -120,12 +128,13 @@ export default function EventForm({
           <input
             name="link_url"
             type="url"
+            aria-label="Call-to-action button URL"
             defaultValue={event?.link_url ?? ''}
             placeholder='https://...'
             className={inputCls}
           />
         </div>
-        <p className="text-gray-600 text-xs mt-1">Both fields required to show the button.</p>
+        <p className="text-gray-500 text-xs mt-1">Both fields required to show the button.</p>
       </div>
 
       {/* Published */}

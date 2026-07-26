@@ -94,7 +94,7 @@ export default async function AdminChapterEternalPage({
           <div>
             <div className="flex items-center gap-3 mb-3">
               <div className="text-amber-400 text-xs font-bold uppercase tracking-widest">Pending</div>
-              <span className="text-gray-600 text-xs">Marked deceased — no chapter eternal entry yet</span>
+              <span className="text-gray-500 text-xs">Marked deceased — no chapter eternal entry yet</span>
             </div>
             <div className="bg-amber-950/20 border border-amber-800/40 rounded-2xl overflow-hidden">
               <div className="divide-y divide-kp-border">

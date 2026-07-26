@@ -62,7 +62,7 @@ function MemberCard({
         {member.role}
       </div>
 
-      <div className="flex items-center justify-center gap-1 mt-3 text-gray-600 group-hover:text-gray-400 transition-colors text-xs">
+      <div className="flex items-center justify-center gap-1 mt-3 text-gray-500 group-hover:text-gray-400 transition-colors text-xs">
         <span>View profile</span>
         <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />

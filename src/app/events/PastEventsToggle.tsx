@@ -67,7 +67,7 @@ function PastEventRow({ event }: { event: Event }) {
             {formatDateRange(event.start_date, event.end_date)}
           </div>
           {timeRange && !expanded && (
-            <div className="text-gray-600 text-xs mt-0.5">{timeRange}</div>
+            <div className="text-gray-500 text-xs mt-0.5">{timeRange}</div>
           )}
         </div>
         <div className="flex-1 min-w-0">
@@ -78,8 +78,8 @@ function PastEventRow({ event }: { event: Event }) {
         </div>
         {hasDetails && (
           <svg
-            className={`w-4 h-4 text-gray-600 shrink-0 transition-transform ${expanded ? 'rotate-180' : ''}`}
-            fill="none" stroke="currentColor" viewBox="0 0 24 24"
+            className={`w-4 h-4 text-gray-500 shrink-0 transition-transform ${expanded ? 'rotate-180' : ''}`}
+            fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"
           >
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
           </svg>
@@ -97,7 +97,7 @@ function PastEventRow({ event }: { event: Event }) {
             if (isSingleDay) {
               return (
                 <div className="flex items-center gap-2 text-gray-400 text-sm">
-                  <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   {startFmt && endFmt ? `${startFmt} – ${endFmt}` : startFmt ?? endFmt}
@@ -150,7 +150,7 @@ export default function PastEventsToggle({ events }: { events: Event[] }) {
         className="w-full flex items-center justify-between px-6 py-4 bg-kp-surface hover:bg-kp-card transition-colors text-left"
       >
         <div className="flex items-center gap-3">
-          <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
           <span className="text-gray-400 text-sm font-medium">
@@ -159,7 +159,7 @@ export default function PastEventsToggle({ events }: { events: Event[] }) {
         </div>
         <svg
           className={`w-4 h-4 text-gray-500 transition-transform ${open ? 'rotate-180' : ''}`}
-          fill="none" stroke="currentColor" viewBox="0 0 24 24"
+          fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"
         >
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
         </svg>

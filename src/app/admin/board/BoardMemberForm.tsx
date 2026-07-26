@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import Image from 'next/image'
@@ -17,7 +17,7 @@ type BoardMember = {
 }
 
 const labelCls = 'block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5'
-const inputCls = 'w-full bg-kp-dark border border-kp-border rounded-xl px-4 py-2.5 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-kp-gold transition-colors'
+const inputCls = 'w-full bg-kp-dark border border-kp-border rounded-xl px-4 py-2.5 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-kp-gold focus:ring-1 focus:ring-kp-gold transition-colors'
 const textareaCls = inputCls + ' resize-y min-h-[120px]'
 
 export default function BoardMemberForm({
@@ -39,7 +39,7 @@ export default function BoardMemberForm({
 
       {/* Photo */}
       <div>
-        <label className={labelCls}>Photo <span className="text-gray-600 font-normal">(optional)</span></label>
+        <label htmlFor="photo" className={labelCls}>Photo <span className="text-gray-500 font-normal">(optional)</span></label>
         <div className="flex items-start gap-5">
           <div className="relative w-24 h-24 rounded-2xl overflow-hidden bg-kp-card border border-kp-border shrink-0 flex items-center justify-center">
             {previewUrl ? (
@@ -53,15 +53,16 @@ export default function BoardMemberForm({
           </div>
           <div className="flex-1 space-y-2">
             <input
+              id="photo"
               name="photo"
               type="file"
               accept="image/*"
               onChange={handleFileChange}
               className="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border file:border-kp-border file:bg-kp-card file:text-gray-300 file:text-sm file:font-medium hover:file:border-kp-gold hover:file:text-kp-gold file:transition-colors cursor-pointer"
             />
-            <p className="text-gray-600 text-xs">JPEG, PNG, or WebP. Stored in Supabase Storage.</p>
+            <p className="text-gray-500 text-xs">JPEG, PNG, or WebP. Stored in Supabase Storage.</p>
             {member?.photo_url && (
-              <p className="text-gray-600 text-xs">Uploading a new file will replace the current photo.</p>
+              <p className="text-gray-500 text-xs">Uploading a new file will replace the current photo.</p>
             )}
           </div>
         </div>
@@ -70,20 +71,21 @@ export default function BoardMemberForm({
       {/* Name + Role */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className={labelCls}>Full Name *</label>
-          <input name="name" required defaultValue={member?.name ?? ''} placeholder="e.g. Peter Moore" className={inputCls} />
+          <label htmlFor="name" className={labelCls}>Full Name *</label>
+          <input id="name" name="name" required defaultValue={member?.name ?? ''} placeholder="e.g. Peter Moore" className={inputCls} />
         </div>
         <div>
-          <label className={labelCls}>Title / Role *</label>
-          <input name="role" required defaultValue={member?.role ?? ''} placeholder="e.g. President" className={inputCls} />
+          <label htmlFor="role" className={labelCls}>Title / Role *</label>
+          <input id="role" name="role" required defaultValue={member?.role ?? ''} placeholder="e.g. President" className={inputCls} />
         </div>
       </div>
 
       {/* Category + Email */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className={labelCls}>Category *</label>
+          <label htmlFor="category" className={labelCls}>Category *</label>
           <select
+            id="category"
             name="category"
             defaultValue={member?.category ?? 'director'}
             className={inputCls}
@@ -93,23 +95,24 @@ export default function BoardMemberForm({
           </select>
         </div>
         <div>
-          <label className={labelCls}>Email <span className="text-gray-600 font-normal">(optional)</span></label>
-          <input name="email" type="email" defaultValue={member?.email ?? ''} placeholder="officer@kappa-phi.org" className={inputCls} />
+          <label htmlFor="email" className={labelCls}>Email <span className="text-gray-500 font-normal">(optional)</span></label>
+          <input id="email" name="email" type="email" defaultValue={member?.email ?? ''} placeholder="officer@kappa-phi.org" className={inputCls} />
         </div>
       </div>
 
       {/* Sort Order + Active */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className={labelCls}>Sort Order</label>
+          <label htmlFor="sort_order" className={labelCls}>Sort Order</label>
           <input
+            id="sort_order"
             name="sort_order"
             type="number"
             min="0"
             defaultValue={member?.sort_order ?? 0}
             className={inputCls}
           />
-          <p className="text-gray-600 text-xs mt-1">Lower numbers appear first within their category.</p>
+          <p className="text-gray-500 text-xs mt-1">Lower numbers appear first within their category.</p>
         </div>
         <div className="flex items-end pb-1">
           <label className="flex items-center gap-3 cursor-pointer group">
@@ -133,21 +136,23 @@ export default function BoardMemberForm({
 
       {/* Biography */}
       <div>
-        <label className={labelCls}>Biography <span className="text-gray-600 font-normal">(optional)</span></label>
+        <label htmlFor="bio" className={labelCls}>Biography <span className="text-gray-500 font-normal">(optional)</span></label>
         <textarea
+          id="bio"
           name="bio"
           defaultValue={member?.bio ?? ''}
           placeholder="Write biography paragraphs here. Separate paragraphs with a blank line."
           className={textareaCls}
           rows={8}
         />
-        <p className="text-gray-600 text-xs mt-1">Separate paragraphs with a blank line (press Enter twice).</p>
+        <p className="text-gray-500 text-xs mt-1">Separate paragraphs with a blank line (press Enter twice).</p>
       </div>
 
       {/* Goals */}
       <div>
-        <label className={labelCls}>Goals &amp; Updates <span className="text-gray-600 font-normal">(optional)</span></label>
+        <label htmlFor="goals" className={labelCls}>Goals &amp; Updates <span className="text-gray-500 font-normal">(optional)</span></label>
         <textarea
+          id="goals"
           name="goals"
           defaultValue={member?.goals ?? ''}
           placeholder="Enter goals or updates here. Separate items with a blank line."

@@ -144,7 +144,7 @@ function ReadRow({ label, value }: { label: string; value?: string | number | nu
   return (
     <div>
       <dt className="text-xs text-gray-500 uppercase tracking-wider font-semibold">{label}</dt>
-      <dd className="text-white mt-0.5 text-sm">{value ?? <span className="text-gray-600 italic">—</span>}</dd>
+      <dd className="text-white mt-0.5 text-sm">{value ?? <span className="text-gray-500 italic">—</span>}</dd>
     </div>
   )
 }
@@ -290,18 +290,18 @@ export default function ProfileForm({
           <dl className="grid grid-cols-3 gap-4">
             <div>
               <dt className="text-xs text-gray-500">Badge Number</dt>
-              <dd className="text-white text-sm mt-0.5">{member?.badge_number ?? <span className="text-gray-600 italic">—</span>}</dd>
+              <dd className="text-white text-sm mt-0.5">{member?.badge_number ?? <span className="text-gray-500 italic">—</span>}</dd>
             </div>
             <div>
               <dt className="text-xs text-gray-500">Pledge Class</dt>
-              <dd className="text-white text-sm mt-0.5">{member?.pledge_class ?? <span className="text-gray-600 italic">—</span>}</dd>
+              <dd className="text-white text-sm mt-0.5">{member?.pledge_class ?? <span className="text-gray-500 italic">—</span>}</dd>
             </div>
             <div>
               <dt className="text-xs text-gray-500">Big Brother</dt>
               <dd className="text-white text-sm mt-0.5">
                 {bigBrotherName
                   ? `${bigBrotherName.first_name ?? ''} ${bigBrotherName.last_name ?? ''}`.trim()
-                  : <span className="text-gray-600 italic">—</span>}
+                  : <span className="text-gray-500 italic">—</span>}
               </dd>
             </div>
           </dl>
@@ -367,7 +367,7 @@ export default function ProfileForm({
                   <div className="col-span-2">
                     <label className={lbl}>
                       Note / Reason{' '}
-                      <span className="text-gray-600 normal-case font-normal">(optional)</span>
+                      <span className="text-gray-500 normal-case font-normal">(optional)</span>
                     </label>
                     <textarea name="note" rows={2} className={`${inp} resize-none`}
                       placeholder="Explain what needs correcting…" />

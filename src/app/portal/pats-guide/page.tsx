@@ -155,7 +155,7 @@ export default async function PatsGuidePage() {
                 </div>
               )}
 
-              <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-kp-border text-xs text-gray-600">
+              <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-kp-border text-xs text-gray-500">
                 {guide?.pdf_url && (
                   <a href={guide.pdf_url} target="_blank" rel="noopener noreferrer" className="text-kp-gold hover:underline">
                     ↗ Original PDF version

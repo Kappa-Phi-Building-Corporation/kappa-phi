@@ -7,7 +7,7 @@ type Guide = {
 }
 
 const labelCls = 'block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5'
-const inputCls = 'w-full bg-kp-dark border border-kp-border rounded-xl px-4 py-2.5 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-kp-gold transition-colors'
+const inputCls = 'w-full bg-kp-dark border border-kp-border rounded-xl px-4 py-2.5 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-kp-gold focus:ring-1 focus:ring-kp-gold transition-colors'
 
 export default function PatsGuideForm({
   action,
@@ -19,18 +19,18 @@ export default function PatsGuideForm({
   return (
     <form action={action} className="space-y-6">
       <div>
-        <label className={labelCls}>Page Title</label>
-        <input name="title" required defaultValue={guide.title} className={inputCls} />
+        <label htmlFor="title" className={labelCls}>Page Title</label>
+        <input id="title" name="title" required defaultValue={guide.title} className={inputCls} />
       </div>
 
       <div>
-        <label className={labelCls}>Intro <span className="text-gray-600 font-normal">(optional, shown under the title)</span></label>
-        <textarea name="intro" rows={2} defaultValue={guide.intro ?? ''} className={`${inputCls} resize-y`} />
+        <label htmlFor="intro" className={labelCls}>Intro <span className="text-gray-500 font-normal">(optional, shown under the title)</span></label>
+        <textarea id="intro" name="intro" rows={2} defaultValue={guide.intro ?? ''} className={`${inputCls} resize-y`} />
       </div>
 
       <div>
-        <label className={labelCls}>Original PDF URL <span className="text-gray-600 font-normal">(optional, shown as a download link)</span></label>
-        <input name="pdf_url" type="url" defaultValue={guide.pdf_url ?? ''} placeholder="https://…" className={inputCls} />
+        <label htmlFor="pdf_url" className={labelCls}>Original PDF URL <span className="text-gray-500 font-normal">(optional, shown as a download link)</span></label>
+        <input id="pdf_url" name="pdf_url" type="url" defaultValue={guide.pdf_url ?? ''} placeholder="https://…" className={inputCls} />
       </div>
 
       <div className="flex justify-end pt-2 border-t border-kp-border">

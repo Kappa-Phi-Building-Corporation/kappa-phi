@@ -54,7 +54,7 @@ export default function MemberLinkRequest({
 
       <div className="border border-kp-border rounded-xl overflow-hidden max-h-64 overflow-y-auto bg-kp-card">
         {filtered.length === 0 && (
-          <div className="px-4 py-8 text-center text-gray-600 text-sm">No members found.</div>
+          <div className="px-4 py-8 text-center text-gray-500 text-sm">No members found.</div>
         )}
         {filtered.map(m => {
           const isSelected = m.id === selectedId

@@ -89,7 +89,7 @@ export default async function ChapterEternalPage({
             In loving memory of the brothers of Epsilon Nu Chapter of Delta Tau Delta who have passed to Chapter Eternal.
           </p>
           {lastUpdatedLabel && (
-            <p className="text-gray-600 text-xs mt-3">Last update {lastUpdatedLabel}</p>
+            <p className="text-gray-500 text-xs mt-3">Last update {lastUpdatedLabel}</p>
           )}
         </div>
       </div>

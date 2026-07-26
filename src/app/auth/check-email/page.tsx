@@ -29,7 +29,7 @@ export default function CheckEmailPage() {
             Once approved, you can log in and access the alumni portal.
           </p>
         </div>
-        <p className="mt-6 text-xs text-gray-600">
+        <p className="mt-6 text-xs text-gray-500">
           Need help?{' '}
           <a href="mailto:kappaphi@kappa-phi.org" className="text-kp-gold">
             kappaphi@kappa-phi.org

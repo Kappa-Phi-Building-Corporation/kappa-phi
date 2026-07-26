@@ -199,7 +199,7 @@ function MemberNodeComponent({ data }: NodeProps) {
       <div className="text-kp-gold/70 text-[10px] mt-1 leading-none">
         #{member.badge_number}
       </div>
-      <div className="text-gray-600 text-[10px] truncate mt-1 leading-none">
+      <div className="text-gray-500 text-[10px] truncate mt-1 leading-none">
         {member.pledge_class ?? ''}
       </div>
       <Handle
@@ -341,7 +341,7 @@ function FamilyTreeInner({ members, initialFocusId }: { members: TreeMember[]; i
                 >
                   <span className="text-kp-gold text-[11px] w-8 shrink-0 tabular-nums">#{m.badge_number}</span>
                   <span className="text-white text-sm truncate">{m.first_name} {m.last_name}</span>
-                  <span className="text-gray-600 text-[10px] ml-auto shrink-0 pl-2">{m.pledge_class}</span>
+                  <span className="text-gray-500 text-[10px] ml-auto shrink-0 pl-2">{m.pledge_class}</span>
                 </button>
               ))}
             </div>
@@ -380,7 +380,8 @@ function FamilyTreeInner({ members, initialFocusId }: { members: TreeMember[]; i
             </div>
             <button
               onClick={() => setFocusedId(null)}
-              className="text-gray-600 hover:text-gray-300 transition-colors text-sm leading-none mt-0.5 shrink-0"
+              aria-label="Close"
+              className="text-gray-500 hover:text-gray-300 transition-colors text-sm leading-none mt-0.5 shrink-0"
             >
               ✕
             </button>
@@ -389,12 +390,12 @@ function FamilyTreeInner({ members, initialFocusId }: { members: TreeMember[]; i
           {/* Lineage */}
           <div className="px-4 py-3 space-y-2.5">
             {isTreeHidden(focusedMember) ? (
-              <p className="text-gray-600 text-xs italic">This member has requested privacy.</p>
+              <p className="text-gray-500 text-xs italic">This member has requested privacy.</p>
             ) : (
               <>
                 {bigBrother ? (
                   <div>
-                    <p className="text-gray-600 text-[10px] uppercase tracking-wider font-semibold mb-1">Big Brother</p>
+                    <p className="text-gray-500 text-[10px] uppercase tracking-wider font-semibold mb-1">Big Brother</p>
                     {isTreeHidden(bigBrother) ? (
                       <span className="text-gray-500 text-sm italic">Hidden member</span>
                     ) : (
@@ -403,23 +404,23 @@ function FamilyTreeInner({ members, initialFocusId }: { members: TreeMember[]; i
                         className="text-kp-gold text-sm hover:underline text-left"
                       >
                         {bigBrother.first_name} {bigBrother.last_name}
-                        <span className="text-gray-600 text-xs ml-1">#{bigBrother.badge_number}</span>
+                        <span className="text-gray-500 text-xs ml-1">#{bigBrother.badge_number}</span>
                       </button>
                     )}
                   </div>
                 ) : (
-                  <p className="text-gray-600 text-xs italic">Root member — no big brother</p>
+                  <p className="text-gray-500 text-xs italic">Root member — no big brother</p>
                 )}
 
                 {littleBrothers.length > 0 && (
                   <div>
-                    <p className="text-gray-600 text-[10px] uppercase tracking-wider font-semibold mb-1">
+                    <p className="text-gray-500 text-[10px] uppercase tracking-wider font-semibold mb-1">
                       Little Brothers ({littleBrothers.length})
                     </p>
                     <div className="space-y-1">
                       {littleBrothers.map(lb => (
                         isTreeHidden(lb) ? (
-                          <span key={lb.id} className="block text-gray-600 text-sm italic">Hidden member</span>
+                          <span key={lb.id} className="block text-gray-500 text-sm italic">Hidden member</span>
                         ) : (
                           <button
                             key={lb.id}
@@ -427,7 +428,7 @@ function FamilyTreeInner({ members, initialFocusId }: { members: TreeMember[]; i
                             className="block text-kp-gold text-sm hover:underline text-left"
                           >
                             {lb.first_name} {lb.last_name}
-                            <span className="text-gray-600 text-xs ml-1">#{lb.badge_number}</span>
+                            <span className="text-gray-500 text-xs ml-1">#{lb.badge_number}</span>
                           </button>
                         )
                       ))}
@@ -436,7 +437,7 @@ function FamilyTreeInner({ members, initialFocusId }: { members: TreeMember[]; i
                 )}
 
                 {littleBrothers.length === 0 && (
-                  <p className="text-gray-600 text-xs italic">No little brothers on record</p>
+                  <p className="text-gray-500 text-xs italic">No little brothers on record</p>
                 )}
               </>
             )}
@@ -445,7 +446,7 @@ function FamilyTreeInner({ members, initialFocusId }: { members: TreeMember[]; i
           {/* Lineage count footer */}
           {focusedLineage && focusedLineage.size > 1 && (
             <div className="border-t border-kp-border px-4 py-2 bg-kp-card/50">
-              <p className="text-gray-600 text-[10px]">
+              <p className="text-gray-500 text-[10px]">
                 {focusedLineage.size - 1} other member{focusedLineage.size !== 2 ? 's' : ''} in lineage highlighted
               </p>
             </div>

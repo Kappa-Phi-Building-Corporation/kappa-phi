@@ -155,8 +155,9 @@ export default async function AdminPatsGuidePage({
 
           <form action={addPhoto} className="flex flex-wrap items-end gap-4 pt-4 border-t border-kp-border">
             <div className="flex-1 min-w-[200px]">
-              <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Add a Photo</label>
+              <label htmlFor="photo" className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Add a Photo</label>
               <input
+                id="photo"
                 name="photo"
                 type="file"
                 accept="image/*"
@@ -165,8 +166,8 @@ export default async function AdminPatsGuidePage({
               />
             </div>
             <div className="flex-1 min-w-[200px]">
-              <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Caption <span className="text-gray-600 font-normal">(optional)</span></label>
-              <input name="caption" className="w-full bg-kp-dark border border-kp-border rounded-xl px-4 py-2.5 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-kp-gold transition-colors" />
+              <label htmlFor="caption" className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Caption <span className="text-gray-500 font-normal">(optional)</span></label>
+              <input id="caption" name="caption" className="w-full bg-kp-dark border border-kp-border rounded-xl px-4 py-2.5 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-kp-gold focus:ring-1 focus:ring-kp-gold transition-colors" />
             </div>
             <button type="submit"
               className="bg-kp-gold text-black font-bold px-5 py-2.5 rounded-xl text-sm hover:opacity-90 transition-opacity shrink-0">

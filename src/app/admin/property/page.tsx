@@ -79,7 +79,7 @@ export default async function AdminPropertyPage({
             <div className="flex items-center gap-3 mb-3">
               <div className="text-kp-gold text-xs font-bold uppercase tracking-widest">{STATUS_LABELS[section]}</div>
               {section === 'archive' && (
-                <span className="text-gray-600 text-xs">sorted by most recently updated</span>
+                <span className="text-gray-500 text-xs">sorted by most recently updated</span>
               )}
             </div>
             <div className="bg-kp-surface border border-kp-border rounded-2xl overflow-hidden">

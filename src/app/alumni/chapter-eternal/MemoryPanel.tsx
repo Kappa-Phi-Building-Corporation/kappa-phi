@@ -50,7 +50,7 @@ export default function MemoryPanel({
               <div key={m.id} className="bg-kp-card border border-kp-border rounded-xl p-4">
                 <div className="flex items-start justify-between gap-3 mb-1.5">
                   <span className="text-kp-gold text-sm font-semibold">{m.author_name}</span>
-                  <span className="text-gray-600 text-xs shrink-0 whitespace-nowrap">
+                  <span className="text-gray-500 text-xs shrink-0 whitespace-nowrap">
                     {new Date(m.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                   </span>
                 </div>
@@ -77,7 +77,7 @@ export default function MemoryPanel({
             required
             rows={3}
             placeholder={`Share a memory of ${memberName}…`}
-            className="w-full bg-kp-dark border border-kp-border rounded-xl px-3 py-2.5 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-kp-gold transition-colors resize-y"
+            className="w-full bg-kp-dark border border-kp-border rounded-xl px-3 py-2.5 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-kp-gold focus:ring-1 focus:ring-kp-gold transition-colors resize-y"
           />
           <button
             type="submit"

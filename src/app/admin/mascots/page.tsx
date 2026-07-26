@@ -81,7 +81,7 @@ export default async function AdminMascotsPage({
                     <div className="text-white text-sm font-semibold truncate">{m.name}</div>
                     <div className="text-gray-500 text-xs mt-0.5">
                       {m.start_year ?? '—'}–{m.end_year ?? 'Present'}
-                      {!m.is_published && <span className="ml-2 text-gray-600">(hidden)</span>}
+                      {!m.is_published && <span className="ml-2 text-gray-500">(hidden)</span>}
                     </div>
                   </div>
                   <Link

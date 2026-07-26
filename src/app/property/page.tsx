@@ -119,7 +119,7 @@ function ArchiveRow({ p }: { p: Project }) {
     <details className="group border-b border-kp-border last:border-0">
       <summary className="flex items-center justify-between gap-4 px-5 py-4 cursor-pointer list-none hover:bg-kp-card transition-colors">
         <div className="flex items-center gap-3 min-w-0">
-          <Chevron className="w-4 h-4 text-gray-600 group-open:rotate-180 transition-transform shrink-0" />
+          <Chevron className="w-4 h-4 text-gray-500 group-open:rotate-180 transition-transform shrink-0" />
           <span className="text-gray-200 text-sm font-medium truncate">{p.name}</span>
         </div>
         <div className="flex items-center gap-3 shrink-0 text-xs">
@@ -260,7 +260,7 @@ export default async function PropertyPage() {
               <summary className="flex items-center gap-3 cursor-pointer list-none mb-0">
                 <div className="text-kp-gold text-xs font-bold uppercase tracking-widest">Project Archive</div>
                 <Chevron className="w-4 h-4 text-kp-gold group-open:rotate-180 transition-transform" />
-                <span className="text-gray-600 text-xs ml-auto">{archive.length} project{archive.length !== 1 ? 's' : ''}</span>
+                <span className="text-gray-500 text-xs ml-auto">{archive.length} project{archive.length !== 1 ? 's' : ''}</span>
               </summary>
 
               <div className="mt-5 bg-kp-surface border border-kp-border rounded-2xl overflow-hidden">

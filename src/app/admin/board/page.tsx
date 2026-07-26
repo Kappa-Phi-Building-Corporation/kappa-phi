@@ -47,7 +47,7 @@ export default async function AdminBoardPage({
           <div className="text-white text-sm font-semibold">{m.name}</div>
           <div className="text-gray-500 text-xs mt-0.5">
             {m.role}
-            {!m.is_active && <span className="ml-2 text-gray-600">(hidden)</span>}
+            {!m.is_active && <span className="ml-2 text-gray-500">(hidden)</span>}
           </div>
         </div>
         <Link

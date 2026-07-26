@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import Image from 'next/image'
@@ -13,7 +13,7 @@ type Mascot = {
 }
 
 const labelCls = 'block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5'
-const inputCls = 'w-full bg-kp-dark border border-kp-border rounded-xl px-4 py-2.5 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-kp-gold transition-colors'
+const inputCls = 'w-full bg-kp-dark border border-kp-border rounded-xl px-4 py-2.5 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-kp-gold focus:ring-1 focus:ring-kp-gold transition-colors'
 
 export default function MascotForm({
   action,
@@ -34,7 +34,7 @@ export default function MascotForm({
 
       {/* Photo */}
       <div>
-        <label className={labelCls}>Photo <span className="text-gray-600 font-normal">(optional)</span></label>
+        <label htmlFor="photo" className={labelCls}>Photo <span className="text-gray-500 font-normal">(optional)</span></label>
         <div className="flex items-start gap-5">
           <div className="relative w-24 h-24 rounded-2xl overflow-hidden bg-kp-card border border-kp-border shrink-0 flex items-center justify-center">
             {previewUrl ? (
@@ -48,48 +48,50 @@ export default function MascotForm({
           </div>
           <div className="flex-1 space-y-2">
             <input
+              id="photo"
               name="photo"
               type="file"
               accept="image/*"
               onChange={handleFileChange}
               className="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border file:border-kp-border file:bg-kp-card file:text-gray-300 file:text-sm file:font-medium hover:file:border-kp-gold hover:file:text-kp-gold file:transition-colors cursor-pointer"
             />
-            <p className="text-gray-600 text-xs">JPEG, PNG, or WebP. Stored in Supabase Storage.</p>
+            <p className="text-gray-500 text-xs">JPEG, PNG, or WebP. Stored in Supabase Storage.</p>
             {mascot?.photo_url && (
-              <p className="text-gray-600 text-xs">Uploading a new file will replace the current photo.</p>
+              <p className="text-gray-500 text-xs">Uploading a new file will replace the current photo.</p>
             )}
           </div>
         </div>
       </div>
 
       <div>
-        <label className={labelCls}>Mascot Name *</label>
-        <input name="name" required defaultValue={mascot?.name ?? ''} placeholder="e.g. Studley" className={inputCls} />
+        <label htmlFor="name" className={labelCls}>Mascot Name *</label>
+        <input id="name" name="name" required defaultValue={mascot?.name ?? ''} placeholder="e.g. Studley" className={inputCls} />
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className={labelCls}>Start Year</label>
-          <input name="start_year" type="number" defaultValue={mascot?.start_year ?? ''} placeholder="e.g. 1972" className={inputCls} />
+          <label htmlFor="start_year" className={labelCls}>Start Year</label>
+          <input id="start_year" name="start_year" type="number" defaultValue={mascot?.start_year ?? ''} placeholder="e.g. 1972" className={inputCls} />
         </div>
         <div>
-          <label className={labelCls}>End Year <span className="text-gray-600 font-normal">(optional)</span></label>
-          <input name="end_year" type="number" defaultValue={mascot?.end_year ?? ''} placeholder="Leave blank for Present" className={inputCls} />
-          <p className="text-gray-600 text-xs mt-1">Leave blank to display &quot;Present&quot;.</p>
+          <label htmlFor="end_year" className={labelCls}>End Year <span className="text-gray-500 font-normal">(optional)</span></label>
+          <input id="end_year" name="end_year" type="number" defaultValue={mascot?.end_year ?? ''} placeholder="Leave blank for Present" className={inputCls} />
+          <p className="text-gray-500 text-xs mt-1">Leave blank to display &quot;Present&quot;.</p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className={labelCls}>Sort Order</label>
+          <label htmlFor="sort_order" className={labelCls}>Sort Order</label>
           <input
+            id="sort_order"
             name="sort_order"
             type="number"
             min="0"
             defaultValue={mascot?.sort_order ?? 0}
             className={inputCls}
           />
-          <p className="text-gray-600 text-xs mt-1">Lower numbers appear first.</p>
+          <p className="text-gray-500 text-xs mt-1">Lower numbers appear first.</p>
         </div>
         <div className="flex items-end pb-1">
           <label className="flex items-center gap-3 cursor-pointer group">

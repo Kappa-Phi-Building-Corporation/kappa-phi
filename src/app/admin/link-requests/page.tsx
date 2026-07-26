@@ -82,7 +82,7 @@ export default async function LinkRequestsPage() {
               )}
             </div>
           ) : (
-            <span className="text-gray-600 text-sm">—</span>
+            <span className="text-gray-500 text-sm">—</span>
           )}
         </td>
         <td className="px-4 py-3">

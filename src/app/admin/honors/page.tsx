@@ -73,7 +73,7 @@ export default async function AdminHonorsPage({
           return (
             <div key={cat.value}>
               <div className="text-kp-gold text-xs font-bold uppercase tracking-widest mb-3">
-                {cat.label} <span className="text-gray-600 normal-case font-normal">({items.length})</span>
+                {cat.label} <span className="text-gray-500 normal-case font-normal">({items.length})</span>
               </div>
               <div className="bg-kp-surface border border-kp-border rounded-2xl overflow-hidden">
                 {items.length === 0 ? (

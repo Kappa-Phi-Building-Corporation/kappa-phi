@@ -42,7 +42,7 @@ export default function BigBrotherMaintenance({
         placeholder="Search name or badge…"
         value={search}
         onChange={e => setSearch(e.target.value)}
-        className="w-full bg-kp-card border border-kp-border rounded-xl px-4 py-2.5 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-kp-gold transition-colors"
+        className="w-full bg-kp-card border border-kp-border rounded-xl px-4 py-2.5 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-kp-gold focus:ring-1 focus:ring-kp-gold transition-colors"
       />
 
       <form action={action}>
@@ -66,7 +66,7 @@ export default function BigBrotherMaintenance({
                   <select
                     name={`bb_${m.id}`}
                     defaultValue=""
-                    className="w-full sm:w-72 bg-kp-dark border border-kp-border rounded-xl px-3 py-2 text-white text-sm focus:outline-none focus:border-kp-gold transition-colors"
+                    className="w-full sm:w-72 bg-kp-dark border border-kp-border rounded-xl px-3 py-2 text-white text-sm focus:outline-none focus:border-kp-gold focus:ring-1 focus:ring-kp-gold transition-colors"
                   >
                     <option value="">— Leave unset —</option>
                     {optionsByExcludedId(m.id).map(o => (

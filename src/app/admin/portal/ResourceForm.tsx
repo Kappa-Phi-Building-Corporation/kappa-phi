@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 type Resource = {
   label: string
@@ -10,7 +10,7 @@ type Resource = {
 }
 
 const labelCls = 'block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5'
-const inputCls = 'w-full bg-kp-dark border border-kp-border rounded-xl px-4 py-2.5 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-kp-gold transition-colors'
+const inputCls = 'w-full bg-kp-dark border border-kp-border rounded-xl px-4 py-2.5 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-kp-gold focus:ring-1 focus:ring-kp-gold transition-colors'
 
 export default function ResourceForm({
   action,
@@ -22,27 +22,28 @@ export default function ResourceForm({
   return (
     <form action={action} className="space-y-6">
       <div>
-        <label className={labelCls}>Link Text *</label>
-        <input name="label" required defaultValue={resource?.label ?? ''} placeholder="e.g. Alumni Mailing List" className={inputCls} />
+        <label htmlFor="label" className={labelCls}>Link Text *</label>
+        <input id="label" name="label" required defaultValue={resource?.label ?? ''} placeholder="e.g. Alumni Mailing List" className={inputCls} />
       </div>
 
       <div>
-        <label className={labelCls}>URL *</label>
-        <input name="href" required defaultValue={resource?.href ?? ''} placeholder="https://... or /alumni/tree" className={inputCls} />
-        <p className="text-gray-600 text-xs mt-1">Use a full URL for external links, or a path like /alumni/tree for pages on this site.</p>
+        <label htmlFor="href" className={labelCls}>URL *</label>
+        <input id="href" name="href" required defaultValue={resource?.href ?? ''} placeholder="https://... or /alumni/tree" className={inputCls} />
+        <p className="text-gray-500 text-xs mt-1">Use a full URL for external links, or a path like /alumni/tree for pages on this site.</p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className={labelCls}>Sort Order</label>
+          <label htmlFor="sort_order" className={labelCls}>Sort Order</label>
           <input
+            id="sort_order"
             name="sort_order"
             type="number"
             min="0"
             defaultValue={resource?.sort_order ?? 0}
             className={inputCls}
           />
-          <p className="text-gray-600 text-xs mt-1">Lower numbers appear first.</p>
+          <p className="text-gray-500 text-xs mt-1">Lower numbers appear first.</p>
         </div>
         <div className="flex flex-col gap-3 justify-end pb-1">
           <label className="flex items-center gap-3 cursor-pointer group">

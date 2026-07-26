@@ -31,7 +31,7 @@ export default function DonationsPage() {
             <a href="mailto:fundraising@kappa-phi.org" className="text-gray-400 text-sm hover:text-kp-gold">
               fundraising@kappa-phi.org
             </a>
-            <span className="text-gray-600 text-sm"> · 573-514-3016</span>
+            <span className="text-gray-500 text-sm"> · 573-514-3016</span>
           </div>
         </div>
 

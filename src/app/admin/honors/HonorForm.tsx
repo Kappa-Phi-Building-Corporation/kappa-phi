@@ -14,7 +14,7 @@ type Honor = {
 type MemberOption = { id: string; label: string }
 
 const labelCls = 'block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5'
-const inputCls = 'w-full bg-kp-dark border border-kp-border rounded-xl px-4 py-2.5 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-kp-gold transition-colors'
+const inputCls = 'w-full bg-kp-dark border border-kp-border rounded-xl px-4 py-2.5 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-kp-gold focus:ring-1 focus:ring-kp-gold transition-colors'
 
 const CATEGORIES: { value: string; label: string }[] = [
   { value: 'student_knight', label: 'Student Knight' },
@@ -66,8 +66,9 @@ export default function HonorForm({
   return (
     <form action={action} className="space-y-6">
       <div>
-        <label className={labelCls}>Category *</label>
+        <label htmlFor="category" className={labelCls}>Category *</label>
         <select
+          id="category"
           name="category"
           value={category}
           onChange={e => handleCategoryChange(e.target.value)}
@@ -78,17 +79,18 @@ export default function HonorForm({
       </div>
 
       <div>
-        <label className={labelCls}>Link to Member <span className="text-gray-600 font-normal">(optional)</span></label>
-        <select name="member_id" value={memberId} onChange={handleMemberChange} className={inputCls}>
+        <label htmlFor="member_id" className={labelCls}>Link to Member <span className="text-gray-500 font-normal">(optional)</span></label>
+        <select id="member_id" name="member_id" value={memberId} onChange={handleMemberChange} className={inputCls}>
           <option value="">— Not linked —</option>
           {members.map(m => <option key={m.id} value={m.id}>{m.label}</option>)}
         </select>
-        <p className="text-gray-600 text-xs mt-1">Selecting a member fills in the display name below. You can still edit it.</p>
+        <p className="text-gray-500 text-xs mt-1">Selecting a member fills in the display name below. You can still edit it.</p>
       </div>
 
       <div>
-        <label className={labelCls}>Display Name *</label>
+        <label htmlFor="display_name" className={labelCls}>Display Name *</label>
         <input
+          id="display_name"
           name="display_name"
           required
           value={displayName}
@@ -100,27 +102,29 @@ export default function HonorForm({
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className={labelCls}>Year / Term</label>
-          <input name="year_label" defaultValue={honor?.year_label ?? ''} placeholder={YEAR_HELP[category]} className={inputCls} />
-          <p className="text-gray-600 text-xs mt-1">{YEAR_HELP[category]}</p>
+          <label htmlFor="year_label" className={labelCls}>Year / Term</label>
+          <input id="year_label" name="year_label" defaultValue={honor?.year_label ?? ''} placeholder={YEAR_HELP[category]} className={inputCls} />
+          <p className="text-gray-500 text-xs mt-1">{YEAR_HELP[category]}</p>
         </div>
         <div>
-          <label className={labelCls}>Title / Role <span className="text-gray-600 font-normal">(optional)</span></label>
+          <label htmlFor="title" className={labelCls}>Title / Role <span className="text-gray-500 font-normal">(optional)</span></label>
           <input
+            id="title"
             name="title"
             defaultValue={honor?.title ?? ''}
             placeholder={category === 'st_pats_board' ? 'e.g. Masterguard, St. Pat, Trumpeteer' : 'e.g. President'}
             className={inputCls}
           />
           {category === 'st_pats_board' && (
-            <p className="text-gray-600 text-xs mt-1">Used for St. Pat&apos;s Board roles. A member with multiple years/roles gets one row per entry.</p>
+            <p className="text-gray-500 text-xs mt-1">Used for St. Pat&apos;s Board roles. A member with multiple years/roles gets one row per entry.</p>
           )}
         </div>
       </div>
 
       <div>
-        <label className={labelCls}>Sort Order</label>
+        <label htmlFor="sort_order" className={labelCls}>Sort Order</label>
         <input
+          id="sort_order"
           name="sort_order"
           type="number"
           min="0"
@@ -128,7 +132,7 @@ export default function HonorForm({
           onChange={e => setSortOrder(parseInt(e.target.value, 10) || 0)}
           className={inputCls + ' max-w-[200px]'}
         />
-        <p className="text-gray-600 text-xs mt-1">
+        <p className="text-gray-500 text-xs mt-1">
           {honor
             ? 'Used as a tiebreaker, and as the primary order for Chapter Presidents (when Year is blank).'
             : `Defaulted to the last ${CATEGORIES.find(c => c.value === category)?.label ?? 'category'} entry's sort order + 5, leaving room to reorder later — adjust if needed.`}

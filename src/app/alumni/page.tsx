@@ -110,7 +110,7 @@ export default async function AlumniPage({
             <div className="mt-5 pt-5 border-t border-kp-border space-y-2 text-sm">
               <Link href="/register" className="block text-kp-gold hover:opacity-80">Not registered? Create an account →</Link>
               <Link href="/forgot-password" className="block text-gray-500 hover:text-gray-300">Forgot password?</Link>
-              <p className="text-gray-600 text-xs pt-1">
+              <p className="text-gray-500 text-xs pt-1">
                 Need help with your badge number or profile? Email{' '}
                 <a href="mailto:kappaphi@kappa-phi.org" className="text-kp-gold">kappaphi@kappa-phi.org</a>
               </p>
@@ -126,7 +126,7 @@ export default async function AlumniPage({
                   <span className="text-kp-gold mt-0.5 text-xs shrink-0">◆</span>
                   <span className="text-gray-300 text-sm">{item.label}</span>
                   {item.soon && (
-                    <span className="ml-auto text-xs text-gray-600 bg-kp-card px-2 py-0.5 rounded shrink-0">Soon</span>
+                    <span className="ml-auto text-xs text-gray-500 bg-kp-card px-2 py-0.5 rounded shrink-0">Soon</span>
                   )}
                 </div>
               ))}

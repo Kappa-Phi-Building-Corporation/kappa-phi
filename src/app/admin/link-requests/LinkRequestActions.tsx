@@ -93,7 +93,7 @@ export default function LinkRequestActions({
             />
             <div className="border border-kp-border rounded-xl overflow-hidden max-h-52 overflow-y-auto bg-kp-card mb-4">
               {filteredMembers.length === 0 && (
-                <div className="px-4 py-6 text-center text-gray-600 text-sm">No members found.</div>
+                <div className="px-4 py-6 text-center text-gray-500 text-sm">No members found.</div>
               )}
               {filteredMembers.map(m => (
                 <button

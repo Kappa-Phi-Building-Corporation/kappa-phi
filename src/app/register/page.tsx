@@ -109,7 +109,7 @@ export default async function RegisterPage({
           </div>
         </div>
 
-        <p className="mt-4 text-xs text-gray-600 text-center leading-relaxed">
+        <p className="mt-4 text-xs text-gray-500 text-center leading-relaxed">
           Accounts may be reviewed by the site administrator. For immediate access or
           help with your badge number, email{' '}
           <a href="mailto:kappaphi@kappa-phi.org" className="text-kp-gold">kappaphi@kappa-phi.org</a>.

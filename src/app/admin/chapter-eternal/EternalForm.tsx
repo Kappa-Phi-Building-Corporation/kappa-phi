@@ -44,7 +44,7 @@ type EditProps = {
 type Props = CreateProps | EditProps
 
 const labelCls = 'block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5'
-const inputCls = 'w-full bg-kp-dark border border-kp-border rounded-xl px-4 py-2.5 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-kp-gold transition-colors'
+const inputCls = 'w-full bg-kp-dark border border-kp-border rounded-xl px-4 py-2.5 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-kp-gold focus:ring-1 focus:ring-kp-gold transition-colors'
 const dateInputCls = inputCls + ' [color-scheme:dark]'
 
 function fmtDate(d: string | null) {
@@ -76,8 +76,9 @@ export default function EternalForm(props: Props) {
       {/* ── Member selector (create mode only) ─── */}
       {!isEdit && (
         <div>
-          <label className={labelCls}>Select Member *</label>
+          <label htmlFor="member_id" className={labelCls}>Select Member *</label>
           <select
+            id="member_id"
             name="member_id"
             required
             defaultValue={props.mode === 'create' ? (props.preselectedId ?? '') : ''}
@@ -107,7 +108,7 @@ export default function EternalForm(props: Props) {
               </optgroup>
             )}
           </select>
-          <p className="text-gray-600 text-xs mt-1">
+          <p className="text-gray-500 text-xs mt-1">
             Name, badge, pledge class, and initiation date are pulled from the member record automatically.
           </p>
         </div>
@@ -125,7 +126,7 @@ export default function EternalForm(props: Props) {
             {member.badge_number && <span>Badge #{member.badge_number}</span>}
             {member.initiation_date && <span>Initiated {fmtDate(member.initiation_date)}</span>}
           </div>
-          <p className="text-gray-600 text-xs mt-2">
+          <p className="text-gray-500 text-xs mt-2">
             To update name or chapter info, edit the{' '}
             <Link href="/admin/members" className="text-kp-gold hover:underline">member record</Link>.
           </p>
@@ -134,7 +135,7 @@ export default function EternalForm(props: Props) {
 
       {/* ── Photo upload ─── */}
       <div>
-        <label className={labelCls}>Memorial Photo <span className="text-gray-600 font-normal">(optional)</span></label>
+        <label htmlFor="photo" className={labelCls}>Memorial Photo <span className="text-gray-500 font-normal">(optional)</span></label>
         <div className="flex items-start gap-5">
           <div className="relative w-32 h-40 rounded-xl overflow-hidden bg-kp-card border border-kp-border shrink-0 flex items-center justify-center">
             {previewUrl ? (
@@ -148,15 +149,16 @@ export default function EternalForm(props: Props) {
           </div>
           <div className="flex-1 space-y-2">
             <input
+              id="photo"
               name="photo"
               type="file"
               accept="image/*"
               onChange={handleFileChange}
               className="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border file:border-kp-border file:bg-kp-card file:text-gray-300 file:text-sm file:font-medium hover:file:border-kp-gold hover:file:text-kp-gold file:transition-colors cursor-pointer"
             />
-            <p className="text-gray-600 text-xs">JPEG, PNG, or WebP.</p>
+            <p className="text-gray-500 text-xs">JPEG, PNG, or WebP.</p>
             {member?.photo_url && (
-              <p className="text-gray-600 text-xs">Uploading a new file will replace the current photo.</p>
+              <p className="text-gray-500 text-xs">Uploading a new file will replace the current photo.</p>
             )}
           </div>
         </div>
@@ -164,8 +166,9 @@ export default function EternalForm(props: Props) {
 
       {/* ── Chapter Eternal date ─── */}
       <div>
-        <label className={labelCls}>Chapter Eternal Date *</label>
+        <label htmlFor="passing_date" className={labelCls}>Chapter Eternal Date *</label>
         <input
+          id="passing_date"
           name="passing_date"
           type="date"
           required
@@ -176,15 +179,16 @@ export default function EternalForm(props: Props) {
 
       {/* ── Obituary link ─── */}
       <div>
-        <label className={labelCls}>Memorial / Obituary Link <span className="text-gray-600 font-normal">(optional)</span></label>
+        <label htmlFor="memorial_link_url" className={labelCls}>Memorial / Obituary Link <span className="text-gray-500 font-normal">(optional)</span></label>
         <input
+          id="memorial_link_url"
           name="memorial_link_url"
           type="url"
           defaultValue={member?.memorial_link_url ?? ''}
           placeholder="https://..."
           className={inputCls}
         />
-        <p className="text-gray-600 text-xs mt-1">
+        <p className="text-gray-500 text-xs mt-1">
           If provided, the member&apos;s name on the memorial page will link to this URL in a new tab.
         </p>
       </div>

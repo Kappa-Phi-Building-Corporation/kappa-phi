@@ -99,7 +99,7 @@ export default async function ChangeRequestsPage() {
                           {memberName(r.member_id)}
                         </p>
                         <p className="text-gray-500 text-xs">{email}</p>
-                        <p className="text-gray-600 text-xs mt-0.5">
+                        <p className="text-gray-500 text-xs mt-0.5">
                           {new Date(r.created_at).toLocaleDateString()}
                         </p>
                       </div>

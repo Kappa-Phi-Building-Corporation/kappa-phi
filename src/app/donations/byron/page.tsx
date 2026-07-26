@@ -117,7 +117,7 @@ export default function ByronPage() {
                   className="object-cover object-top"
                 />
               </div>
-              <p className="text-gray-600 text-xs text-center mt-2">Byron N. Vermillion</p>
+              <p className="text-gray-500 text-xs text-center mt-2">Byron N. Vermillion</p>
             </div>
           </div>
         </section>
@@ -171,7 +171,7 @@ export default function ByronPage() {
             {faq.map((item, i) => (
               <details key={i} className="group border-b border-kp-border last:border-0">
                 <summary className="flex items-center gap-3 px-6 py-4 cursor-pointer list-none hover:bg-kp-card transition-colors">
-                  <Chevron className="w-4 h-4 text-gray-600 group-open:rotate-180 transition-transform shrink-0" />
+                  <Chevron className="w-4 h-4 text-gray-500 group-open:rotate-180 transition-transform shrink-0" />
                   <span className="text-gray-200 text-sm font-medium">{item.q}</span>
                 </summary>
                 <div className="px-6 pb-5 pt-1 pl-13">

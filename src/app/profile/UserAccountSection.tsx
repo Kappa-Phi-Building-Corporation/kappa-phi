@@ -113,7 +113,7 @@ export default function UserAccountSection({
               <div className="col-span-2">
                 <label className={lbl}>Email Address</label>
                 <input name="email" type="email" defaultValue={authEmail} className={inp} required />
-                <p className="text-xs text-gray-600 mt-1">Changing your email will require re-confirmation at the new address.</p>
+                <p className="text-xs text-gray-500 mt-1">Changing your email will require re-confirmation at the new address.</p>
               </div>
             </div>
             <div className="flex gap-3">

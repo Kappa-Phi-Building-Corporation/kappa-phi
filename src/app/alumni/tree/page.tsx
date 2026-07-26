@@ -44,7 +44,7 @@ export default async function FamilyTreePage({
           <p className="text-gray-500 text-sm pb-0.5">
             {count} member{count !== 1 ? 's' : ''}
           </p>
-          <p className="text-gray-600 text-xs pb-0.5 hidden sm:block">
+          <p className="text-gray-500 text-xs pb-0.5 hidden sm:block">
             Click a member to highlight their lineage · Scroll to zoom · Drag to pan
           </p>
         </div>

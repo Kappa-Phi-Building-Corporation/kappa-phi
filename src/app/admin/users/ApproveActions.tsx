@@ -120,14 +120,14 @@ export function ApproveActions({
                 placeholder="Search by name or badge…"
                 value={search}
                 onChange={e => setSearch(e.target.value)}
-                className="w-full bg-kp-card border border-kp-border rounded-lg px-3 py-2 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-kp-blue mb-3"
+                className="w-full bg-kp-card border border-kp-border rounded-lg px-3 py-2 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-kp-blue focus:ring-1 focus:ring-kp-blue mb-3"
               />
 
               <select
                 name="memberId"
                 required
                 size={8}
-                className="w-full bg-kp-card border border-kp-border rounded-lg px-2 py-1 text-white text-sm focus:outline-none focus:border-kp-blue mb-4"
+                className="w-full bg-kp-card border border-kp-border rounded-lg px-2 py-1 text-white text-sm focus:outline-none focus:border-kp-blue focus:ring-1 focus:ring-kp-blue mb-4"
               >
                 {filtered.length === 0 && (
                   <option disabled value="">No members match</option>

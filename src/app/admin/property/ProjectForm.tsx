@@ -15,7 +15,7 @@ type Project = {
 }
 
 const labelCls = 'block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5'
-const inputCls = 'w-full bg-kp-dark border border-kp-border rounded-xl px-4 py-2.5 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-kp-gold transition-colors'
+const inputCls = 'w-full bg-kp-dark border border-kp-border rounded-xl px-4 py-2.5 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-kp-gold focus:ring-1 focus:ring-kp-gold transition-colors'
 const textareaCls = inputCls + ' resize-y min-h-[100px]'
 
 export default function ProjectForm({
@@ -32,15 +32,16 @@ export default function ProjectForm({
 
       {/* Name */}
       <div>
-        <label className={labelCls}>Project Name *</label>
-        <input name="name" required defaultValue={project?.name ?? ''} placeholder="e.g. HVAC Upgrades Phase 2" className={inputCls} />
+        <label htmlFor="name" className={labelCls}>Project Name *</label>
+        <input id="name" name="name" required defaultValue={project?.name ?? ''} placeholder="e.g. HVAC Upgrades Phase 2" className={inputCls} />
       </div>
 
       {/* Status + Sort Order */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className={labelCls}>Section *</label>
+          <label htmlFor="status" className={labelCls}>Section *</label>
           <select
+            id="status"
             name="status"
             value={status}
             onChange={e => setStatus(e.target.value)}
@@ -52,9 +53,9 @@ export default function ProjectForm({
           </select>
         </div>
         <div>
-          <label className={labelCls}>Sort Order</label>
-          <input name="sort_order" type="number" min="0" defaultValue={project?.sort_order ?? 0} className={inputCls} />
-          <p className="text-gray-600 text-xs mt-1">Lower numbers appear first within the section.</p>
+          <label htmlFor="sort_order" className={labelCls}>Sort Order</label>
+          <input id="sort_order" name="sort_order" type="number" min="0" defaultValue={project?.sort_order ?? 0} className={inputCls} />
+          <p className="text-gray-500 text-xs mt-1">Lower numbers appear first within the section.</p>
         </div>
       </div>
 
@@ -62,33 +63,33 @@ export default function ProjectForm({
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {status === 'planned' ? (
           <div>
-            <label className={labelCls}>Scheduled Date</label>
-            <input name="scheduled_date" defaultValue={project?.scheduled_date ?? ''} placeholder="e.g. Spring 2026 or TBD" className={inputCls} />
+            <label htmlFor="scheduled_date" className={labelCls}>Scheduled Date</label>
+            <input id="scheduled_date" name="scheduled_date" defaultValue={project?.scheduled_date ?? ''} placeholder="e.g. Spring 2026 or TBD" className={inputCls} />
             <input type="hidden" name="completed_date" value="" />
           </div>
         ) : (
           <div>
-            <label className={labelCls}>Completed Date</label>
-            <input name="completed_date" defaultValue={project?.completed_date ?? ''} placeholder="e.g. Summer 2024" className={inputCls} />
+            <label htmlFor="completed_date" className={labelCls}>Completed Date</label>
+            <input id="completed_date" name="completed_date" defaultValue={project?.completed_date ?? ''} placeholder="e.g. Summer 2024" className={inputCls} />
             <input type="hidden" name="scheduled_date" value="" />
           </div>
         )}
         <div>
-          <label className={labelCls}>Cost <span className="text-gray-600 font-normal">(optional)</span></label>
-          <input name="cost" defaultValue={project?.cost ?? ''} placeholder="e.g. $15,000" className={inputCls} />
+          <label htmlFor="cost" className={labelCls}>Cost <span className="text-gray-500 font-normal">(optional)</span></label>
+          <input id="cost" name="cost" defaultValue={project?.cost ?? ''} placeholder="e.g. $15,000" className={inputCls} />
         </div>
       </div>
 
       {/* Contractor */}
       <div>
-        <label className={labelCls}>Contractor <span className="text-gray-600 font-normal">(optional)</span></label>
-        <input name="contractor" defaultValue={project?.contractor ?? ''} placeholder="e.g. Acme Contractors — Rolla, MO" className={inputCls} />
+        <label htmlFor="contractor" className={labelCls}>Contractor <span className="text-gray-500 font-normal">(optional)</span></label>
+        <input id="contractor" name="contractor" defaultValue={project?.contractor ?? ''} placeholder="e.g. Acme Contractors — Rolla, MO" className={inputCls} />
       </div>
 
       {/* Description */}
       <div>
-        <label className={labelCls}>Description</label>
-        <textarea name="description" defaultValue={project?.description ?? ''} placeholder="Describe the project…" className={textareaCls} rows={6} />
+        <label htmlFor="description" className={labelCls}>Description</label>
+        <textarea id="description" name="description" defaultValue={project?.description ?? ''} placeholder="Describe the project…" className={textareaCls} rows={6} />
       </div>
 
       {/* Published toggle */}
