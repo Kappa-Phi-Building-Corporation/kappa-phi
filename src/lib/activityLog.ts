@@ -19,6 +19,8 @@ export type ActivityEntityType =
   | 'big_brother'
   | 'change_request'
   | 'link_request'
+  | 'site_content'
+  | 'email_template'
 
 export async function logActivity(
   admin: ReturnType<typeof createAdminClient>,

@@ -1,13 +1,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/server'
-
-const stats = [
-  { number: '500+', label: 'Brothers Initiated' },
-  { number: '440+', label: 'Living Alumni' },
-  { number: '60+', label: 'Years of Brotherhood' },
-  { number: '5×', label: 'Hugh Shields Award' },
-]
+import { getSiteContent } from '@/lib/siteContent'
 
 const banners = [
   {
@@ -47,6 +41,14 @@ export default async function Home() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   const isLoggedIn = !!user
+  const content = await getSiteContent()
+
+  const stats = [
+    { number: content.home_stat_1_number, label: content.home_stat_1_label },
+    { number: content.home_stat_2_number, label: content.home_stat_2_label },
+    { number: content.home_stat_3_number, label: content.home_stat_3_label },
+    { number: content.home_stat_4_number, label: content.home_stat_4_label },
+  ]
 
   return (
     <>
@@ -67,7 +69,7 @@ export default async function Home() {
           <div className="max-w-2xl">
             <div className="inline-flex items-center gap-2 bg-kp-blue/80 backdrop-blur text-blue-100 text-xs font-semibold px-3 py-1.5 rounded-full mb-5 uppercase tracking-widest">
               <span className="w-1.5 h-1.5 bg-kp-gold rounded-full" />
-              Epsilon Nu · Delta Tau Delta · Missouri S&T
+              {content.home_hero_badge}
             </div>
 
             <div className="flex items-center gap-5 mb-5">
@@ -81,7 +83,7 @@ export default async function Home() {
             </div>
 
             <p className="text-gray-200 text-xl mb-8 leading-relaxed max-w-lg">
-              Supporting brotherhood, housing, and alumni engagement at Missouri University of Science &amp; Technology since 1963.
+              {content.home_hero_subtitle}
             </p>
 
             <div className="flex flex-wrap gap-3">
@@ -130,9 +132,7 @@ export default async function Home() {
               Our Mission
             </div>
             <p className="text-white text-xl md:text-2xl leading-relaxed font-light">
-              Ensure the Epsilon Nu chapter of Delta Tau Delta Fraternity is the recognized leader
-              among social fraternities on the Missouri University of Science &amp; Technology campus
-              through the abiding maintenance and upkeep of the Shelter.
+              {content.home_mission}
             </p>
           </div>
         </div>

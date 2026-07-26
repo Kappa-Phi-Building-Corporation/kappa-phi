@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { getSiteContent } from '@/lib/siteContent'
 
 export const metadata = { title: 'About Kappa Phi' }
 export const revalidate = 3600
@@ -139,7 +140,7 @@ function Chevron() {
 export default async function AboutPage() {
   const admin = createAdminClient()
 
-  const [{ data: honorRows }, { data: mascotRows }] = await Promise.all([
+  const [{ data: honorRows }, { data: mascotRows }, content] = await Promise.all([
     admin
       .from('chapter_honors')
       .select('category, display_name, year_label, title, sort_order'),
@@ -148,6 +149,7 @@ export default async function AboutPage() {
       .select('name, start_year, end_year, photo_url, sort_order')
       .eq('is_published', true)
       .order('sort_order', { ascending: true }),
+    getSiteContent(),
   ])
 
   const honors = honorRows ?? []
@@ -200,7 +202,7 @@ export default async function AboutPage() {
             <div className="text-kp-gold text-xs font-bold uppercase tracking-widest mb-3">History &amp; Heritage</div>
             <h1 className="text-4xl md:text-5xl font-black text-white mb-4">About Kappa Phi</h1>
             <p className="text-gray-300 text-lg max-w-2xl leading-relaxed">
-              Over 60 years of brotherhood, excellence, and service at Missouri University of Science &amp; Technology.
+              {content.about_intro}
             </p>
           </div>
         </div>

@@ -31,6 +31,8 @@ const ENTITY_LABELS: Record<string, string> = {
   big_brother: 'Big Brother',
   change_request: 'Change Request',
   link_request: 'Link Request',
+  site_content: 'Site Content',
+  email_template: 'Email Template',
 }
 
 const ACTION_STYLES: Record<string, string> = {
