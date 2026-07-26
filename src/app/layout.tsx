@@ -10,9 +10,25 @@ import { createAdminClient } from '@/lib/supabase/admin'
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://kappa-phi.org'
+const description = 'Supporting the Epsilon Nu Chapter of Delta Tau Delta Fraternity at Missouri University of Science & Technology.'
+
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: { default: 'Kappa Phi Building Corporation', template: '%s | Kappa Phi BC' },
-  description: 'Supporting the Epsilon Nu Chapter of Delta Tau Delta Fraternity at Missouri University of Science & Technology.',
+  description,
+  openGraph: {
+    title: 'Kappa Phi Building Corporation',
+    description,
+    url: '/',
+    siteName: 'Kappa Phi Building Corporation',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Kappa Phi Building Corporation',
+    description,
+  },
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
