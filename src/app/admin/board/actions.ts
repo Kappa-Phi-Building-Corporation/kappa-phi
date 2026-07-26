@@ -44,7 +44,7 @@ function buildPayload(form: FormData) {
     goals:           (form.get('goals') as string)?.trim() || null,
     goals_bulleted:  form.get('goals_bulleted') === 'on',
     sort_order:      parseInt((form.get('sort_order') as string) ?? '0', 10) || 0,
-    is_active:       form.get('is_active') !== 'off',
+    is_active:       form.get('is_active') === 'on',
   }
 }
 

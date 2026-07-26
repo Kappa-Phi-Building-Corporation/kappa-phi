@@ -22,7 +22,7 @@ function buildPayload(form: FormData) {
     is_external:  form.get('is_external') === 'on',
     requires_auth: form.get('requires_auth') === 'on',
     sort_order:   parseInt((form.get('sort_order') as string) ?? '0', 10) || 0,
-    is_published: form.get('is_published') !== 'off',
+    is_published: form.get('is_published') === 'on',
   }
 }
 

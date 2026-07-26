@@ -27,7 +27,7 @@ function buildProjectPayload(form: FormData) {
     cost:           (form.get('cost') as string)?.trim() || null,
     contractor:     (form.get('contractor') as string)?.trim() || null,
     sort_order:     parseInt((form.get('sort_order') as string) ?? '0', 10) || 0,
-    is_published:   form.get('is_published') !== 'off',
+    is_published:   form.get('is_published') === 'on',
   }
 }
 

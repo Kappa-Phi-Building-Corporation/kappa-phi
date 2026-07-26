@@ -42,7 +42,7 @@ function buildPayload(form: FormData) {
     start_year:   startYear ? parseInt(startYear, 10) : null,
     end_year:     endYear ? parseInt(endYear, 10) : null,
     sort_order:   parseInt((form.get('sort_order') as string) ?? '0', 10) || 0,
-    is_published: form.get('is_published') !== 'off',
+    is_published: form.get('is_published') === 'on',
   }
 }
 
