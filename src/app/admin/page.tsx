@@ -5,6 +5,83 @@ import { createAdminClient } from '@/lib/supabase/admin'
 
 export const metadata = { title: 'Administration' }
 
+type SectionItem = {
+  title: string
+  href: string
+  description: string
+  pending: number
+  pendingLabel: string
+  total?: number
+  totalLabel?: string
+  icon: React.ReactNode
+}
+
+function SectionCard({ section }: { section: SectionItem }) {
+  const hasPending = section.pending > 0
+  return (
+    <Link
+      href={section.href}
+      className={`group relative bg-kp-surface rounded-xl border p-4 no-underline flex flex-col gap-3 transition-all hover:shadow-lg hover:shadow-black/30 ${
+        hasPending
+          ? 'border-amber-500/50 hover:border-amber-400'
+          : 'border-kp-border hover:border-kp-gold/40'
+      }`}
+    >
+      {/* Icon + badge */}
+      <div className="flex items-start justify-between gap-2">
+        <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${
+          hasPending ? 'bg-amber-500/20 text-amber-400' : 'bg-kp-card text-gray-400 group-hover:text-kp-gold'
+        } transition-colors`}>
+          {section.icon}
+        </div>
+        {hasPending && (
+          <span className="flex items-center gap-1.5 bg-amber-500/20 text-amber-400 text-[10px] font-bold px-2 py-1 rounded-full border border-amber-500/30 shrink-0">
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+            {section.pending} {section.pendingLabel}
+          </span>
+        )}
+        {section.total !== undefined && !hasPending && (
+          <span className="text-gray-500 text-[10px] font-medium px-2 py-1 rounded-full border border-kp-border shrink-0">
+            {section.total} {section.totalLabel ?? 'records'}
+          </span>
+        )}
+      </div>
+
+      {/* Text */}
+      <div>
+        <h2 className={`text-sm font-bold mb-0.5 transition-colors ${
+          hasPending ? 'text-amber-300' : 'text-white group-hover:text-kp-gold'
+        }`}>
+          {section.title}
+        </h2>
+        <p className="text-gray-400 text-xs leading-relaxed line-clamp-2">{section.description}</p>
+      </div>
+    </Link>
+  )
+}
+
+function GroupNav({ isFullAdmin }: { isFullAdmin: boolean }) {
+  const groups = [
+    ...(isFullAdmin ? [{ id: 'member-admin', label: 'Member Administration' }] : []),
+    { id: 'website-content', label: 'Website Content' },
+    ...(isFullAdmin ? [{ id: 'system', label: 'System & Communications' }] : []),
+  ]
+  if (groups.length < 2) return null
+  return (
+    <div className="flex flex-wrap gap-2 mb-2">
+      {groups.map(g => (
+        <a
+          key={g.id}
+          href={`#${g.id}`}
+          className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-kp-surface border border-kp-border text-gray-400 hover:text-kp-gold hover:border-kp-gold/40 no-underline transition-colors"
+        >
+          {g.label}
+        </a>
+      ))}
+    </div>
+  )
+}
+
 export default async function AdminDashboardPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -86,7 +163,7 @@ export default async function AdminDashboardPage() {
       pending: pendingUsers ?? 0,
       pendingLabel: 'awaiting approval',
       icon: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
             d="M17 20h5v-2a4 4 0 00-5.477-3.693M9 20H4v-2a4 4 0 015.477-3.693M15 7a4 4 0 11-8 0 4 4 0 018 0zm6 4a3 3 0 11-6 0 3 3 0 016 0z" />
         </svg>
@@ -101,7 +178,7 @@ export default async function AdminDashboardPage() {
       total: totalMembers ?? 0,
       totalLabel: 'records',
       icon: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
             d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
         </svg>
@@ -116,7 +193,7 @@ export default async function AdminDashboardPage() {
       total: missingBigBrother ?? 0,
       totalLabel: 'missing',
       icon: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
             d="M17 20h5v-2a4 4 0 00-5.477-3.693M9 20H4v-2a4 4 0 015.477-3.693M15 7a4 4 0 11-8 0 4 4 0 018 0zm6 4a3 3 0 11-6 0 3 3 0 016 0zM12 4v4m-2-2h4" />
         </svg>
@@ -129,7 +206,7 @@ export default async function AdminDashboardPage() {
       pending: pendingLinks ?? 0,
       pendingLabel: 'awaiting review',
       icon: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
             d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
         </svg>
@@ -142,7 +219,7 @@ export default async function AdminDashboardPage() {
       pending: pendingChanges ?? 0,
       pendingLabel: 'awaiting review',
       icon: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
             d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
         </svg>
@@ -151,42 +228,42 @@ export default async function AdminDashboardPage() {
     {
       title: 'Member Reports',
       href: '/admin/reports',
-      description: 'Mailing lists, email lists, and other exports — view on screen or download as CSV.',
+      description: 'Mailing lists, email lists, and other exports.',
       pending: 0,
       pendingLabel: '',
       icon: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
             d="M9 17v-6a2 2 0 012-2h2a2 2 0 012 2v6m-6 0h6m-6 0H5a2 2 0 01-2-2V5a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2h-2" />
         </svg>
       ),
     },
+  ]
+
+  const contentSections = [
     {
-      title: 'Activity Log',
-      href: '/admin/activity',
-      description: 'See who changed what across member and content records, and when.',
+      title: 'Homepage & About',
+      href: '/admin/content',
+      description: 'Edit hero text, stats, and mission statement.',
       pending: 0,
       pendingLabel: '',
       icon: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
-            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0V16h4v5" />
         </svg>
       ),
     },
-  ]
-
-  const websiteSections = [
     {
       title: 'Honor Rolls',
       href: '/admin/honors',
-      description: 'Manage Student Knights, Highest GPA, IFC Reps, St. Pat\'s Board, and Chapter Presidents.',
+      description: 'Student Knights, Highest GPA, IFC Reps, St. Pat\'s Board, Chapter Presidents.',
       pending: 0,
       pendingLabel: '',
       total: honorCount ?? 0,
       totalLabel: 'entries',
       icon: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
             d="M12 15a4 4 0 100-8 4 4 0 000 8zm-7 6l2.879-5.757M19 21l-2.879-5.757M8.5 11.5L5 21l4-1.5 3 2.5 3-2.5 4 1.5-3.5-9.5" />
         </svg>
@@ -195,13 +272,13 @@ export default async function AdminDashboardPage() {
     {
       title: 'Chapter Mascots',
       href: '/admin/mascots',
-      description: 'Configure chapter mascots with names, years, and optional photos.',
+      description: 'Chapter mascots with names, years, and optional photos.',
       pending: 0,
       pendingLabel: '',
       total: mascotCount ?? 0,
       totalLabel: 'mascots',
       icon: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
             d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5C21.27 7.61 17 4.5 12 4.5zM12 16a4 4 0 110-8 4 4 0 010 8z" />
         </svg>
@@ -210,13 +287,13 @@ export default async function AdminDashboardPage() {
     {
       title: 'Board Members',
       href: '/admin/board',
-      description: 'Add and edit officers and directors shown on the public board page.',
+      description: 'Officers and directors shown on the public board page.',
       pending: 0,
       pendingLabel: '',
       total: boardCount ?? 0,
       totalLabel: 'active',
       icon: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
             d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
         </svg>
@@ -225,13 +302,13 @@ export default async function AdminDashboardPage() {
     {
       title: 'Chapter Eternal',
       href: '/admin/chapter-eternal',
-      description: 'Manage the memorial page for brothers who have passed to Chapter Eternal.',
+      description: 'Memorial page for brothers who have passed.',
       pending: eternalPending ?? 0,
       pendingLabel: 'need entry',
       total: eternalCount ?? 0,
       totalLabel: 'entries',
       icon: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
             d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
         </svg>
@@ -240,13 +317,13 @@ export default async function AdminDashboardPage() {
     {
       title: 'Property Management',
       href: '/admin/property',
-      description: 'Add, edit, and manage planned and completed shelter improvement projects.',
+      description: 'Planned and completed shelter improvement projects.',
       pending: 0,
       pendingLabel: '',
       total: propertyCount ?? 0,
       totalLabel: 'projects',
       icon: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
             d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
         </svg>
@@ -255,13 +332,13 @@ export default async function AdminDashboardPage() {
     {
       title: 'Events',
       href: '/admin/events',
-      description: 'Create and manage events shown on the public events & calendar page.',
+      description: 'Events shown on the public events & calendar page.',
       pending: 0,
       pendingLabel: '',
       total: upcomingEvents ?? 0,
       totalLabel: 'upcoming',
       icon: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
             d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
         </svg>
@@ -270,13 +347,13 @@ export default async function AdminDashboardPage() {
     {
       title: 'Portal Resources',
       href: '/admin/portal',
-      description: 'Manage the resource links shown on the Chapter Portal page.',
+      description: 'Resource links shown on the Chapter Portal page.',
       pending: 0,
       pendingLabel: '',
       total: portalResourceCount ?? 0,
       totalLabel: 'links',
       icon: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
             d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
         </svg>
@@ -285,13 +362,55 @@ export default async function AdminDashboardPage() {
     {
       title: "Booth's Guide to Pats",
       href: '/admin/portal/pats-guide',
-      description: 'Edit the in-house St. Pat\'s survival guide text and photo gallery.',
+      description: 'In-house St. Pat\'s survival guide text and photo gallery.',
       pending: 0,
       pendingLabel: '',
       icon: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
             d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+        </svg>
+      ),
+    },
+  ]
+
+  const systemSections = [
+    {
+      title: 'Activity Log',
+      href: '/admin/activity',
+      description: 'Who changed what across member and content records.',
+      pending: 0,
+      pendingLabel: '',
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      ),
+    },
+    {
+      title: 'Login Log',
+      href: '/admin/login-log',
+      description: 'See who has signed into the site, and when.',
+      pending: 0,
+      pendingLabel: '',
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+            d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+        </svg>
+      ),
+    },
+    {
+      title: 'Email Templates',
+      href: '/admin/email-templates',
+      description: 'Edit the subject and body of system emails.',
+      pending: 0,
+      pendingLabel: '',
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+            d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
         </svg>
       ),
     },
@@ -300,57 +419,6 @@ export default async function AdminDashboardPage() {
   const totalPending = isFullAdmin
     ? (pendingUsers ?? 0) + (pendingLinks ?? 0) + (pendingChanges ?? 0) + (eternalPending ?? 0)
     : (eternalPending ?? 0)
-
-  function SectionCard({ section }: { section: typeof memberSections[number] | typeof websiteSections[number] }) {
-    const hasPending = section.pending > 0
-    return (
-      <Link
-        href={section.href}
-        className={`group relative bg-kp-surface rounded-2xl border p-6 no-underline flex flex-col gap-4 transition-all hover:shadow-lg hover:shadow-black/30 ${
-          hasPending
-            ? 'border-amber-500/50 hover:border-amber-400'
-            : 'border-kp-border hover:border-kp-gold/40'
-        }`}
-      >
-        {/* Icon + badge */}
-        <div className="flex items-start justify-between">
-          <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-            hasPending ? 'bg-amber-500/20 text-amber-400' : 'bg-kp-card text-gray-400 group-hover:text-kp-gold'
-          } transition-colors`}>
-            {section.icon}
-          </div>
-          {hasPending && (
-            <span className="flex items-center gap-1.5 bg-amber-500/20 text-amber-400 text-xs font-bold px-3 py-1 rounded-full border border-amber-500/30">
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-              {section.pending} {section.pendingLabel}
-            </span>
-          )}
-          {'total' in section && !hasPending && (
-            <span className="text-gray-500 text-xs font-medium px-3 py-1 rounded-full border border-kp-border">
-              {section.total} {'totalLabel' in section ? section.totalLabel : 'records'}
-            </span>
-          )}
-        </div>
-
-        {/* Text */}
-        <div>
-          <h2 className={`text-lg font-bold mb-1 transition-colors ${
-            hasPending ? 'text-amber-300' : 'text-white group-hover:text-kp-gold'
-          }`}>
-            {section.title}
-          </h2>
-          <p className="text-gray-400 text-sm leading-relaxed">{section.description}</p>
-        </div>
-
-        {/* Arrow */}
-        <div className={`flex items-center gap-1 text-xs font-semibold mt-auto transition-colors ${
-          hasPending ? 'text-amber-400' : 'text-gray-500 group-hover:text-kp-gold'
-        }`}>
-          {hasPending ? 'Review now' : 'Manage'} →
-        </div>
-      </Link>
-    )
-  }
 
   return (
     <div className="bg-kp-dark min-h-screen">
@@ -366,22 +434,33 @@ export default async function AdminDashboardPage() {
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-4 py-10 space-y-12">
+      <div className="max-w-5xl mx-auto px-4 py-10 space-y-10">
+        <GroupNav isFullAdmin={isFullAdmin} />
+
         {isFullAdmin && (
-          <section>
+          <section id="member-admin" className="scroll-mt-6">
             <h2 className="text-kp-gold text-xs font-bold uppercase tracking-widest mb-4">Member Administration</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
               {memberSections.map(section => <SectionCard key={section.href} section={section} />)}
             </div>
           </section>
         )}
 
-        <section>
-          <h2 className="text-kp-gold text-xs font-bold uppercase tracking-widest mb-4">Website Administration</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {websiteSections.map(section => <SectionCard key={section.href} section={section} />)}
+        <section id="website-content" className="scroll-mt-6">
+          <h2 className="text-kp-gold text-xs font-bold uppercase tracking-widest mb-4">Website Content</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+            {contentSections.map(section => <SectionCard key={section.href} section={section} />)}
           </div>
         </section>
+
+        {isFullAdmin && (
+          <section id="system" className="scroll-mt-6">
+            <h2 className="text-kp-gold text-xs font-bold uppercase tracking-widest mb-4">System &amp; Communications</h2>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+              {systemSections.map(section => <SectionCard key={section.href} section={section} />)}
+            </div>
+          </section>
+        )}
       </div>
     </div>
   )
