@@ -2,8 +2,11 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { LocalDateTime } from '@/components/LocalTime'
 
 export const metadata = { title: 'Activity Log — Admin' }
+
+const PAGE_SIZE = 50
 
 type LogRow = {
   id: string
@@ -44,10 +47,27 @@ const ACTION_STYLES: Record<string, string> = {
   deny: 'bg-red-900/40 text-red-400',
 }
 
+function parsePage(v: string | undefined) {
+  const n = parseInt(v ?? '1', 10)
+  return Number.isFinite(n) && n > 0 ? n : 1
+}
+
+function typeHref(t?: string) {
+  return t ? `/admin/activity?type=${t}` : '/admin/activity'
+}
+
+function pageHref(type: string | undefined, page: number) {
+  const params = new URLSearchParams()
+  if (type) params.set('type', type)
+  if (page > 1) params.set('page', String(page))
+  const qs = params.toString()
+  return qs ? `/admin/activity?${qs}` : '/admin/activity'
+}
+
 export default async function ActivityLogPage({
   searchParams,
 }: {
-  searchParams: Promise<{ type?: string }>
+  searchParams: Promise<{ type?: string; page?: string }>
 }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -57,24 +77,22 @@ export default async function ActivityLogPage({
   const { data: currentProfile } = await admin.from('profiles').select('role').eq('id', user.id).single()
   if (currentProfile?.role !== 'admin') redirect('/portal')
 
-  const { type } = await searchParams
+  const { type, page: pageRaw } = await searchParams
+  const page = parsePage(pageRaw)
 
   let query = admin
     .from('admin_activity_log')
-    .select('id, actor_name, action, entity_type, entity_id, entity_label, created_at')
+    .select('id, actor_name, action, entity_type, entity_id, entity_label, created_at', { count: 'exact' })
     .order('created_at', { ascending: false })
-    .limit(300)
+    .range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1)
 
   if (type) query = query.eq('entity_type', type)
 
-  const { data: rowsRaw } = await query
+  const { data: rowsRaw, count } = await query
   const rows = (rowsRaw ?? []) as LogRow[]
+  const totalPages = Math.max(1, Math.ceil((count ?? 0) / PAGE_SIZE))
 
   const entityTypes = Object.keys(ENTITY_LABELS)
-
-  function typeHref(t?: string) {
-    return t ? `/admin/activity?type=${t}` : '/admin/activity'
-  }
 
   return (
     <div className="bg-kp-dark min-h-screen">
@@ -83,7 +101,7 @@ export default async function ActivityLogPage({
           <div className="text-kp-gold text-xs font-bold uppercase tracking-widest mb-2">Administration</div>
           <h1 className="text-4xl font-black text-white">Activity Log</h1>
           <p className="text-gray-400 mt-2 text-sm">
-            The most recent {rows.length} change{rows.length !== 1 ? 's' : ''} across member and content records.
+            {count ?? 0} change{(count ?? 0) !== 1 ? 's' : ''} across member and content records. Times shown in your local timezone.
           </p>
         </div>
       </div>
@@ -130,9 +148,7 @@ export default async function ActivityLogPage({
                   {rows.map(r => (
                     <tr key={r.id} className="border-b border-kp-border/50 last:border-0 hover:bg-kp-card/40 transition-colors">
                       <td className="px-4 py-3 text-gray-500 text-xs whitespace-nowrap">
-                        {new Date(r.created_at).toLocaleString(undefined, {
-                          month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit',
-                        })}
+                        <LocalDateTime iso={r.created_at} />
                       </td>
                       <td className="px-4 py-3 text-white font-medium whitespace-nowrap">{r.actor_name}</td>
                       <td className="px-4 py-3">
@@ -146,6 +162,32 @@ export default async function ActivityLogPage({
                   ))}
                 </tbody>
               </table>
+            </div>
+          )}
+
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between px-4 py-3 border-t border-kp-border text-xs text-gray-500">
+              <span>Page {page} of {totalPages}</span>
+              <div className="flex gap-2">
+                <Link
+                  href={pageHref(type, Math.max(1, page - 1))}
+                  aria-disabled={page <= 1}
+                  className={`px-3 py-1.5 rounded-lg border border-kp-border no-underline transition-colors ${
+                    page <= 1 ? 'text-gray-700 pointer-events-none' : 'text-gray-300 hover:border-kp-gold hover:text-kp-gold'
+                  }`}
+                >
+                  ← Prev
+                </Link>
+                <Link
+                  href={pageHref(type, page + 1)}
+                  aria-disabled={page >= totalPages}
+                  className={`px-3 py-1.5 rounded-lg border border-kp-border no-underline transition-colors ${
+                    page >= totalPages ? 'text-gray-700 pointer-events-none' : 'text-gray-300 hover:border-kp-gold hover:text-kp-gold'
+                  }`}
+                >
+                  Next →
+                </Link>
+              </div>
             </div>
           )}
         </div>

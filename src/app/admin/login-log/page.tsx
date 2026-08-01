@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { LocalTime, LocalDateTime } from './LocalTime'
+import { LocalTime, LocalDateTime } from '@/components/LocalTime'
 
 export const metadata = { title: 'Login Log — Admin' }
 
