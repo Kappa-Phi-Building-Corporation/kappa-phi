@@ -2,8 +2,11 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { LocalTime, LocalDateTime } from './LocalTime'
 
 export const metadata = { title: 'Login Log — Admin' }
+
+const PAGE_SIZE = 50
 
 type LoginRow = {
   id: string
@@ -24,20 +27,60 @@ type VisitRow = {
   request_count: number
 }
 
-function fmtDateTime(iso: string) {
-  return new Date(iso).toLocaleString(undefined, {
-    month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit',
-  })
+function parsePage(v: string | undefined) {
+  const n = parseInt(v ?? '1', 10)
+  return Number.isFinite(n) && n > 0 ? n : 1
 }
 
-function fmtTime(iso: string) {
-  return new Date(iso).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })
+function buildPageHref(q: string | undefined, vp: number, lp: number) {
+  const params = new URLSearchParams()
+  if (q) params.set('q', q)
+  if (vp > 1) params.set('vp', String(vp))
+  if (lp > 1) params.set('lp', String(lp))
+  const qs = params.toString()
+  return qs ? `/admin/login-log?${qs}` : '/admin/login-log'
+}
+
+function Pagination({
+  page, totalPages, prevHref, nextHref,
+}: {
+  page: number
+  totalPages: number
+  prevHref: string
+  nextHref: string
+}) {
+  if (totalPages <= 1) return null
+  return (
+    <div className="flex items-center justify-between px-4 py-3 border-t border-kp-border text-xs text-gray-500">
+      <span>Page {page} of {totalPages}</span>
+      <div className="flex gap-2">
+        <Link
+          href={prevHref}
+          aria-disabled={page <= 1}
+          className={`px-3 py-1.5 rounded-lg border border-kp-border no-underline transition-colors ${
+            page <= 1 ? 'text-gray-700 pointer-events-none' : 'text-gray-300 hover:border-kp-gold hover:text-kp-gold'
+          }`}
+        >
+          ← Prev
+        </Link>
+        <Link
+          href={nextHref}
+          aria-disabled={page >= totalPages}
+          className={`px-3 py-1.5 rounded-lg border border-kp-border no-underline transition-colors ${
+            page >= totalPages ? 'text-gray-700 pointer-events-none' : 'text-gray-300 hover:border-kp-gold hover:text-kp-gold'
+          }`}
+        >
+          Next →
+        </Link>
+      </div>
+    </div>
+  )
 }
 
 export default async function LoginLogPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string }>
+  searchParams: Promise<{ q?: string; vp?: string; lp?: string }>
 }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -47,27 +90,40 @@ export default async function LoginLogPage({
   const { data: currentProfile } = await admin.from('profiles').select('role').eq('id', user.id).single()
   if (currentProfile?.role !== 'admin') redirect('/portal')
 
-  const { q } = await searchParams
+  const { q, vp: vpRaw, lp: lpRaw } = await searchParams
+  const visitsPage = parsePage(vpRaw)
+  const loginsPage = parsePage(lpRaw)
 
   let loginQuery = admin
     .from('login_log')
-    .select('id, user_id, email, name, created_at')
+    .select('id, user_id, email, name, created_at', { count: 'exact' })
     .order('created_at', { ascending: false })
-    .limit(300)
+    .range((loginsPage - 1) * PAGE_SIZE, loginsPage * PAGE_SIZE - 1)
 
   if (q) loginQuery = loginQuery.or(`email.ilike.%${q}%,name.ilike.%${q}%`)
 
   let visitQuery = admin
     .from('site_visits')
-    .select('id, user_id, email, name, visit_date, first_seen_at, last_seen_at, request_count')
+    .select('id, user_id, email, name, visit_date, first_seen_at, last_seen_at, request_count', { count: 'exact' })
     .order('last_seen_at', { ascending: false })
-    .limit(300)
+    .range((visitsPage - 1) * PAGE_SIZE, visitsPage * PAGE_SIZE - 1)
 
   if (q) visitQuery = visitQuery.or(`email.ilike.%${q}%,name.ilike.%${q}%`)
 
-  const [{ data: loginRowsRaw }, { data: visitRowsRaw }] = await Promise.all([loginQuery, visitQuery])
+  const [
+    { data: loginRowsRaw, count: loginCount },
+    { data: visitRowsRaw, count: visitCount },
+  ] = await Promise.all([loginQuery, visitQuery])
+
   const loginRows = (loginRowsRaw ?? []) as LoginRow[]
   const visitRows = (visitRowsRaw ?? []) as VisitRow[]
+  const visitTotalPages = Math.max(1, Math.ceil((visitCount ?? 0) / PAGE_SIZE))
+  const loginTotalPages = Math.max(1, Math.ceil((loginCount ?? 0) / PAGE_SIZE))
+
+  const visitPrevHref = buildPageHref(q, Math.max(1, visitsPage - 1), loginsPage)
+  const visitNextHref = buildPageHref(q, visitsPage + 1, loginsPage)
+  const loginPrevHref = buildPageHref(q, visitsPage, Math.max(1, loginsPage - 1))
+  const loginNextHref = buildPageHref(q, visitsPage, loginsPage + 1)
 
   return (
     <div className="bg-kp-dark min-h-screen">
@@ -77,7 +133,7 @@ export default async function LoginLogPage({
           <h1 className="text-4xl font-black text-white">Login Log</h1>
           <p className="text-gray-400 mt-2 text-sm">
             Who has signed in, and who has actually been using the site since — a valid session cookie
-            doesn&apos;t mean someone&apos;s still around.
+            doesn&apos;t mean someone&apos;s still around. Times shown in your local timezone.
           </p>
         </div>
       </div>
@@ -101,7 +157,7 @@ export default async function LoginLogPage({
 
         <section>
           <h2 className="text-kp-gold text-xs font-bold uppercase tracking-widest mb-3">
-            Site Access <span className="text-gray-500 font-normal normal-case">— one row per user per day</span>
+            Site Access <span className="text-gray-500 font-normal normal-case">— one row per user per day · {visitCount ?? 0} total</span>
           </h2>
           <div className="bg-kp-surface border border-kp-border rounded-2xl overflow-hidden">
             {visitRows.length === 0 ? (
@@ -125,8 +181,8 @@ export default async function LoginLogPage({
                         <td className="px-4 py-3 text-gray-300 text-xs whitespace-nowrap">{r.visit_date}</td>
                         <td className="px-4 py-3 text-white font-medium whitespace-nowrap">{r.name ?? '—'}</td>
                         <td className="px-4 py-3 text-gray-300">{r.email}</td>
-                        <td className="px-4 py-3 text-gray-500 text-xs whitespace-nowrap">{fmtTime(r.first_seen_at)}</td>
-                        <td className="px-4 py-3 text-gray-500 text-xs whitespace-nowrap">{fmtTime(r.last_seen_at)}</td>
+                        <td className="px-4 py-3 text-gray-500 text-xs whitespace-nowrap"><LocalTime iso={r.first_seen_at} /></td>
+                        <td className="px-4 py-3 text-gray-500 text-xs whitespace-nowrap"><LocalTime iso={r.last_seen_at} /></td>
                         <td className="px-4 py-3 text-gray-500 text-xs tabular-nums">{r.request_count}</td>
                       </tr>
                     ))}
@@ -134,12 +190,13 @@ export default async function LoginLogPage({
                 </table>
               </div>
             )}
+            <Pagination page={visitsPage} totalPages={visitTotalPages} prevHref={visitPrevHref} nextHref={visitNextHref} />
           </div>
         </section>
 
         <section>
           <h2 className="text-kp-gold text-xs font-bold uppercase tracking-widest mb-3">
-            Logins <span className="text-gray-500 font-normal normal-case">— discrete sign-in events</span>
+            Logins <span className="text-gray-500 font-normal normal-case">— discrete sign-in events · {loginCount ?? 0} total</span>
           </h2>
           <div className="bg-kp-surface border border-kp-border rounded-2xl overflow-hidden">
             {loginRows.length === 0 ? (
@@ -157,7 +214,7 @@ export default async function LoginLogPage({
                   <tbody>
                     {loginRows.map(r => (
                       <tr key={r.id} className="border-b border-kp-border/50 last:border-0 hover:bg-kp-card/40 transition-colors">
-                        <td className="px-4 py-3 text-gray-500 text-xs whitespace-nowrap">{fmtDateTime(r.created_at)}</td>
+                        <td className="px-4 py-3 text-gray-500 text-xs whitespace-nowrap"><LocalDateTime iso={r.created_at} /></td>
                         <td className="px-4 py-3 text-white font-medium whitespace-nowrap">{r.name ?? '—'}</td>
                         <td className="px-4 py-3 text-gray-300">{r.email}</td>
                       </tr>
@@ -166,6 +223,7 @@ export default async function LoginLogPage({
                 </table>
               </div>
             )}
+            <Pagination page={loginsPage} totalPages={loginTotalPages} prevHref={loginPrevHref} nextHref={loginNextHref} />
           </div>
         </section>
 
