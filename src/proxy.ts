@@ -1,7 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
-import { NextResponse, type NextRequest } from 'next/server'
+import { NextResponse, type NextRequest, type NextFetchEvent } from 'next/server'
 
-export async function proxy(request: NextRequest) {
+export async function proxy(request: NextRequest, event: NextFetchEvent) {
   let supabaseResponse = NextResponse.next({ request })
 
   const supabase = createServerClient(
@@ -24,6 +24,17 @@ export async function proxy(request: NextRequest) {
   )
 
   const { data: { user } } = await supabase.auth.getUser()
+
+  // Records ongoing site access (not just the login moment) so admins can
+  // tell a stale-but-still-valid session cookie apart from real usage.
+  // Fire-and-forget via waitUntil so it never adds latency to the response.
+  if (user) {
+    const meta = (user.user_metadata ?? {}) as Record<string, string>
+    const name = `${meta.first_name ?? ''} ${meta.last_name ?? ''}`.trim() || null
+    event.waitUntil(
+      Promise.resolve(supabase.rpc('log_site_visit', { p_email: user.email ?? '', p_name: name })).then(() => {})
+    )
+  }
 
   const protectedPaths = ['/profile']
   const isProtected = protectedPaths.some(path =>

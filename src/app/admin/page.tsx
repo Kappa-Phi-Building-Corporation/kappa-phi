@@ -409,7 +409,7 @@ export default async function AdminDashboardPage() {
     {
       title: 'Login Log',
       href: '/admin/login-log',
-      description: 'See who has signed into the site, and when.',
+      description: 'Sign-ins and ongoing site access, day by day.',
       pending: 0,
       pendingLabel: '',
       icon: (
