@@ -1,6 +1,7 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { Markdown } from '@/components/Markdown'
 import { ImageLightboxThumbnail } from '@/components/ImageLightbox'
+import AddToCalendarButton from '@/components/AddToCalendarButton'
 import { SocialIcon } from '@/lib/socialPlatforms'
 import { getSiteContent } from '@/lib/siteContent'
 import PastEventsToggle from './PastEventsToggle'
@@ -225,8 +226,8 @@ export default async function EventsPage() {
                       <Markdown body={event.description} className="text-gray-300 text-sm leading-relaxed" />
                     )}
 
-                    {event.link_url && event.link_label && (
-                      <div>
+                    <div className="flex flex-wrap items-center gap-3">
+                      {event.link_url && event.link_label && (
                         <a
                           href={event.link_url}
                           target="_blank"
@@ -235,8 +236,18 @@ export default async function EventsPage() {
                         >
                           {event.link_label}
                         </a>
-                      </div>
-                    )}
+                      )}
+                      <AddToCalendarButton
+                        eventId={event.id}
+                        title={event.title}
+                        description={event.description}
+                        location={event.location}
+                        startDate={event.start_date}
+                        endDate={event.end_date}
+                        startTime={event.start_time}
+                        endTime={event.end_time}
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
