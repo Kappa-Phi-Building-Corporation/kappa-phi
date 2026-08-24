@@ -1,6 +1,6 @@
-import Image from 'next/image'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { Markdown } from '@/components/Markdown'
+import { ImageLightboxThumbnail } from '@/components/ImageLightbox'
 import PastEventsToggle from './PastEventsToggle'
 
 export const metadata = { title: 'Alumni Events & Calendar' }
@@ -191,43 +191,43 @@ export default async function EventsPage() {
                   <h3 className="text-kp-gold font-black text-lg leading-tight">{event.title}</h3>
                 </div>
 
-                {event.photo_url && (
-                  <div className="relative w-full aspect-[16/9]">
-                    <Image src={event.photo_url} alt={event.title} fill sizes="(max-width: 768px) 100vw, 640px" className="object-cover" />
+                <div className="p-6 flex gap-5">
+                  {event.photo_url && (
+                    <ImageLightboxThumbnail src={event.photo_url} alt={event.title} />
+                  )}
+
+                  <div className="flex-1 min-w-0 space-y-4">
+                    {/* Date/time — unambiguous */}
+                    <EventDateTime event={event} />
+
+                    {event.location && (
+                      <div className="flex items-center gap-2.5 text-gray-400 text-sm">
+                        <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                            d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        {event.location}
+                      </div>
+                    )}
+
+                    {event.description && (
+                      <Markdown body={event.description} className="text-gray-300 text-sm leading-relaxed" />
+                    )}
+
+                    {event.link_url && event.link_label && (
+                      <div>
+                        <a
+                          href={event.link_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-block bg-kp-gold text-black font-bold px-5 py-2.5 rounded-lg text-sm no-underline hover:opacity-90 transition-opacity"
+                        >
+                          {event.link_label}
+                        </a>
+                      </div>
+                    )}
                   </div>
-                )}
-
-                <div className="p-6 space-y-4">
-                  {/* Date/time — unambiguous */}
-                  <EventDateTime event={event} />
-
-                  {event.location && (
-                    <div className="flex items-center gap-2.5 text-gray-400 text-sm">
-                      <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                          d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                      </svg>
-                      {event.location}
-                    </div>
-                  )}
-
-                  {event.description && (
-                    <Markdown body={event.description} className="text-gray-300 text-sm leading-relaxed" />
-                  )}
-
-                  {event.link_url && event.link_label && (
-                    <div>
-                      <a
-                        href={event.link_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-block bg-kp-gold text-black font-bold px-5 py-2.5 rounded-lg text-sm no-underline hover:opacity-90 transition-opacity"
-                      >
-                        {event.link_label}
-                      </a>
-                    </div>
-                  )}
                 </div>
               </div>
             ))}

@@ -1,8 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import Image from 'next/image'
 import { Markdown } from '@/components/Markdown'
+import { ImageLightboxThumbnail } from '@/components/ImageLightbox'
 
 type Event = {
   id: string
@@ -90,7 +90,11 @@ function PastEventRow({ event }: { event: Event }) {
       </button>
 
       {expanded && hasDetails && (
-        <div className="px-6 py-4 bg-kp-card/20 space-y-3">
+        <div className="px-6 py-4 bg-kp-card/20 flex gap-4">
+          {event.photo_url && (
+            <ImageLightboxThumbnail src={event.photo_url} alt={event.title} />
+          )}
+          <div className="flex-1 min-w-0 space-y-3">
           {/* Date/time — use same unambiguous logic as upcoming cards */}
           {(() => {
             const isSingleDay = !event.end_date || event.end_date === event.start_date
@@ -120,11 +124,6 @@ function PastEventRow({ event }: { event: Event }) {
               </div>
             )
           })()}
-          {event.photo_url && (
-            <div className="relative w-full aspect-[16/9] rounded-lg overflow-hidden">
-              <Image src={event.photo_url} alt={event.title} fill sizes="(max-width: 768px) 100vw, 640px" className="object-cover" />
-            </div>
-          )}
           {event.description && (
             <Markdown body={event.description} className="text-gray-400 text-sm leading-relaxed" />
           )}
@@ -138,6 +137,7 @@ function PastEventRow({ event }: { event: Event }) {
               {event.link_label} ↗
             </a>
           )}
+          </div>
         </div>
       )}
     </div>
