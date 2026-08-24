@@ -5,8 +5,10 @@ import { SpeedInsights } from '@vercel/speed-insights/next'
 import './globals.css'
 import Navigation from '@/components/Navigation'
 import Footer from '@/components/Footer'
+import AnnouncementBanner from '@/components/AnnouncementBanner'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { getSiteContent } from '@/lib/siteContent'
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 
@@ -34,6 +36,7 @@ export const metadata: Metadata = {
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
+  const content = await getSiteContent()
 
   let navUser: { email: string; firstName?: string; isAdmin: boolean; adminPendingCount?: number } | null = null
 
@@ -83,6 +86,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html lang="en" className={inter.variable}>
       <body className="bg-kp-dark text-white min-h-screen flex flex-col antialiased">
         <Navigation navUser={navUser} />
+        <AnnouncementBanner
+          enabled={content.announcement_enabled === 'true'}
+          message={content.announcement_message}
+          expires={content.announcement_expires}
+        />
         <main className="flex-1">{children}</main>
         <Footer />
         <Analytics />

@@ -15,6 +15,9 @@ export const SITE_CONTENT_DEFAULTS = {
   about_intro: 'Over 60 years of brotherhood, excellence, and service at Missouri University of Science & Technology.',
   about_founded_number: '1963',
   about_founded_label: 'Founded',
+  announcement_enabled: 'true',
+  announcement_message: "Welcome to our newly redesigned website! Returning alumni: you'll need to re-register to access the Alumni section.",
+  announcement_expires: '2026-11-22',
 } as const
 
 export type SiteContentKey = keyof typeof SITE_CONTENT_DEFAULTS

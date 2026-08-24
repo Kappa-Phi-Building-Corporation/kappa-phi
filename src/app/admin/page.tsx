@@ -247,7 +247,7 @@ export default async function AdminDashboardPage() {
     {
       title: 'Homepage & About',
       href: '/admin/content',
-      description: 'Edit hero text, stats, and mission statement.',
+      description: 'Hero text, stats, mission statement, and the site announcement banner.',
       pending: 0,
       pendingLabel: '',
       icon: (

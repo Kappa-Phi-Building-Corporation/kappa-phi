@@ -34,7 +34,7 @@ export default async function SiteContentPage({
           <div className="text-kp-gold text-xs font-bold uppercase tracking-widest mb-2">Administration</div>
           <h1 className="text-4xl font-black text-white">Homepage &amp; About Content</h1>
           <p className="text-gray-400 mt-2 text-sm">
-            Edit the hero text, stats, and mission statement shown on the public homepage and About page.
+            Edit the hero text, stats, mission statement, and site-wide announcement banner.
           </p>
         </div>
       </div>
@@ -123,6 +123,35 @@ export default async function SiteContentPage({
                   className={inputCls}
                 />
               </div>
+            </div>
+          </div>
+
+          <div className="bg-kp-surface border border-kp-border rounded-2xl p-6 md:p-8 space-y-5">
+            <div>
+              <h2 className="text-white font-bold text-lg">Site Announcement</h2>
+              <p className="text-gray-500 text-xs mt-1">
+                A dismissible banner shown under the nav on every page, e.g. for a temporary notice. Visitors who dismiss it won&apos;t see it again unless you change the message.
+              </p>
+            </div>
+
+            <div>
+              <label htmlFor="announcement_enabled" className={labelCls}>Status</label>
+              <select id="announcement_enabled" name="announcement_enabled" defaultValue={content.announcement_enabled} className={inputCls}>
+                <option value="true">Shown</option>
+                <option value="false">Hidden</option>
+              </select>
+            </div>
+
+            <div>
+              <label htmlFor="announcement_message" className={labelCls}>Message</label>
+              <textarea id="announcement_message" name="announcement_message" defaultValue={content.announcement_message} rows={2} className={textareaCls} />
+              <p className="text-gray-500 text-xs mt-1">A &quot;Register now&quot; link to /register is added automatically after the message.</p>
+            </div>
+
+            <div className="max-w-xs">
+              <label htmlFor="announcement_expires" className={labelCls}>Auto-Hide After</label>
+              <input id="announcement_expires" name="announcement_expires" type="date" defaultValue={content.announcement_expires} className={inputCls + ' [color-scheme:dark]'} />
+              <p className="text-gray-500 text-xs mt-1">The banner stops showing after this date, even if still &quot;Shown&quot; above.</p>
             </div>
           </div>
 
