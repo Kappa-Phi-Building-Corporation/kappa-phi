@@ -18,6 +18,7 @@ export const SITE_CONTENT_DEFAULTS = {
   announcement_enabled: 'true',
   announcement_message: "Welcome to our newly redesigned website! Returning alumni: you'll need to re-register to access the Alumni section.",
   announcement_expires: '2026-11-22',
+  social_section_text: 'Stay up to date — follow the chapter on social media',
 } as const
 
 export type SiteContentKey = keyof typeof SITE_CONTENT_DEFAULTS

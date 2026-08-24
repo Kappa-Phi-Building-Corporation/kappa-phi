@@ -37,6 +37,7 @@ const ENTITY_LABELS: Record<string, string> = {
   site_content: 'Site Content',
   email_template: 'Email Template',
   chapter_milestone: 'Chapter Milestone',
+  social_link: 'Social Link',
 }
 
 const ACTION_STYLES: Record<string, string> = {

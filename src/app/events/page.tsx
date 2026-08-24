@@ -1,6 +1,8 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { Markdown } from '@/components/Markdown'
 import { ImageLightboxThumbnail } from '@/components/ImageLightbox'
+import { SocialIcon } from '@/lib/socialPlatforms'
+import { getSiteContent } from '@/lib/siteContent'
 import PastEventsToggle from './PastEventsToggle'
 
 export const metadata = { title: 'Alumni Events & Calendar' }
@@ -120,7 +122,7 @@ export default async function EventsPage() {
   const admin = createAdminClient()
   const today = new Date().toISOString().split('T')[0]
 
-  const [{ data: upcomingRaw }, { data: pastRaw }, { data: photoRows }] = await Promise.all([
+  const [{ data: upcomingRaw }, { data: pastRaw }, { data: photoRows }, { data: socialRows }, content] = await Promise.all([
     admin
       .from('events')
       .select('id, title, description, start_date, end_date, start_time, end_time, location, link_label, link_url')
@@ -138,7 +140,15 @@ export default async function EventsPage() {
     // column doesn't exist yet (migration not run), only photos are
     // missing — the event listing itself still loads correctly.
     admin.from('events').select('id, photo_url'),
+    admin
+      .from('social_links')
+      .select('id, platform, label, url')
+      .eq('is_published', true)
+      .order('sort_order', { ascending: true }),
+    getSiteContent(),
   ])
+
+  const socialLinks = socialRows ?? []
 
   const photoByEventId = new Map((photoRows ?? []).map(p => [p.id, p.photo_url as string | null]))
   const withPhoto = <T extends { id: string }>(e: T) => ({ ...e, photo_url: photoByEventId.get(e.id) ?? null })
@@ -254,19 +264,25 @@ export default async function EventsPage() {
         {past.length > 0 && <PastEventsToggle events={past} />}
 
         {/* Social */}
-        <div className="bg-kp-blue-dark rounded-2xl p-5 flex flex-wrap items-center gap-4">
-          <p className="text-blue-100 text-sm flex-1">Stay up to date — follow the chapter on social media</p>
-          <div className="flex gap-3">
-            <a href="https://www.facebook.com/endelts" target="_blank" rel="noopener noreferrer"
-              className="bg-kp-gold text-black font-bold px-4 py-2 rounded-lg text-sm no-underline hover:opacity-90">
-              Facebook
-            </a>
-            <a href="https://www.instagram.com/rolladelts/" target="_blank" rel="noopener noreferrer"
-              className="border border-white/40 text-white font-bold px-4 py-2 rounded-lg text-sm no-underline hover:border-kp-gold hover:text-kp-gold transition-colors">
-              Instagram
-            </a>
+        {socialLinks.length > 0 && (
+          <div className="bg-kp-blue-dark rounded-2xl p-5 flex flex-wrap items-center gap-4">
+            <p className="text-blue-100 text-sm flex-1">{content.social_section_text}</p>
+            <div className="flex flex-wrap gap-3">
+              {socialLinks.map(s => (
+                <a
+                  key={s.id}
+                  href={s.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 border border-white/40 text-white font-bold px-4 py-2 rounded-lg text-sm no-underline hover:border-kp-gold hover:text-kp-gold transition-colors"
+                >
+                  <SocialIcon platform={s.platform} />
+                  {s.label}
+                </a>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   )

@@ -110,6 +110,7 @@ export default async function AdminDashboardPage() {
     { count: mascotCount },
     { count: missingBigBrother },
     { count: milestoneCount },
+    { count: socialLinkCount },
   ] = await Promise.all([
     admin.from('profiles')
       .select('*', { count: 'exact', head: true })
@@ -155,6 +156,8 @@ export default async function AdminDashboardPage() {
       .not('badge_number', 'is', null)
       .is('big_brother_id', null),
     admin.from('chapter_milestones')
+      .select('*', { count: 'exact', head: true }),
+    admin.from('social_links')
       .select('*', { count: 'exact', head: true }),
   ])
 
@@ -359,6 +362,21 @@ export default async function AdminDashboardPage() {
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
             d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+      ),
+    },
+    {
+      title: 'Social Links',
+      href: '/admin/social-links',
+      description: 'The "Stay up to date" social buttons on the Events page.',
+      pending: 0,
+      pendingLabel: '',
+      total: socialLinkCount ?? 0,
+      totalLabel: 'links',
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+            d="M8.68 13.34a3 3 0 000-2.68m0 2.68l6.64 3.32m-6.64-6l6.64-3.32M18 6a3 3 0 11-6 0 3 3 0 016 0zM18 18a3 3 0 11-6 0 3 3 0 016 0zM9 12a3 3 0 11-6 0 3 3 0 016 0z" />
         </svg>
       ),
     },

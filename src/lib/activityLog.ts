@@ -22,6 +22,7 @@ export type ActivityEntityType =
   | 'site_content'
   | 'email_template'
   | 'chapter_milestone'
+  | 'social_link'
 
 export async function logActivity(
   admin: ReturnType<typeof createAdminClient>,

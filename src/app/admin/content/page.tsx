@@ -155,6 +155,18 @@ export default async function SiteContentPage({
             </div>
           </div>
 
+          <div className="bg-kp-surface border border-kp-border rounded-2xl p-6 md:p-8 space-y-5">
+            <h2 className="text-white font-bold text-lg">Social Media Strip</h2>
+            <div>
+              <label htmlFor="social_section_text" className={labelCls}>Lead-In Text</label>
+              <input id="social_section_text" name="social_section_text" defaultValue={content.social_section_text} className={inputCls} />
+              <p className="text-gray-500 text-xs mt-1">
+                Shown on the Events page next to the Facebook/Instagram/etc. buttons —{' '}
+                <Link href="/admin/social-links" className="text-kp-gold hover:underline">manage those links here</Link>.
+              </p>
+            </div>
+          </div>
+
           <div className="flex items-center justify-between pt-2 border-t border-kp-border">
             <Link href="/admin/milestones" className="text-gray-500 text-sm hover:text-kp-gold transition-colors no-underline">
               Manage Key Milestones timeline →
