@@ -191,7 +191,7 @@ export default async function EventsPage() {
                   <h3 className="text-kp-gold font-black text-lg leading-tight">{event.title}</h3>
                 </div>
 
-                <div className="p-6 flex gap-5">
+                <div className="p-6 flex items-start gap-5">
                   {event.photo_url && (
                     <ImageLightboxThumbnail src={event.photo_url} alt={event.title} />
                   )}

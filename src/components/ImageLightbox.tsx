@@ -4,9 +4,10 @@ import { useState } from 'react'
 import Image from 'next/image'
 
 // A small clickable thumbnail that opens the full image in an overlay.
-// The overlay box has a fixed size but uses object-contain, so it
-// letterboxes correctly regardless of the source image's actual aspect
-// ratio — no cropping, and no need to know the image's real dimensions.
+// Both the thumbnail and the overlay use object-contain against a fixed
+// box, so the image letterboxes/pillarboxes as needed but is never
+// cropped — works for any source aspect ratio without knowing its real
+// dimensions ahead of time.
 export function ImageLightboxThumbnail({
   src,
   alt,
@@ -26,7 +27,7 @@ export function ImageLightboxThumbnail({
         aria-label={`View full image: ${alt}`}
         className={`${className} group`}
       >
-        <Image src={src} alt={alt} fill sizes="140px" className="object-cover" />
+        <Image src={src} alt={alt} fill sizes="140px" className="object-contain" />
         <span className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/40 transition-colors">
           <svg
             className="w-5 h-5 text-white opacity-0 group-hover:opacity-100 transition-opacity"

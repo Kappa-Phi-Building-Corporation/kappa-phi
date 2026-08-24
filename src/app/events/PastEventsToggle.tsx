@@ -90,7 +90,7 @@ function PastEventRow({ event }: { event: Event }) {
       </button>
 
       {expanded && hasDetails && (
-        <div className="px-6 py-4 bg-kp-card/20 flex gap-4">
+        <div className="px-6 py-4 bg-kp-card/20 flex items-start gap-4">
           {event.photo_url && (
             <ImageLightboxThumbnail src={event.photo_url} alt={event.title} />
           )}
