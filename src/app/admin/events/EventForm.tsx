@@ -1,5 +1,9 @@
 ﻿'use client'
 
+import { useState } from 'react'
+import Image from 'next/image'
+import EventDescriptionEditor from './EventDescriptionEditor'
+
 type Event = {
   title: string
   description: string | null
@@ -11,12 +15,12 @@ type Event = {
   link_label: string | null
   link_url: string | null
   is_published: boolean
+  photo_url?: string | null
 }
 
 const labelCls = 'block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5'
 const inputCls = 'w-full bg-kp-dark border border-kp-border rounded-xl px-4 py-2.5 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-kp-gold focus:ring-1 focus:ring-kp-gold transition-colors'
 const dateInputCls = inputCls + ' [color-scheme:dark]'
-const textareaCls = inputCls + ' resize-y min-h-[120px]'
 
 export default function EventForm({
   action,
@@ -25,6 +29,13 @@ export default function EventForm({
   action: (formData: FormData) => void | Promise<void>
   event?: Event | null
 }) {
+  const [previewUrl, setPreviewUrl] = useState<string | null>(event?.photo_url ?? null)
+
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (file) setPreviewUrl(URL.createObjectURL(file))
+  }
+
   return (
     <form action={action} className="space-y-6">
       {/* Title */}
@@ -103,15 +114,39 @@ export default function EventForm({
 
       {/* Description */}
       <div>
-        <label htmlFor="description" className={labelCls}>Description / Schedule <span className="text-gray-500 font-normal">(optional)</span></label>
-        <textarea
-          id="description"
-          name="description"
-          defaultValue={event?.description ?? ''}
-          placeholder={'Multi-line schedule or details.\nEach line will be shown as-is.'}
-          className={textareaCls}
-        />
-        <p className="text-gray-500 text-xs mt-1">Displayed with line breaks preserved. Use plain text.</p>
+        <label className={labelCls}>Description / Schedule <span className="text-gray-500 font-normal">(optional)</span></label>
+        <EventDescriptionEditor name="description" initialValue={event?.description ?? ''} />
+      </div>
+
+      {/* Flyer / photo */}
+      <div>
+        <label htmlFor="photo" className={labelCls}>Flyer / Photo <span className="text-gray-500 font-normal">(optional)</span></label>
+        <div className="flex items-start gap-5">
+          <div className="relative w-28 h-28 rounded-xl overflow-hidden bg-kp-card border border-kp-border shrink-0 flex items-center justify-center">
+            {previewUrl ? (
+              <Image src={previewUrl} alt="Preview" fill unoptimized className="object-cover" />
+            ) : (
+              <svg className="w-8 h-8 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14M14 8h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+            )}
+          </div>
+          <div className="flex-1 space-y-2">
+            <input
+              id="photo"
+              name="photo"
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border file:border-kp-border file:bg-kp-card file:text-gray-300 file:text-sm file:font-medium hover:file:border-kp-gold hover:file:text-kp-gold file:transition-colors cursor-pointer"
+            />
+            <p className="text-gray-500 text-xs">JPEG, PNG, or WebP. Shown at the top of the event card.</p>
+            {event?.photo_url && (
+              <p className="text-gray-500 text-xs">Uploading a new file will replace the current photo.</p>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* CTA Link */}

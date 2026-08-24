@@ -1,4 +1,6 @@
+import Image from 'next/image'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { Markdown } from '@/components/Markdown'
 import PastEventsToggle from './PastEventsToggle'
 
 export const metadata = { title: 'Alumni Events & Calendar' }
@@ -49,6 +51,7 @@ type EventRow = {
   location: string | null
   link_label: string | null
   link_url: string | null
+  photo_url: string | null
 }
 
 const CalendarIcon = () => (
@@ -117,7 +120,7 @@ export default async function EventsPage() {
   const admin = createAdminClient()
   const today = new Date().toISOString().split('T')[0]
 
-  const [{ data: upcomingRaw }, { data: pastRaw }] = await Promise.all([
+  const [{ data: upcomingRaw }, { data: pastRaw }, { data: photoRows }] = await Promise.all([
     admin
       .from('events')
       .select('id, title, description, start_date, end_date, start_time, end_time, location, link_label, link_url')
@@ -131,13 +134,20 @@ export default async function EventsPage() {
       .lt('start_date', today)
       .order('start_date', { ascending: false })
       .limit(50),
+    // Queried separately from the listings above so that if the photo_url
+    // column doesn't exist yet (migration not run), only photos are
+    // missing — the event listing itself still loads correctly.
+    admin.from('events').select('id, photo_url'),
   ])
 
+  const photoByEventId = new Map((photoRows ?? []).map(p => [p.id, p.photo_url as string | null]))
+  const withPhoto = <T extends { id: string }>(e: T) => ({ ...e, photo_url: photoByEventId.get(e.id) ?? null })
+
   // Promote any multi-day event still in progress (started before today, ends today or later)
-  const inProgress = (pastRaw ?? []).filter(e => e.end_date && e.end_date >= today)
-  const trueUpcoming = upcomingRaw ?? []
+  const inProgress = (pastRaw ?? []).filter(e => e.end_date && e.end_date >= today).map(withPhoto)
+  const trueUpcoming = (upcomingRaw ?? []).map(withPhoto)
   const upcoming = [...inProgress, ...trueUpcoming]
-  const past = (pastRaw ?? []).filter(e => !e.end_date || e.end_date < today)
+  const past = (pastRaw ?? []).filter(e => !e.end_date || e.end_date < today).map(withPhoto)
 
   return (
     <div className="bg-kp-dark min-h-screen">
@@ -181,6 +191,12 @@ export default async function EventsPage() {
                   <h3 className="text-kp-gold font-black text-lg leading-tight">{event.title}</h3>
                 </div>
 
+                {event.photo_url && (
+                  <div className="relative w-full aspect-[16/9]">
+                    <Image src={event.photo_url} alt={event.title} fill sizes="(max-width: 768px) 100vw, 640px" className="object-cover" />
+                  </div>
+                )}
+
                 <div className="p-6 space-y-4">
                   {/* Date/time — unambiguous */}
                   <EventDateTime event={event} />
@@ -197,9 +213,7 @@ export default async function EventsPage() {
                   )}
 
                   {event.description && (
-                    <p className="text-gray-300 text-sm leading-relaxed whitespace-pre-line">
-                      {event.description}
-                    </p>
+                    <Markdown body={event.description} className="text-gray-300 text-sm leading-relaxed" />
                   )}
 
                   {event.link_url && event.link_label && (

@@ -1,6 +1,8 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
+import { Markdown } from '@/components/Markdown'
 
 type Event = {
   id: string
@@ -13,6 +15,7 @@ type Event = {
   location: string | null
   link_label: string | null
   link_url: string | null
+  photo_url: string | null
 }
 
 function formatTime(t: string | null): string | null {
@@ -117,10 +120,13 @@ function PastEventRow({ event }: { event: Event }) {
               </div>
             )
           })()}
+          {event.photo_url && (
+            <div className="relative w-full aspect-[16/9] rounded-lg overflow-hidden">
+              <Image src={event.photo_url} alt={event.title} fill sizes="(max-width: 768px) 100vw, 640px" className="object-cover" />
+            </div>
+          )}
           {event.description && (
-            <p className="text-gray-400 text-sm leading-relaxed whitespace-pre-line">
-              {event.description}
-            </p>
+            <Markdown body={event.description} className="text-gray-400 text-sm leading-relaxed" />
           )}
           {event.link_url && event.link_label && (
             <a
