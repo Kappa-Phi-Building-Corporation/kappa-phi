@@ -23,6 +23,11 @@ const routes: Route[] = [
   { path: '/register',               changeFrequency: 'yearly',  priority: 0.3 },
 ]
 
+// Reads admin-toggled settings from the database, so it must render per request
+// rather than being prerendered at build time (CI builds have no database
+// credentials, and a build-time snapshot would ignore later admin changes).
+export const dynamic = 'force-dynamic'
+
 // Pages an admin can switch off under Homepage & About Content are only listed while shown.
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const content = await getSiteContent()
