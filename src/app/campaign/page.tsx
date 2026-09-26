@@ -1,4 +1,5 @@
 import Image from 'next/image'
+import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getSiteContent } from '@/lib/siteContent'
@@ -157,6 +158,12 @@ export default async function CampaignPage() {
             >
               See the Renderings
             </a>
+            <Link
+              href="/newsletters"
+              className="inline-block border-2 border-white/40 text-white font-bold px-6 py-3 rounded-xl text-sm no-underline hover:border-kp-gold hover:text-kp-gold transition-colors"
+            >
+              See the Newsletters
+            </Link>
           </div>
         </div>
       </div>

@@ -20,7 +20,10 @@ async function assertAdmin() {
 export async function updateSiteContent(formData: FormData) {
   const admin = await assertAdmin()
 
-  const keys = Object.keys(SITE_CONTENT_DEFAULTS) as SiteContentKey[]
+  // Only keys actually present in the form are saved. Other settings (e.g. the
+  // campaign, which has its own admin page) share this table and must not be
+  // reset to their defaults just because this form doesn't include them.
+  const keys = (Object.keys(SITE_CONTENT_DEFAULTS) as SiteContentKey[]).filter(k => formData.has(k))
   const rows = keys.map(key => ({
     key,
     value: ((formData.get(key) as string) ?? '').trim() || SITE_CONTENT_DEFAULTS[key],
@@ -34,10 +37,8 @@ export async function updateSiteContent(formData: FormData) {
 
   revalidatePath('/')
   revalidatePath('/about')
-  revalidatePath('/campaign')
   revalidatePath('/property')
   revalidatePath('/sitemap.xml')
-  revalidatePath('/donations')
   revalidatePath('/admin/content')
   redirect('/admin/content?success=1')
 }

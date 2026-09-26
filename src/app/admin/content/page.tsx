@@ -167,66 +167,11 @@ export default async function SiteContentPage({
             </div>
           </div>
 
-          <div className="bg-kp-surface border border-kp-border rounded-2xl p-6 md:p-8 space-y-5">
-            <div>
-              <h2 className="text-white font-bold text-lg">Capital Campaign</h2>
-              <p className="text-gray-500 text-xs mt-1">
-                The public <Link href="/campaign" className="text-kp-gold hover:underline">/campaign</Link> page for the Shelter renovation. The renderings and area descriptions are built into the page; the text, goal, and giving levels below are editable.
-              </p>
-            </div>
-
-            <div>
-              <label htmlFor="campaign_enabled" className={labelCls}>Status</label>
-              <select id="campaign_enabled" name="campaign_enabled" defaultValue={content.campaign_enabled} className={inputCls}>
-                <option value="true">Published</option>
-                <option value="false">Hidden (page returns Not Found)</option>
-              </select>
-            </div>
-
-            <div>
-              <label htmlFor="campaign_headline" className={labelCls}>Headline</label>
-              <input id="campaign_headline" name="campaign_headline" defaultValue={content.campaign_headline} className={inputCls} />
-            </div>
-
-            <div>
-              <label htmlFor="campaign_intro" className={labelCls}>Introduction</label>
-              <textarea id="campaign_intro" name="campaign_intro" defaultValue={content.campaign_intro} rows={4} className={textareaCls} />
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label htmlFor="campaign_goal" className={labelCls}>Fundraising Goal ($)</label>
-                <input id="campaign_goal" name="campaign_goal" defaultValue={content.campaign_goal} placeholder="e.g. 750000" inputMode="numeric" className={inputCls} />
-              </div>
-              <div>
-                <label htmlFor="campaign_raised" className={labelCls}>Total Contributed ($)</label>
-                <input id="campaign_raised" name="campaign_raised" defaultValue={content.campaign_raised} placeholder="e.g. 401730" inputMode="numeric" className={inputCls} />
-              </div>
-              <div>
-                <label htmlFor="campaign_donors" className={labelCls}>Number of Donors</label>
-                <input id="campaign_donors" name="campaign_donors" defaultValue={content.campaign_donors} placeholder="e.g. 40" inputMode="numeric" className={inputCls} />
-              </div>
-              <div>
-                <label htmlFor="campaign_as_of" className={labelCls}>Figures As Of</label>
-                <input id="campaign_as_of" name="campaign_as_of" defaultValue={content.campaign_as_of} placeholder="e.g. April 7, 2025" className={inputCls} />
-              </div>
-            </div>
-            <p className="text-gray-500 text-xs -mt-2">
-              These figures were entered from the Spring 2025 mailing — update them (and the date) whenever you have new totals. Enter 0 as the goal to hide the progress bar, or 0 as the donor count to hide just that number.
-            </p>
-
-            <div>
-              <span className={labelCls}>Fundraising Contact</span>
-              <p className="text-gray-500 text-xs mb-3">Shown to donors on the Donations and Campaign pages. Leave the phone blank to omit it.</p>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <input name="fundraising_contact_name" aria-label="Contact name" defaultValue={content.fundraising_contact_name} placeholder="Name or title" className={inputCls} />
-                <input name="fundraising_contact_email" aria-label="Contact email" type="email" defaultValue={content.fundraising_contact_email} placeholder="Email" className={inputCls} />
-                <input name="fundraising_contact_phone" aria-label="Contact phone" defaultValue={content.fundraising_contact_phone} placeholder="Phone (optional)" className={inputCls} />
-              </div>
-            </div>
-
-            <p className="text-gray-500 text-xs">
-              <Link href="/admin/giving-levels" className="text-kp-gold hover:underline">Manage giving levels →</Link>
+          <div className="bg-kp-surface border border-kp-border rounded-2xl p-6 md:p-8">
+            <h2 className="text-white font-bold text-lg">Capital Campaign</h2>
+            <p className="text-gray-500 text-xs mt-1">
+              The campaign headline, goal, progress, fundraising contact and giving levels now live in{' '}
+              <Link href="/admin/giving-levels" className="text-kp-gold hover:underline">Capital Campaign &amp; Giving Levels</Link>.
             </p>
           </div>
 

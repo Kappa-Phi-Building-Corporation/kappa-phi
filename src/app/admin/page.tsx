@@ -402,9 +402,9 @@ export default async function AdminDashboardPage() {
       ),
     },
     {
-      title: 'Giving Levels',
+      title: 'Capital Campaign & Giving Levels',
       href: '/admin/giving-levels',
-      description: 'Donation tiers on the Capital Campaign page. Goal and headline are under Homepage & About Content.',
+      description: 'Campaign headline, goal and progress, contact, and the donor giving levels.',
       pending: 0,
       pendingLabel: '',
       total: givingLevelCount ?? 0,

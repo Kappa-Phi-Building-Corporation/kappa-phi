@@ -38,6 +38,30 @@ export const SITE_CONTENT_DEFAULTS = {
 
 export type SiteContentKey = keyof typeof SITE_CONTENT_DEFAULTS
 
+// Settings edited on Admin → Capital Campaign & Giving Levels.
+export const CAMPAIGN_KEYS = [
+  'campaign_enabled',
+  'campaign_headline',
+  'campaign_intro',
+  'campaign_goal',
+  'campaign_raised',
+  'campaign_donors',
+  'campaign_as_of',
+  'fundraising_contact_name',
+  'fundraising_contact_email',
+  'fundraising_contact_phone',
+] as const satisfies readonly SiteContentKey[]
+
+// Campaign fields that may be saved blank: a blank goal/raised/donor count hides
+// that number on the public pages, and the phone is optional. Everything else
+// falls back to its default when left empty.
+export const CAMPAIGN_BLANK_OK: ReadonlySet<string> = new Set([
+  'campaign_goal',
+  'campaign_raised',
+  'campaign_donors',
+  'fundraising_contact_phone',
+])
+
 export async function getSiteContent(): Promise<Record<SiteContentKey, string>> {
   const admin = createAdminClient()
   const keys = Object.keys(SITE_CONTENT_DEFAULTS) as SiteContentKey[]

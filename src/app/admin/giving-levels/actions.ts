@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { logActivity } from '@/lib/activityLog'
+import { CAMPAIGN_KEYS, CAMPAIGN_BLANK_OK, SITE_CONTENT_DEFAULTS } from '@/lib/siteContent'
 
 async function assertAdmin() {
   const supabase = await createClient()
@@ -25,6 +26,30 @@ function buildPayload(form: FormData) {
     sort_order: parseInt((form.get('sort_order') as string) ?? '0', 10) || 0,
     is_published: form.get('is_published') === 'on',
   }
+}
+
+export async function updateCampaignSettings(formData: FormData) {
+  const admin = await assertAdmin()
+
+  const rows = CAMPAIGN_KEYS.map(key => {
+    const value = ((formData.get(key) as string) ?? '').trim()
+    return {
+      key,
+      value: value || (CAMPAIGN_BLANK_OK.has(key) ? '' : SITE_CONTENT_DEFAULTS[key]),
+      updated_at: new Date().toISOString(),
+    }
+  })
+
+  const { error } = await admin.from('site_content').upsert(rows, { onConflict: 'key' })
+  if (error) redirect('/admin/giving-levels?error=' + encodeURIComponent(error.message))
+
+  await logActivity(admin, { action: 'update', entityType: 'site_content', entityLabel: 'Capital campaign settings' })
+
+  revalidatePath('/')
+  revalidatePath('/campaign')
+  revalidatePath('/donations')
+  revalidatePath('/admin/giving-levels')
+  redirect('/admin/giving-levels?success=settings')
 }
 
 export async function createGivingLevel(formData: FormData) {

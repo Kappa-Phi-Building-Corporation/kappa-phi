@@ -41,7 +41,7 @@ export default async function EditGivingLevelPage({
         <div className="max-w-3xl mx-auto px-4 py-8">
           <Link href="/admin/giving-levels"
             className="text-gray-500 text-sm hover:text-kp-gold transition-colors mb-3 inline-block no-underline">
-            ← Back to Giving Levels
+            ← Back to Capital Campaign & Giving Levels
           </Link>
           <div className="text-kp-gold text-xs font-bold uppercase tracking-widest mb-1">Administration</div>
           <h1 className="text-3xl font-black text-white">Edit Giving Level</h1>
