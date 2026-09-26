@@ -21,6 +21,7 @@ function buildPayload(form: FormData) {
     name: (form.get('name') as string)?.trim() || '',
     amount_label: (form.get('amount_label') as string)?.trim() || '',
     description: (form.get('description') as string)?.trim() || null,
+    donors: (form.get('donors') as string)?.trim() || null,
     sort_order: parseInt((form.get('sort_order') as string) ?? '0', 10) || 0,
     is_published: form.get('is_published') === 'on',
   }

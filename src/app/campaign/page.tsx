@@ -1,17 +1,20 @@
+import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getSiteContent } from '@/lib/siteContent'
 import { ImageLightboxThumbnail } from '@/components/ImageLightbox'
-import WaysToGive from '@/components/WaysToGive'
+
+const GIVE_URL = 'https://dtdepsilonnu.causevox.com'
+const GIVE_LABEL = 'dtdepsilonnu.causevox.com'
 
 export const metadata = {
   title: 'Capital Campaign — Renovating the Shelter',
   description:
-    'Help renovate the Epsilon Nu Shelter at Missouri S&T. See the design renderings, giving levels, and ways to give.',
+    'Help renovate the Epsilon Nu Shelter at Missouri S&T. See the design renderings, giving societies, and how to give.',
   openGraph: {
     title: 'Capital Campaign — Renovating the Shelter',
     description:
-      'Help renovate the Epsilon Nu Shelter at Missouri S&T. See the design renderings, giving levels, and ways to give.',
+      'Help renovate the Epsilon Nu Shelter at Missouri S&T. See the design renderings, giving societies, and how to give.',
     images: ['/images/campaign/living-room.jpg'],
   },
 }
@@ -98,20 +101,31 @@ const usd = (n: number) =>
 export default async function CampaignPage() {
   const admin = createAdminClient()
 
-  const [content, { data: levelRows }] = await Promise.all([
+  const [content, { data: levelRows }, { data: donorRows }] = await Promise.all([
     getSiteContent(),
     admin
       .from('campaign_giving_levels')
       .select('id, name, amount_label, description')
       .eq('is_published', true)
       .order('sort_order', { ascending: true }),
+    // Queried separately from the levels above so that if the donors column
+    // doesn't exist yet (migration not run), only donor names are missing —
+    // the levels themselves still load.
+    admin.from('campaign_giving_levels').select('id, donors'),
   ])
 
   if (content.campaign_enabled !== 'true') notFound()
 
-  const levels = levelRows ?? []
+  const donorsByLevel = new Map(
+    (donorRows ?? []).map(r => [
+      r.id,
+      ((r.donors as string | null) ?? '').split('\n').map(n => n.trim()).filter(Boolean),
+    ]),
+  )
+  const levels = (levelRows ?? []).map(l => ({ ...l, donors: donorsByLevel.get(l.id) ?? [] }))
   const goal = toNumber(content.campaign_goal)
   const raised = toNumber(content.campaign_raised)
+  const donorCount = toNumber(content.campaign_donors)
   const percent = goal > 0 ? Math.min(100, Math.round((raised / goal) * 100)) : 0
 
   return (
@@ -161,7 +175,12 @@ export default async function CampaignPage() {
                   {usd(raised)} <span className="text-gray-500 text-lg font-semibold">of {usd(goal)}</span>
                 </div>
               </div>
-              <div className="text-kp-gold text-2xl font-black tabular-nums">{percent}%</div>
+              <div className="text-right">
+                <div className="text-kp-gold text-2xl font-black tabular-nums">{percent}%</div>
+                {donorCount > 0 && (
+                  <div className="text-gray-400 text-xs tabular-nums">{donorCount} donors</div>
+                )}
+              </div>
             </div>
             <div
               role="progressbar"
@@ -173,6 +192,9 @@ export default async function CampaignPage() {
             >
               <div className="h-full rounded-full bg-kp-gold" style={{ width: `${percent}%` }} />
             </div>
+            <p className="text-gray-500 text-xs mt-3">
+              Thank you, generous donors! As of {content.campaign_as_of}.
+            </p>
           </section>
         )}
 
@@ -244,22 +266,39 @@ export default async function CampaignPage() {
         {levels.length > 0 && (
           <section>
             <div className="mb-6">
-              <div className="text-kp-gold text-xs font-bold uppercase tracking-widest mb-2">Giving Levels</div>
-              <h2 className="text-white font-black text-3xl">Choose Your Level of Impact</h2>
+              <div className="text-kp-gold text-xs font-bold uppercase tracking-widest mb-2">Giving Societies</div>
+              <h2 className="text-white font-black text-3xl">Giving Levels &amp; Donor Recognition</h2>
+              <p className="text-gray-400 text-sm mt-2 max-w-2xl">
+                Donors of $1,000 and above are recognized in giving societies in campaign publications, and
+                pledges of $2,500 and above are displayed on a permanent donor plaque at the house.
+              </p>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 items-start">
               {levels.map(l => (
-                <div key={l.id} className="bg-kp-surface border border-kp-border rounded-2xl overflow-hidden flex flex-col">
+                <div key={l.id} className="bg-kp-surface border border-kp-border rounded-2xl overflow-hidden">
                   <div className="bg-kp-blue px-5 py-4">
-                    <div className="text-kp-gold text-2xl font-black tabular-nums">{l.amount_label}</div>
-                    <div className="text-white font-bold text-sm mt-0.5">{l.name}</div>
+                    <div className="text-white font-bold">{l.name}</div>
+                    <div className="text-kp-gold text-sm font-bold tabular-nums mt-0.5">{l.amount_label}</div>
                   </div>
-                  {l.description && (
-                    <p className="p-5 text-gray-300 text-sm leading-relaxed">{l.description}</p>
-                  )}
+                  <div className="p-5 space-y-3">
+                    {l.donors.length > 0 ? (
+                      <ul className="space-y-1 text-gray-200 text-sm">
+                        {l.donors.map((d, i) => <li key={`${i}-${d}`}>{d}</li>)}
+                      </ul>
+                    ) : (
+                      <p className="text-gray-500 text-sm italic">Your name could be here…</p>
+                    )}
+                    {l.description && (
+                      <p className="text-gray-500 text-xs leading-relaxed pt-3 border-t border-kp-border">{l.description}</p>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
+            <p className="text-gray-500 text-xs mt-4">
+              Donor list as of {content.campaign_as_of}. To request a change to how you&apos;re recognized, contact
+              the VP of Fundraising below.
+            </p>
           </section>
         )}
 
@@ -268,12 +307,48 @@ export default async function CampaignPage() {
           <div>
             <div className="text-kp-gold text-xs font-bold uppercase tracking-widest mb-2">Make Your Gift</div>
             <h2 className="text-white font-black text-3xl">Be Part of the Renovation</h2>
-            <p className="text-gray-300 text-sm leading-relaxed mt-2 max-w-2xl">
-              Please note &ldquo;Capital Campaign&rdquo; with your gift so it&apos;s directed to the renovation.
-            </p>
           </div>
 
-          <WaysToGive checkMemo="Write “Capital Campaign” on the memo line." />
+          <div className="bg-kp-surface border border-kp-gold/30 rounded-2xl overflow-hidden">
+            <div className="grid grid-cols-1 md:grid-cols-[auto_1fr] items-center">
+              <div className="bg-kp-blue p-6 md:p-8 flex flex-col items-center gap-3">
+                <div className="text-kp-gold text-xs font-bold uppercase tracking-widest">Scan to give</div>
+                <a
+                  href={GIVE_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={`Give online at ${GIVE_LABEL}`}
+                  className="block rounded-2xl bg-white p-2 ring-4 ring-kp-gold"
+                >
+                  <Image
+                    src="/images/campaign/give-qr.svg"
+                    alt={`QR code linking to ${GIVE_LABEL}`}
+                    width={200}
+                    height={200}
+                    unoptimized
+                    className="w-44 h-44 sm:w-52 sm:h-52"
+                  />
+                </a>
+              </div>
+              <div className="p-6 md:p-8 space-y-4">
+                <p className="text-gray-200 leading-relaxed">
+                  Join your brothers and make a gift today! Every donation will help bring us closer to an improved
+                  Shelter. Scan the QR code with your phone, or visit{' '}
+                  <a href={GIVE_URL} target="_blank" rel="noopener noreferrer" className="text-kp-gold font-bold">
+                    {GIVE_LABEL}
+                  </a>.
+                </p>
+                <a
+                  href={GIVE_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-block bg-kp-gold text-black font-bold px-6 py-3 rounded-xl text-sm no-underline hover:opacity-90 transition-opacity"
+                >
+                  Give Online
+                </a>
+              </div>
+            </div>
+          </div>
 
           <div className="bg-kp-blue-dark rounded-2xl p-6 md:p-8">
             <p className="text-blue-100 text-sm leading-relaxed">
@@ -281,9 +356,6 @@ export default async function CampaignPage() {
               Adam Rice, VP of Fundraising, at{' '}
               <a href="mailto:fundraising@kappa-phi.org" className="text-kp-gold">fundraising@kappa-phi.org</a>{' '}
               or 573-514-3016.
-            </p>
-            <p className="text-blue-300 text-xs mt-4">
-              Donations to the Kappa Phi Building Corporation are <em>not</em> tax deductible.
             </p>
           </div>
         </section>

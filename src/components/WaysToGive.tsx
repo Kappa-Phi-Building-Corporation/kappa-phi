@@ -1,6 +1,5 @@
-// The PayPal / Venmo / Check cards, shared by /donations and /campaign so the
-// payment details only live in one place.
-export default function WaysToGive({ checkMemo }: { checkMemo?: string }) {
+// The PayPal / Venmo / Check cards for /donations.
+export default function WaysToGive() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
       <div className="bg-kp-surface border border-kp-border rounded-2xl overflow-hidden text-center">
@@ -47,7 +46,6 @@ export default function WaysToGive({ checkMemo }: { checkMemo?: string }) {
             <p>117 Fairburn Dr.</p>
             <p>Rolla, MO 65401</p>
           </address>
-          {checkMemo && <p className="text-gray-500 text-xs mt-3">{checkMemo}</p>}
         </div>
       </div>
     </div>

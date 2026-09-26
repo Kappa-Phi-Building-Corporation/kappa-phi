@@ -4,6 +4,7 @@ type GivingLevel = {
   name: string
   amount_label: string
   description: string | null
+  donors: string | null
   sort_order: number
   is_published: boolean
 }
@@ -43,6 +44,21 @@ export default function GivingLevelForm({
           placeholder="e.g. Name on the donor wall in the renovated living room"
           className={inputCls + ' resize-y'}
         />
+      </div>
+
+      <div>
+        <label htmlFor="donors" className={labelCls}>Donors</label>
+        <textarea
+          id="donors"
+          name="donors"
+          rows={6}
+          defaultValue={level?.donors ?? ''}
+          placeholder={"One name per line, e.g.\nJane Q. Public '95\nAnonymous"}
+          className={inputCls + ' resize-y'}
+        />
+        <p className="text-gray-500 text-xs mt-1">
+          Listed publicly under this level. Put notes in parentheses after the name, e.g. &quot;(in memory of …)&quot;. Leave blank for none.
+        </p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-end">

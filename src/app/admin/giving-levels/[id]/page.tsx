@@ -26,7 +26,7 @@ export default async function EditGivingLevelPage({
 
   const { data: level } = await admin
     .from('campaign_giving_levels')
-    .select('name, amount_label, description, sort_order, is_published')
+    .select('name, amount_label, description, donors, sort_order, is_published')
     .eq('id', id)
     .single()
   if (!level) notFound()

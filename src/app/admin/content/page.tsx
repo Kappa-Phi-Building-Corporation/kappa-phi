@@ -196,15 +196,23 @@ export default async function SiteContentPage({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label htmlFor="campaign_goal" className={labelCls}>Fundraising Goal ($)</label>
-                <input id="campaign_goal" name="campaign_goal" defaultValue={content.campaign_goal} placeholder="e.g. 500000" inputMode="numeric" className={inputCls} />
+                <input id="campaign_goal" name="campaign_goal" defaultValue={content.campaign_goal} placeholder="e.g. 750000" inputMode="numeric" className={inputCls} />
               </div>
               <div>
-                <label htmlFor="campaign_raised" className={labelCls}>Raised So Far ($)</label>
-                <input id="campaign_raised" name="campaign_raised" defaultValue={content.campaign_raised} placeholder="e.g. 125000" inputMode="numeric" className={inputCls} />
+                <label htmlFor="campaign_raised" className={labelCls}>Total Contributed ($)</label>
+                <input id="campaign_raised" name="campaign_raised" defaultValue={content.campaign_raised} placeholder="e.g. 401730" inputMode="numeric" className={inputCls} />
+              </div>
+              <div>
+                <label htmlFor="campaign_donors" className={labelCls}>Number of Donors</label>
+                <input id="campaign_donors" name="campaign_donors" defaultValue={content.campaign_donors} placeholder="e.g. 40" inputMode="numeric" className={inputCls} />
+              </div>
+              <div>
+                <label htmlFor="campaign_as_of" className={labelCls}>Figures As Of</label>
+                <input id="campaign_as_of" name="campaign_as_of" defaultValue={content.campaign_as_of} placeholder="e.g. April 7, 2025" className={inputCls} />
               </div>
             </div>
             <p className="text-gray-500 text-xs -mt-2">
-              The progress bar appears once a goal is entered. Leave both blank to hide it. Update &quot;Raised So Far&quot; whenever you want the page to reflect new gifts.
+              These figures were entered from the Spring 2025 mailing — update them (and the date) whenever you have new totals. Enter 0 as the goal to hide the progress bar, or 0 as the donor count to hide just that number.
             </p>
 
             <p className="text-gray-500 text-xs">

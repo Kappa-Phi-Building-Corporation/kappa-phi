@@ -22,8 +22,11 @@ export const SITE_CONTENT_DEFAULTS = {
   campaign_enabled: 'true',
   campaign_headline: 'Renovating the Shelter',
   campaign_intro: "The Kappa Phi Building Corporation is raising funds to renovate the Shelter: new flooring, lighting, and finishes throughout, a redesigned multi-purpose room and kitchen, and an updated living room, so the next generation of Epsilon Nu brothers has a home worthy of the chapter's legacy.",
-  campaign_goal: '',
-  campaign_raised: '',
+  // Figures from the Spring 2025 mailing — update in Admin → Homepage & About Content.
+  campaign_goal: '750000',
+  campaign_raised: '401730',
+  campaign_donors: '40',
+  campaign_as_of: 'April 7, 2025',
 } as const
 
 export type SiteContentKey = keyof typeof SITE_CONTENT_DEFAULTS
