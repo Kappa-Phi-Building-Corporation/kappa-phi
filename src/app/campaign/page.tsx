@@ -54,7 +54,7 @@ const SPACES: Space[] = [
   {
     title: 'Custom Crest Flooring',
     blurb:
-      'The fraternity crest inlaid in the floor of the multi-purpose room, so every brother who walks in stands on the chapter’s heritage.',
+      'The fraternity crest inlaid in the floor of the multi-purpose room.',
     renderings: [
       {
         src: '/images/campaign/crest-flooring-option-1.jpg',
