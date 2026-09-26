@@ -19,6 +19,11 @@ export const SITE_CONTENT_DEFAULTS = {
   announcement_message: "Welcome to our newly redesigned website! Returning alumni: you'll need to re-register to access the Alumni section.",
   announcement_expires: '2026-11-22',
   social_section_text: 'Stay up to date — follow the chapter on social media',
+  campaign_enabled: 'true',
+  campaign_headline: 'Renovating the Shelter',
+  campaign_intro: "The Kappa Phi Building Corporation is raising funds to renovate the Shelter: new flooring, lighting, and finishes throughout, a redesigned multi-purpose room and kitchen, and an updated living room, so the next generation of Epsilon Nu brothers has a home worthy of the chapter's legacy.",
+  campaign_goal: '',
+  campaign_raised: '',
 } as const
 
 export type SiteContentKey = keyof typeof SITE_CONTENT_DEFAULTS

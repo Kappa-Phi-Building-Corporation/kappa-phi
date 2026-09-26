@@ -167,6 +167,51 @@ export default async function SiteContentPage({
             </div>
           </div>
 
+          <div className="bg-kp-surface border border-kp-border rounded-2xl p-6 md:p-8 space-y-5">
+            <div>
+              <h2 className="text-white font-bold text-lg">Capital Campaign</h2>
+              <p className="text-gray-500 text-xs mt-1">
+                The public <Link href="/campaign" className="text-kp-gold hover:underline">/campaign</Link> page for the Shelter renovation. The renderings and area descriptions are built into the page; the text, goal, and giving levels below are editable.
+              </p>
+            </div>
+
+            <div>
+              <label htmlFor="campaign_enabled" className={labelCls}>Status</label>
+              <select id="campaign_enabled" name="campaign_enabled" defaultValue={content.campaign_enabled} className={inputCls}>
+                <option value="true">Published</option>
+                <option value="false">Hidden (page returns Not Found)</option>
+              </select>
+            </div>
+
+            <div>
+              <label htmlFor="campaign_headline" className={labelCls}>Headline</label>
+              <input id="campaign_headline" name="campaign_headline" defaultValue={content.campaign_headline} className={inputCls} />
+            </div>
+
+            <div>
+              <label htmlFor="campaign_intro" className={labelCls}>Introduction</label>
+              <textarea id="campaign_intro" name="campaign_intro" defaultValue={content.campaign_intro} rows={4} className={textareaCls} />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="campaign_goal" className={labelCls}>Fundraising Goal ($)</label>
+                <input id="campaign_goal" name="campaign_goal" defaultValue={content.campaign_goal} placeholder="e.g. 500000" inputMode="numeric" className={inputCls} />
+              </div>
+              <div>
+                <label htmlFor="campaign_raised" className={labelCls}>Raised So Far ($)</label>
+                <input id="campaign_raised" name="campaign_raised" defaultValue={content.campaign_raised} placeholder="e.g. 125000" inputMode="numeric" className={inputCls} />
+              </div>
+            </div>
+            <p className="text-gray-500 text-xs -mt-2">
+              The progress bar appears once a goal is entered. Leave both blank to hide it. Update &quot;Raised So Far&quot; whenever you want the page to reflect new gifts.
+            </p>
+
+            <p className="text-gray-500 text-xs">
+              <Link href="/admin/giving-levels" className="text-kp-gold hover:underline">Manage giving levels →</Link>
+            </p>
+          </div>
+
           <div className="flex items-center justify-between pt-2 border-t border-kp-border">
             <Link href="/admin/milestones" className="text-gray-500 text-sm hover:text-kp-gold transition-colors no-underline">
               Manage Key Milestones timeline →

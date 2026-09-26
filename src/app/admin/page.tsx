@@ -111,6 +111,7 @@ export default async function AdminDashboardPage() {
     { count: missingBigBrother },
     { count: milestoneCount },
     { count: socialLinkCount },
+    { count: givingLevelCount },
   ] = await Promise.all([
     admin.from('profiles')
       .select('*', { count: 'exact', head: true })
@@ -158,6 +159,8 @@ export default async function AdminDashboardPage() {
     admin.from('chapter_milestones')
       .select('*', { count: 'exact', head: true }),
     admin.from('social_links')
+      .select('*', { count: 'exact', head: true }),
+    admin.from('campaign_giving_levels')
       .select('*', { count: 'exact', head: true }),
   ])
 
@@ -377,6 +380,21 @@ export default async function AdminDashboardPage() {
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
             d="M8.68 13.34a3 3 0 000-2.68m0 2.68l6.64 3.32m-6.64-6l6.64-3.32M18 6a3 3 0 11-6 0 3 3 0 016 0zM18 18a3 3 0 11-6 0 3 3 0 016 0zM9 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+      ),
+    },
+    {
+      title: 'Giving Levels',
+      href: '/admin/giving-levels',
+      description: 'Donation tiers on the Capital Campaign page. Goal and headline are under Homepage & About Content.',
+      pending: 0,
+      pendingLabel: '',
+      total: givingLevelCount ?? 0,
+      totalLabel: 'levels',
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+            d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
       ),
     },

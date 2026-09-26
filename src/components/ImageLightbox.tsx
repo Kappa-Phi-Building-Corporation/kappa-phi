@@ -12,10 +12,20 @@ export function ImageLightboxThumbnail({
   src,
   alt,
   className = 'relative w-20 sm:w-28 aspect-[3/4] shrink-0 rounded-lg overflow-hidden border border-kp-border bg-kp-card',
+  sizes = '140px',
+  fit = 'contain',
+  caption,
 }: {
   src: string
   alt: string
   className?: string
+  // Rendered width of the thumbnail, used to pick an appropriately sized
+  // source image — override for thumbnails much larger than the default.
+  sizes?: string
+  // 'cover' fills the thumbnail box (may trim edges); use only when the box
+  // already matches the image's aspect ratio.
+  fit?: 'contain' | 'cover'
+  caption?: string
 }) {
   const [open, setOpen] = useState(false)
 
@@ -27,7 +37,7 @@ export function ImageLightboxThumbnail({
         aria-label={`View full image: ${alt}`}
         className={`${className} group`}
       >
-        <Image src={src} alt={alt} fill sizes="140px" className="object-contain" />
+        <Image src={src} alt={alt} fill sizes={sizes} className={fit === 'cover' ? 'object-cover' : 'object-contain'} />
         <span className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/40 transition-colors">
           <svg
             className="w-5 h-5 text-white opacity-0 group-hover:opacity-100 transition-opacity"
@@ -55,11 +65,19 @@ export function ImageLightboxThumbnail({
             </svg>
           </button>
           <div
-            className="relative w-[92vw] h-[85vh] max-w-4xl"
+            className={`relative w-[92vw] max-w-6xl ${caption ? 'h-[78vh]' : 'h-[85vh]'}`}
             onClick={e => e.stopPropagation()}
           >
             <Image src={src} alt={alt} fill sizes="92vw" className="object-contain" />
           </div>
+          {caption && (
+            <p
+              className="absolute bottom-4 sm:bottom-8 inset-x-4 text-center text-sm text-gray-200"
+              onClick={e => e.stopPropagation()}
+            >
+              {caption}
+            </p>
+          )}
         </div>
       )}
     </>

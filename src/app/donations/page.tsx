@@ -1,6 +1,17 @@
+import Link from 'next/link'
+import { getSiteContent } from '@/lib/siteContent'
+import WaysToGive from '@/components/WaysToGive'
+
 export const metadata = { title: 'Donations & Fundraising' }
 
-export default function DonationsPage() {
+// Cached for 1 hour; revalidated on demand when admin saves site content
+export const revalidate = 3600
+
+export default async function DonationsPage() {
+  const content = await getSiteContent()
+  const campaignEnabled = content.campaign_enabled === 'true'
+  const headline = content.campaign_headline
+
   return (
     <div className="bg-kp-dark min-h-screen">
       <div className="bg-kp-crimson-dark border-b border-kp-border">
@@ -35,57 +46,34 @@ export default function DonationsPage() {
           </div>
         </div>
 
+        {/* Capital campaign callout */}
+        {campaignEnabled && (
+          <Link
+            href="/campaign"
+            className="group block relative overflow-hidden rounded-2xl border border-kp-gold/40 no-underline"
+          >
+            <div
+              className="absolute inset-0 bg-cover bg-center"
+              style={{ backgroundImage: "url('/images/campaign/living-room.jpg')" }}
+            />
+            <div className="absolute inset-0 bg-kp-dark/85 group-hover:bg-kp-dark/80 transition-colors" />
+            <div className="relative p-8 flex flex-wrap items-center justify-between gap-4">
+              <div className="max-w-xl">
+                <div className="text-kp-gold text-xs font-bold uppercase tracking-widest mb-2">Capital Campaign</div>
+                <h2 className="text-white font-black text-2xl mb-2">{headline}</h2>
+                <p className="text-gray-300 text-sm">See the renderings, the giving levels, and how to be part of the renovation.</p>
+              </div>
+              <span className="shrink-0 bg-kp-gold text-black font-bold px-6 py-2.5 rounded-lg text-sm group-hover:opacity-90 transition-opacity">
+                View the Campaign →
+              </span>
+            </div>
+          </Link>
+        )}
+
         {/* Ways to give */}
         <div>
           <h2 className="text-white font-bold text-2xl mb-6">Ways to Give</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            <div className="bg-kp-surface border border-kp-border rounded-2xl overflow-hidden text-center">
-              <div className="bg-kp-blue px-5 py-3.5">
-                <h3 className="text-kp-gold font-bold">PayPal</h3>
-              </div>
-              <div className="p-6">
-                <p className="text-gray-400 text-sm mb-5">One-time or recurring donations</p>
-                <a
-                  href="https://www.paypal.com/donate?hosted_button_id=RRHFP9PRAJW4G"
-                  target="_blank" rel="noopener noreferrer"
-                  className="inline-block bg-kp-gold text-black font-bold px-6 py-2.5 rounded-lg hover:opacity-90 transition-opacity text-sm no-underline"
-                >
-                  Donate via PayPal
-                </a>
-              </div>
-            </div>
-
-            <div className="bg-kp-surface border border-kp-border rounded-2xl overflow-hidden text-center">
-              <div className="bg-kp-blue px-5 py-3.5">
-                <h3 className="text-kp-gold font-bold">Venmo</h3>
-              </div>
-              <div className="p-6">
-                <p className="text-gray-400 text-sm mb-5">One-time donations</p>
-                <a
-                  href="https://venmo.com/u/KappaPhiBuildingCorp"
-                  target="_blank" rel="noopener noreferrer"
-                  className="inline-block bg-kp-gold text-black font-bold px-6 py-2.5 rounded-lg hover:opacity-90 transition-opacity text-sm no-underline"
-                >
-                  @KappaPhiBuildingCorp
-                </a>
-              </div>
-            </div>
-
-            <div className="bg-kp-surface border border-kp-border rounded-2xl overflow-hidden">
-              <div className="bg-kp-blue px-5 py-3.5">
-                <h3 className="text-kp-gold font-bold">Check</h3>
-              </div>
-              <div className="p-6">
-                <p className="text-gray-400 text-sm mb-3">Payable to Kappa Phi Building Corporation:</p>
-                <address className="not-italic text-gray-300 text-sm space-y-0.5">
-                  <p>Kappa Phi Building Corporation</p>
-                  <p>VP of Fundraising</p>
-                  <p>117 Fairburn Dr.</p>
-                  <p>Rolla, MO 65401</p>
-                </address>
-              </div>
-            </div>
-          </div>
+          <WaysToGive />
         </div>
 
         {/* Scholarship */}
