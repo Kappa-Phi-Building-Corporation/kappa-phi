@@ -50,6 +50,16 @@ export default async function Home() {
     { number: content.home_stat_4_number, label: content.home_stat_4_label },
   ]
 
+  const campaignEnabled = content.campaign_enabled === 'true'
+  const toNumber = (v: string) => {
+    const n = parseFloat(v.replace(/[^0-9.]/g, ''))
+    return Number.isFinite(n) ? n : 0
+  }
+  const usd = (n: number) => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })
+  const goal = toNumber(content.campaign_goal)
+  const raised = toNumber(content.campaign_raised)
+  const percent = goal > 0 ? Math.min(100, Math.round((raised / goal) * 100)) : 0
+
   return (
     <>
       {/* ── Hero ── */}
@@ -94,10 +104,10 @@ export default async function Home() {
                 {isLoggedIn ? 'Alumni Information' : 'Alumni Login'}
               </Link>
               <Link
-                href="/donations"
+                href={campaignEnabled ? '/campaign' : '/donations'}
                 className="border-2 border-white/50 text-white font-bold px-7 py-3.5 rounded-xl no-underline hover:border-kp-gold hover:text-kp-gold transition-colors text-sm"
               >
-                Support the Shelter
+                {campaignEnabled ? 'Renovate the Shelter' : 'Support the Shelter'}
               </Link>
               <Link
                 href="/about"
@@ -123,6 +133,64 @@ export default async function Home() {
           </div>
         </div>
       </section>
+
+      {/* ── Capital Campaign ── */}
+      {campaignEnabled && (
+        <section
+          className="relative border-b border-kp-border overflow-hidden"
+          style={{
+            backgroundImage: "url('/images/campaign/living-room.jpg')",
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          }}
+        >
+          <div className="absolute inset-0 bg-kp-dark/90" />
+          <div className="relative max-w-7xl mx-auto px-4 py-14 grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+            <div>
+              <div className="text-kp-gold text-xs font-bold uppercase tracking-widest mb-3">Capital Campaign</div>
+              <h2 className="text-white text-3xl md:text-4xl font-black mb-4">{content.campaign_headline}</h2>
+              <p className="text-gray-300 leading-relaxed mb-6 max-w-xl">{content.campaign_intro}</p>
+              <div className="flex flex-wrap gap-3">
+                <Link
+                  href="/campaign"
+                  className="bg-kp-gold text-black font-bold px-7 py-3.5 rounded-xl no-underline hover:opacity-90 transition-opacity text-sm"
+                >
+                  See the Renderings
+                </Link>
+                <Link
+                  href="/campaign#give"
+                  className="border-2 border-white/50 text-white font-bold px-7 py-3.5 rounded-xl no-underline hover:border-kp-gold hover:text-kp-gold transition-colors text-sm"
+                >
+                  Give Now
+                </Link>
+              </div>
+            </div>
+
+            {goal > 0 && (
+              <div className="bg-kp-surface/90 border border-kp-gold/30 rounded-2xl p-6 md:p-8">
+                <div className="text-kp-gold text-xs font-bold uppercase tracking-widest mb-1">Campaign Progress</div>
+                <div className="flex items-end justify-between gap-4 mb-4">
+                  <div className="text-white text-3xl md:text-4xl font-black tabular-nums">
+                    {usd(raised)} <span className="text-gray-500 text-base font-semibold">of {usd(goal)}</span>
+                  </div>
+                  <div className="text-kp-gold text-2xl font-black tabular-nums">{percent}%</div>
+                </div>
+                <div
+                  role="progressbar"
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  aria-valuenow={percent}
+                  aria-label={`${percent}% of the campaign goal raised`}
+                  className="h-3 rounded-full bg-kp-card overflow-hidden"
+                >
+                  <div className="h-full rounded-full bg-kp-gold" style={{ width: `${percent}%` }} />
+                </div>
+                <p className="text-gray-500 text-xs mt-3">Thank you, generous donors! As of {content.campaign_as_of}.</p>
+              </div>
+            )}
+          </div>
+        </section>
+      )}
 
       {/* ── Mission ── */}
       <section className="bg-kp-surface border-b border-kp-border py-14">

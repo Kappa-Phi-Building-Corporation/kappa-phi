@@ -39,6 +39,7 @@ const ENTITY_LABELS: Record<string, string> = {
   chapter_milestone: 'Chapter Milestone',
   social_link: 'Social Link',
   giving_level: 'Giving Level',
+  newsletter: 'Newsletter',
 }
 
 const ACTION_STYLES: Record<string, string> = {

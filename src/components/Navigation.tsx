@@ -6,17 +6,22 @@ import { usePathname } from 'next/navigation'
 import { useState } from 'react'
 import { logout } from '@/app/auth/actions'
 
-const navItems = [
-  { label: 'Home', href: '/' },
-  { label: 'About', href: '/about' },
-  { label: 'Board', href: '/board' },
-  { label: 'Alumni', href: '/alumni' },
-  { label: 'Property', href: '/property' },
-  { label: 'Donations', href: '/donations' },
-  { label: 'Events', href: '/events' },
-  { label: 'Contact', href: '/contact' },
-  { label: 'Portal', href: '/portal' },
-]
+type NavItem = { label: string; href: string; highlight?: boolean }
+
+function buildNavItems({ showCampaign, showProperty }: { showCampaign: boolean; showProperty: boolean }): NavItem[] {
+  return [
+    { label: 'Home', href: '/' },
+    { label: 'About', href: '/about' },
+    { label: 'Board', href: '/board' },
+    { label: 'Alumni', href: '/alumni' },
+    ...(showProperty ? [{ label: 'Property', href: '/property' }] : []),
+    ...(showCampaign ? [{ label: 'Campaign', href: '/campaign', highlight: true }] : []),
+    { label: 'Donations', href: '/donations' },
+    { label: 'Events', href: '/events' },
+    { label: 'Contact', href: '/contact' },
+    { label: 'Portal', href: '/portal' },
+  ]
+}
 
 type NavUser = {
   email: string
@@ -25,9 +30,18 @@ type NavUser = {
   adminPendingCount?: number
 }
 
-export default function Navigation({ navUser }: { navUser: NavUser | null }) {
+export default function Navigation({
+  navUser,
+  showCampaign = true,
+  showProperty = false,
+}: {
+  navUser: NavUser | null
+  showCampaign?: boolean
+  showProperty?: boolean
+}) {
   const pathname = usePathname()
   const [open, setOpen] = useState(false)
+  const navItems = buildNavItems({ showCampaign, showProperty })
 
   const isActive = (href: string) =>
     href === '/' ? pathname === '/' : pathname.startsWith(href)
@@ -63,7 +77,9 @@ export default function Navigation({ navUser }: { navUser: NavUser | null }) {
               className={`px-3 py-1.5 rounded-md text-sm font-medium no-underline transition-colors ${
                 isActive(item.href)
                   ? 'bg-kp-gold text-black'
-                  : 'text-blue-100 hover:bg-kp-blue-light hover:text-white'
+                  : item.highlight
+                    ? 'text-kp-gold ring-1 ring-kp-gold/60 hover:bg-kp-gold hover:text-black'
+                    : 'text-blue-100 hover:bg-kp-blue-light hover:text-white'
               }`}
             >
               {item.label}
@@ -162,7 +178,9 @@ export default function Navigation({ navUser }: { navUser: NavUser | null }) {
                 className={`px-3 py-2.5 rounded-md text-sm font-medium no-underline transition-colors ${
                   isActive(item.href)
                     ? 'bg-kp-gold text-black'
-                    : 'text-blue-100 hover:bg-kp-blue-light hover:text-white'
+                    : item.highlight
+                      ? 'text-kp-gold ring-1 ring-kp-gold/60 hover:bg-kp-gold hover:text-black'
+                      : 'text-blue-100 hover:bg-kp-blue-light hover:text-white'
                 }`}
               >
                 {item.label}

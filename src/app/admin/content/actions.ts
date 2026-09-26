@@ -35,6 +35,8 @@ export async function updateSiteContent(formData: FormData) {
   revalidatePath('/')
   revalidatePath('/about')
   revalidatePath('/campaign')
+  revalidatePath('/property')
+  revalidatePath('/sitemap.xml')
   revalidatePath('/donations')
   revalidatePath('/admin/content')
   redirect('/admin/content?success=1')

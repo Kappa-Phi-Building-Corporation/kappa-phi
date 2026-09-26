@@ -215,9 +215,37 @@ export default async function SiteContentPage({
               These figures were entered from the Spring 2025 mailing — update them (and the date) whenever you have new totals. Enter 0 as the goal to hide the progress bar, or 0 as the donor count to hide just that number.
             </p>
 
+            <div>
+              <span className={labelCls}>Fundraising Contact</span>
+              <p className="text-gray-500 text-xs mb-3">Shown to donors on the Donations and Campaign pages. Leave the phone blank to omit it.</p>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <input name="fundraising_contact_name" aria-label="Contact name" defaultValue={content.fundraising_contact_name} placeholder="Name or title" className={inputCls} />
+                <input name="fundraising_contact_email" aria-label="Contact email" type="email" defaultValue={content.fundraising_contact_email} placeholder="Email" className={inputCls} />
+                <input name="fundraising_contact_phone" aria-label="Contact phone" defaultValue={content.fundraising_contact_phone} placeholder="Phone (optional)" className={inputCls} />
+              </div>
+            </div>
+
             <p className="text-gray-500 text-xs">
               <Link href="/admin/giving-levels" className="text-kp-gold hover:underline">Manage giving levels →</Link>
             </p>
+          </div>
+
+          <div className="bg-kp-surface border border-kp-border rounded-2xl p-6 md:p-8 space-y-5">
+            <div>
+              <h2 className="text-white font-bold text-lg">Property Page</h2>
+              <p className="text-gray-500 text-xs mt-1">
+                When hidden, the Property link leaves the top menu, the page returns Not Found, and it drops out of search and the sitemap. Your project data is kept —{' '}
+                <Link href="/admin/property" className="text-kp-gold hover:underline">edit projects here</Link>{' '}
+                and switch this back to Shown when it&apos;s up to date.
+              </p>
+            </div>
+            <div className="max-w-xs">
+              <label htmlFor="property_page_enabled" className={labelCls}>Status</label>
+              <select id="property_page_enabled" name="property_page_enabled" defaultValue={content.property_page_enabled} className={inputCls}>
+                <option value="true">Shown</option>
+                <option value="false">Hidden</option>
+              </select>
+            </div>
           </div>
 
           <div className="flex items-center justify-between pt-2 border-t border-kp-border">

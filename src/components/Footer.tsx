@@ -6,6 +6,7 @@ const quickLinks = [
   ['Alumni Information', '/alumni'],
   ['Donations & Fundraising', '/donations'],
   ['Events & Calendar', '/events'],
+  ['Newsletters', '/newsletters'],
   ['Contact Us', '/contact'],
   ['Chapter Portal', '/portal'],
 ]

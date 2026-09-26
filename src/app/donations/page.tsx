@@ -38,11 +38,13 @@ export default async function DonationsPage() {
             beloved shelter.
           </p>
           <div className="border-t border-kp-border pt-5">
-            <p className="text-kp-gold font-semibold">Adam Rice &mdash; VP of Fundraising</p>
-            <a href="mailto:fundraising@kappa-phi.org" className="text-gray-400 text-sm hover:text-kp-gold">
-              fundraising@kappa-phi.org
+            <p className="text-kp-gold font-semibold">{content.fundraising_contact_name}</p>
+            <a href={`mailto:${content.fundraising_contact_email}`} className="text-gray-400 text-sm hover:text-kp-gold">
+              {content.fundraising_contact_email}
             </a>
-            <span className="text-gray-500 text-sm"> · 573-514-3016</span>
+            {content.fundraising_contact_phone && (
+              <span className="text-gray-500 text-sm"> · {content.fundraising_contact_phone}</span>
+            )}
           </div>
         </div>
 

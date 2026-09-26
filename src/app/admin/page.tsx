@@ -112,6 +112,7 @@ export default async function AdminDashboardPage() {
     { count: milestoneCount },
     { count: socialLinkCount },
     { count: givingLevelCount },
+    { count: newsletterCount },
   ] = await Promise.all([
     admin.from('profiles')
       .select('*', { count: 'exact', head: true })
@@ -161,6 +162,8 @@ export default async function AdminDashboardPage() {
     admin.from('social_links')
       .select('*', { count: 'exact', head: true }),
     admin.from('campaign_giving_levels')
+      .select('*', { count: 'exact', head: true }),
+    admin.from('newsletters')
       .select('*', { count: 'exact', head: true }),
   ])
 
@@ -380,6 +383,21 @@ export default async function AdminDashboardPage() {
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
             d="M8.68 13.34a3 3 0 000-2.68m0 2.68l6.64 3.32m-6.64-6l6.64-3.32M18 6a3 3 0 11-6 0 3 3 0 016 0zM18 18a3 3 0 11-6 0 3 3 0 016 0zM9 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+      ),
+    },
+    {
+      title: 'Newsletters',
+      href: '/admin/newsletters',
+      description: 'Upload newsletter PDFs for the public Newsletters page.',
+      pending: 0,
+      pendingLabel: '',
+      total: newsletterCount ?? 0,
+      totalLabel: 'newsletters',
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+            d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
         </svg>
       ),
     },

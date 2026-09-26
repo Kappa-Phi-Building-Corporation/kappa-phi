@@ -27,6 +27,13 @@ export const SITE_CONTENT_DEFAULTS = {
   campaign_raised: '401730',
   campaign_donors: '40',
   campaign_as_of: 'April 7, 2025',
+  // Shown on /donations and /campaign wherever donors are told who to contact.
+  fundraising_contact_name: 'Kappa Phi Building Corporation',
+  fundraising_contact_email: 'kappaphi@kappa-phi.org',
+  fundraising_contact_phone: '',
+  // The Property page is out of date, so it starts hidden. Shown/Hidden in
+  // Admin → Homepage & About Content brings it back (nav link, page, sitemap, search).
+  property_page_enabled: 'false',
 } as const
 
 export type SiteContentKey = keyof typeof SITE_CONTENT_DEFAULTS

@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { getSiteContent } from '@/lib/siteContent'
 
 export const metadata = { title: 'Search' }
 
@@ -48,6 +49,7 @@ export default async function SearchPage({
   const { data: { user } } = await supabase.auth.getUser()
 
   const admin = createAdminClient()
+  const propertyEnabled = (await getSiteContent()).property_page_enabled === 'true'
   let canSearchMembers = false
   let isAdmin = false
 
@@ -93,7 +95,8 @@ export default async function SearchPage({
     ])
 
     honors = (honorRows as HonorResult[] | null) ?? []
-    projects = (projectRows as ProjectResult[] | null) ?? []
+    // Project results link to /property, which 404s while that page is hidden.
+    projects = propertyEnabled ? ((projectRows as ProjectResult[] | null) ?? []) : []
     members = (memberRows.data as MemberResult[] | null) ?? []
   }
 
@@ -106,14 +109,20 @@ export default async function SearchPage({
         <div className="max-w-4xl mx-auto px-4 py-10">
           <div className="text-kp-gold text-xs font-bold uppercase tracking-widest mb-2">Search</div>
           <h1 className="text-4xl font-black text-white mb-6">
-            {canSearchMembers ? 'Search Members, Honors & Property' : 'Search Honors & Property'}
+            {canSearchMembers
+              ? (propertyEnabled ? 'Search Members, Honors & Property' : 'Search Members & Honors')
+              : (propertyEnabled ? 'Search Honors & Property' : 'Search Honors')}
           </h1>
           <form method="get" className="flex gap-3">
             <input
               type="search"
               name="q"
               defaultValue={q}
-              placeholder={canSearchMembers ? 'Search by name, badge number, honor, or project…' : 'Search honor rolls or property projects…'}
+              placeholder={
+                canSearchMembers
+                  ? (propertyEnabled ? 'Search by name, badge number, honor, or project…' : 'Search by name, badge number, or honor…')
+                  : (propertyEnabled ? 'Search honor rolls or property projects…' : 'Search honor rolls…')
+              }
               autoFocus
               className="flex-1 bg-kp-dark border border-kp-border rounded-xl px-4 py-3 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-kp-gold focus:ring-1 focus:ring-kp-gold transition-colors"
             />

@@ -1,5 +1,7 @@
 import Image from 'next/image'
+import { notFound } from 'next/navigation'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { getSiteContent } from '@/lib/siteContent'
 
 export const metadata = { title: 'Property Management' }
 export const revalidate = 3600
@@ -160,6 +162,11 @@ function ArchiveRow({ p }: { p: Project }) {
 // ─── Page ─────────────────────────────────────────────────────────
 
 export default async function PropertyPage() {
+  // Hidden by default while the page content is out of date; an admin turns
+  // it back on under Homepage & About Content.
+  const content = await getSiteContent()
+  if (content.property_page_enabled !== 'true') notFound()
+
   const admin = createAdminClient()
 
   // Planned/recent ordered by sort_order; archive ordered by updated_at DESC (most recently archived first)

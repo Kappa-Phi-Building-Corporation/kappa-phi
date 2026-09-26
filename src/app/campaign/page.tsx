@@ -296,8 +296,8 @@ export default async function CampaignPage() {
               ))}
             </div>
             <p className="text-gray-500 text-xs mt-4">
-              Donor list as of {content.campaign_as_of}. To request a change to how you&apos;re recognized, contact
-              the VP of Fundraising below.
+              Donor list as of {content.campaign_as_of}. To request a change to how you&apos;re recognized, use the
+              contact below.
             </p>
           </section>
         )}
@@ -352,10 +352,10 @@ export default async function CampaignPage() {
 
           <div className="bg-kp-blue-dark rounded-2xl p-6 md:p-8">
             <p className="text-blue-100 text-sm leading-relaxed">
-              Interested in a larger gift, a multi-year pledge, or naming and recognition opportunities? Contact
-              Adam Rice, VP of Fundraising, at{' '}
-              <a href="mailto:fundraising@kappa-phi.org" className="text-kp-gold">fundraising@kappa-phi.org</a>{' '}
-              or 573-514-3016.
+              Interested in a larger gift, a multi-year pledge, or naming and recognition opportunities? Contact{' '}
+              {content.fundraising_contact_name} at{' '}
+              <a href={`mailto:${content.fundraising_contact_email}`} className="text-kp-gold">{content.fundraising_contact_email}</a>
+              {content.fundraising_contact_phone ? ` or ${content.fundraising_contact_phone}` : ''}.
             </p>
           </div>
         </section>

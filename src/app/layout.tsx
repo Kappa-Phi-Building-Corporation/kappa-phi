@@ -85,7 +85,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang="en" className={inter.variable}>
       <body className="bg-kp-dark text-white min-h-screen flex flex-col antialiased">
-        <Navigation navUser={navUser} />
+        <Navigation
+          navUser={navUser}
+          showCampaign={content.campaign_enabled === 'true'}
+          showProperty={content.property_page_enabled === 'true'}
+        />
         <AnnouncementBanner
           enabled={content.announcement_enabled === 'true'}
           message={content.announcement_message}
