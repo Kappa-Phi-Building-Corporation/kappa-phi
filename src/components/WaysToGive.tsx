@@ -1,7 +1,23 @@
-// The PayPal / Venmo / Check cards for /donations.
+// The CauseVox / PayPal / Venmo / Check cards for /donations.
 export default function WaysToGive() {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+      <div className="bg-kp-surface border border-kp-gold/40 rounded-2xl overflow-hidden text-center">
+        <div className="bg-kp-blue px-5 py-3.5">
+          <h3 className="text-kp-gold font-bold">Capital Campaign</h3>
+        </div>
+        <div className="p-6">
+          <p className="text-gray-400 text-sm mb-5">Give toward the Shelter renovation</p>
+          <a
+            href="https://dtdepsilonnu.causevox.com/"
+            target="_blank" rel="noopener noreferrer"
+            className="inline-block bg-kp-gold text-black font-bold px-6 py-2.5 rounded-lg hover:opacity-90 transition-opacity text-sm no-underline"
+          >
+            Donate Online
+          </a>
+        </div>
+      </div>
+
       <div className="bg-kp-surface border border-kp-border rounded-2xl overflow-hidden text-center">
         <div className="bg-kp-blue px-5 py-3.5">
           <h3 className="text-kp-gold font-bold">PayPal</h3>
