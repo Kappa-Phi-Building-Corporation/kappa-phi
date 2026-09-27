@@ -75,7 +75,7 @@ export default async function DonationsPage() {
         {/* Ways to give */}
         <div>
           <h2 className="text-white font-bold text-2xl mb-6">Ways to Give</h2>
-          <WaysToGive />
+          <WaysToGive campaignGiveUrl={content.campaign_give_url} />
         </div>
 
         {/* Scholarship */}

@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { logActivity } from '@/lib/activityLog'
+import { ensureBucket } from '@/lib/ensureBucket'
 
 const BUCKET = 'newsletters'
 const MAX_BYTES = 50 * 1024 * 1024
@@ -38,16 +39,7 @@ export type NewsletterInput = {
 export async function prepareNewsletterUpload(): Promise<Result<{ path: string; token: string }>> {
   const admin = await assertAdmin()
 
-  // Create the bucket on first use so there's no manual Storage setup.
-  const { error: bucketError } = await admin.storage.getBucket(BUCKET)
-  if (bucketError) {
-    const { error: createError } = await admin.storage.createBucket(BUCKET, {
-      public: true,
-      fileSizeLimit: MAX_BYTES,
-      allowedMimeTypes: ['application/pdf'],
-    })
-    if (createError) return { ok: false, error: `Could not create the storage bucket: ${createError.message}` }
-  }
+  await ensureBucket(admin, BUCKET, { fileSizeLimitBytes: MAX_BYTES, allowedMimeTypes: ['application/pdf'] })
 
   const path = `${crypto.randomUUID()}.pdf`
   const { data, error } = await admin.storage.from(BUCKET).createSignedUploadUrl(path)

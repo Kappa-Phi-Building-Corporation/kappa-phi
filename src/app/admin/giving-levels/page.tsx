@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getSiteContent } from '@/lib/siteContent'
@@ -23,12 +24,13 @@ export default async function AdminGivingLevelsPage({
   const { data: profile } = await admin.from('profiles').select('role').eq('id', user.id).single()
   if (profile?.role !== 'admin' && profile?.role !== 'website_admin') redirect('/portal')
 
-  const [content, { data: levels }] = await Promise.all([
+  const [content, { data: levels }, { count: sectionCount }] = await Promise.all([
     getSiteContent(),
     admin
       .from('campaign_giving_levels')
       .select('id, name, amount_label, description, sort_order, is_published')
       .order('sort_order', { ascending: true }),
+    admin.from('campaign_sections').select('*', { count: 'exact', head: true }),
   ])
 
   const rows = levels ?? []
@@ -44,8 +46,8 @@ export default async function AdminGivingLevelsPage({
           <div className="text-kp-gold text-xs font-bold uppercase tracking-widest mb-2">Administration</div>
           <h1 className="text-4xl font-black text-white">Capital Campaign &amp; Giving Levels</h1>
           <p className="text-gray-400 mt-1 text-sm">
-            Everything on the public <Link href="/campaign" className="text-kp-gold hover:underline">Campaign page</Link> that you can edit.
-            The renderings and area descriptions are built into the page.
+            Everything on the public <Link href="/campaign" className="text-kp-gold hover:underline">Campaign page</Link>: settings, the vision
+            &amp; renderings, and the giving levels.
           </p>
         </div>
       </div>
@@ -63,7 +65,7 @@ export default async function AdminGivingLevelsPage({
         )}
 
         {/* Campaign settings */}
-        <form action={updateCampaignSettings} className="bg-kp-surface border border-kp-border rounded-2xl p-6 md:p-8 space-y-5">
+        <form action={updateCampaignSettings} encType="multipart/form-data" className="bg-kp-surface border border-kp-border rounded-2xl p-6 md:p-8 space-y-5">
           <h2 className="text-white font-bold text-lg">Campaign Settings</h2>
 
           <div>
@@ -82,6 +84,30 @@ export default async function AdminGivingLevelsPage({
           <div>
             <label htmlFor="campaign_intro" className={labelCls}>Introduction</label>
             <textarea id="campaign_intro" name="campaign_intro" defaultValue={content.campaign_intro} rows={4} className={inputCls + ' resize-y'} />
+          </div>
+
+          <div>
+            <span className={labelCls}>Hero Photo</span>
+            <div className="flex items-start gap-4">
+              <div className="relative w-28 h-20 shrink-0 rounded-lg overflow-hidden border border-kp-border bg-kp-card">
+                <Image
+                  src={content.campaign_hero_image || '/images/campaign/living-room.jpg'}
+                  alt="Current campaign hero photo"
+                  fill
+                  sizes="112px"
+                  className="object-cover"
+                />
+              </div>
+              <div className="flex-1 min-w-0">
+                <input
+                  name="hero_image"
+                  type="file"
+                  accept="image/*"
+                  className="w-full text-sm text-gray-400 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border file:border-kp-border file:bg-kp-card file:text-gray-300 file:text-xs file:font-medium hover:file:border-kp-gold hover:file:text-kp-gold file:transition-colors cursor-pointer"
+                />
+                <p className="text-gray-500 text-xs mt-1.5">Background image behind the headline. Leave empty to keep the current photo.</p>
+              </div>
+            </div>
           </div>
 
           <div>
@@ -119,12 +145,59 @@ export default async function AdminGivingLevelsPage({
             <p className="text-gray-500 text-xs mt-2">Shown to donors on the Campaign and Donations pages. Leave the phone blank to omit it.</p>
           </div>
 
+          <div>
+            <label htmlFor="campaign_give_url" className={labelCls}>Give Online Link</label>
+            <input id="campaign_give_url" name="campaign_give_url" type="url" defaultValue={content.campaign_give_url} className={inputCls} />
+            <p className="text-gray-500 text-xs mt-1">
+              Where the &quot;Give Online&quot; button, the QR code, and the Donations page &quot;Capital Campaign&quot; card all point.
+            </p>
+          </div>
+
+          <div>
+            <label htmlFor="campaign_give_blurb" className={labelCls}>Give Section Message</label>
+            <textarea id="campaign_give_blurb" name="campaign_give_blurb" defaultValue={content.campaign_give_blurb} rows={3} className={inputCls + ' resize-y'} />
+          </div>
+
+          <div>
+            <label htmlFor="campaign_gift_funds" className={labelCls}>&quot;What Your Gift Funds&quot; List</label>
+            <textarea
+              id="campaign_gift_funds"
+              name="campaign_gift_funds"
+              defaultValue={content.campaign_gift_funds}
+              rows={6}
+              placeholder={'One item per line, e.g.\nRenovated living room'}
+              className={inputCls + ' resize-y'}
+            />
+            <p className="text-gray-500 text-xs mt-1">One item per line. Leave blank to hide this section entirely.</p>
+          </div>
+
+          <div>
+            <label htmlFor="campaign_renderings_credit" className={labelCls}>Renderings Credit Line</label>
+            <input id="campaign_renderings_credit" name="campaign_renderings_credit" defaultValue={content.campaign_renderings_credit} className={inputCls} />
+            <p className="text-gray-500 text-xs mt-1">Small print under the renderings. Leave blank to omit it.</p>
+          </div>
+
           <div className="flex justify-end pt-2 border-t border-kp-border">
             <button type="submit" className="bg-kp-gold text-black font-bold px-6 py-2.5 rounded-xl text-sm hover:opacity-90 transition-opacity">
               Save Campaign Settings
             </button>
           </div>
         </form>
+
+        {/* Vision & renderings */}
+        <div className="bg-kp-surface border border-kp-border rounded-2xl p-6 md:p-8 flex items-center justify-between gap-4 flex-wrap">
+          <div>
+            <h2 className="text-white font-bold text-lg">Vision &amp; Renderings</h2>
+            <p className="text-gray-500 text-xs mt-1">
+              {sectionCount ?? 0} section{(sectionCount ?? 0) !== 1 ? 's' : ''} in &quot;What We&apos;re Building,&quot; each with its own photos.
+            </p>
+          </div>
+          <Link
+            href="/admin/campaign-sections"
+            className="shrink-0 bg-kp-gold text-black font-bold px-5 py-2.5 rounded-xl text-sm hover:opacity-90 transition-opacity no-underline">
+            Manage Sections &amp; Photos →
+          </Link>
+        </div>
 
         {/* Giving levels */}
         <section className="space-y-4">

@@ -113,6 +113,7 @@ export default async function AdminDashboardPage() {
     { count: socialLinkCount },
     { count: givingLevelCount },
     { count: newsletterCount },
+    { count: campaignSectionCount },
   ] = await Promise.all([
     admin.from('profiles')
       .select('*', { count: 'exact', head: true })
@@ -164,6 +165,8 @@ export default async function AdminDashboardPage() {
     admin.from('campaign_giving_levels')
       .select('*', { count: 'exact', head: true }),
     admin.from('newsletters')
+      .select('*', { count: 'exact', head: true }),
+    admin.from('campaign_sections')
       .select('*', { count: 'exact', head: true }),
   ])
 
@@ -413,6 +416,21 @@ export default async function AdminDashboardPage() {
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
             d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      ),
+    },
+    {
+      title: 'Campaign Vision & Renderings',
+      href: '/admin/campaign-sections',
+      description: '"What We\'re Building" sections and photos on the Campaign page.',
+      pending: 0,
+      pendingLabel: '',
+      total: campaignSectionCount ?? 0,
+      totalLabel: 'sections',
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14M14 8h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
         </svg>
       ),
     },

@@ -40,6 +40,7 @@ const ENTITY_LABELS: Record<string, string> = {
   social_link: 'Social Link',
   giving_level: 'Giving Level',
   newsletter: 'Newsletter',
+  campaign_section: 'Campaign Section',
 }
 
 const ACTION_STYLES: Record<string, string> = {

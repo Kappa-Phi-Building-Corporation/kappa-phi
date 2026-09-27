@@ -6,6 +6,10 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { logActivity } from '@/lib/activityLog'
 import { CAMPAIGN_KEYS, CAMPAIGN_BLANK_OK, SITE_CONTENT_DEFAULTS } from '@/lib/siteContent'
+import { compressImage } from '@/lib/imageCompress'
+import { ensureBucket } from '@/lib/ensureBucket'
+
+const PHOTO_BUCKET = 'campaign-photos'
 
 async function assertAdmin() {
   const supabase = await createClient()
@@ -31,7 +35,7 @@ function buildPayload(form: FormData) {
 export async function updateCampaignSettings(formData: FormData) {
   const admin = await assertAdmin()
 
-  const rows = CAMPAIGN_KEYS.map(key => {
+  const rows: { key: string; value: string; updated_at: string }[] = CAMPAIGN_KEYS.map(key => {
     const value = ((formData.get(key) as string) ?? '').trim()
     return {
       key,
@@ -39,6 +43,22 @@ export async function updateCampaignSettings(formData: FormData) {
       updated_at: new Date().toISOString(),
     }
   })
+
+  // The hero image is a file input in the same form; only touch it when a
+  // new file was actually chosen, so re-saving the rest of the settings
+  // never clears it.
+  const heroFile = formData.get('hero_image') as File | null
+  if (heroFile && heroFile.size > 0) {
+    await ensureBucket(admin, PHOTO_BUCKET, { fileSizeLimitBytes: 8 * 1024 * 1024, allowedMimeTypes: ['image/*'] })
+    const raw = new Uint8Array(await heroFile.arrayBuffer())
+    const { buffer, contentType } = await compressImage(raw, 1920)
+    const path = `hero-${Date.now()}.jpg`
+    const { error: uploadError } = await admin.storage.from(PHOTO_BUCKET).upload(path, buffer, { contentType, upsert: true })
+    if (!uploadError) {
+      const { data: { publicUrl } } = admin.storage.from(PHOTO_BUCKET).getPublicUrl(path)
+      rows.push({ key: 'campaign_hero_image', value: publicUrl, updated_at: new Date().toISOString() })
+    }
+  }
 
   const { error } = await admin.from('site_content').upsert(rows, { onConflict: 'key' })
   if (error) redirect('/admin/giving-levels?error=' + encodeURIComponent(error.message))

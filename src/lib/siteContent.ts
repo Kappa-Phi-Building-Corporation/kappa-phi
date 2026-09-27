@@ -34,6 +34,21 @@ export const SITE_CONTENT_DEFAULTS = {
   // The Property page is out of date, so it starts hidden. Shown/Hidden in
   // Admin → Homepage & About Content brings it back (nav link, page, sitemap, search).
   property_page_enabled: 'false',
+  // Campaign page pieces beyond the sections/photos (which live in the
+  // campaign_sections/campaign_section_photos tables) and the giving levels
+  // (campaign_giving_levels table).
+  campaign_hero_image: '', // falls back to /images/campaign/living-room.jpg when blank
+  campaign_give_url: 'https://dtdepsilonnu.causevox.com',
+  campaign_give_blurb: 'Join your brothers and make a gift today! Every donation will help bring us closer to an improved Shelter.',
+  campaign_gift_funds: [
+    'New flooring and wall base throughout the lower level, corridors, and stairs',
+    'Updated lighting in the renovated spaces',
+    'Redesigned multi-purpose room with kitchen and audio/video wall',
+    'Renovated living room',
+    'Updated meeting room',
+    'Refreshed restrooms and showers',
+  ].join('\n'),
+  campaign_renderings_credit: 'Renderings by Chiodini Architects. These are design concepts; final finishes and layouts may vary.',
 } as const
 
 export type SiteContentKey = keyof typeof SITE_CONTENT_DEFAULTS
@@ -50,16 +65,24 @@ export const CAMPAIGN_KEYS = [
   'fundraising_contact_name',
   'fundraising_contact_email',
   'fundraising_contact_phone',
+  'campaign_give_url',
+  'campaign_give_blurb',
+  'campaign_gift_funds',
+  'campaign_renderings_credit',
 ] as const satisfies readonly SiteContentKey[]
 
 // Campaign fields that may be saved blank: a blank goal/raised/donor count hides
-// that number on the public pages, and the phone is optional. Everything else
-// falls back to its default when left empty.
+// that number on the public pages, a blank gift-funds list or renderings
+// credit hides that section/line, and the phone is optional. Everything else
+// falls back to its default when left empty. (campaign_hero_image is handled
+// separately, as a file upload rather than a form field.)
 export const CAMPAIGN_BLANK_OK: ReadonlySet<string> = new Set([
   'campaign_goal',
   'campaign_raised',
   'campaign_donors',
   'fundraising_contact_phone',
+  'campaign_gift_funds',
+  'campaign_renderings_credit',
 ])
 
 export async function getSiteContent(): Promise<Record<SiteContentKey, string>> {

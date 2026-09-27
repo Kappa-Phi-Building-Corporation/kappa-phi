@@ -1,12 +1,11 @@
 import Image from 'next/image'
 import Link from 'next/link'
+import QRCode from 'qrcode'
 import { notFound } from 'next/navigation'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getSiteContent } from '@/lib/siteContent'
 import { ImageLightboxThumbnail } from '@/components/ImageLightbox'
-
-const GIVE_URL = 'https://dtdepsilonnu.causevox.com'
-const GIVE_LABEL = 'dtdepsilonnu.causevox.com'
+import { Markdown } from '@/components/Markdown'
 
 export const metadata = {
   title: 'Capital Campaign — Renovating the Shelter',
@@ -20,76 +19,11 @@ export const metadata = {
   },
 }
 
-// Cached for 1 hour; revalidated on demand when admin saves campaign settings or giving levels
+// Cached for 1 hour; revalidated on demand when admin saves campaign
+// settings, sections/photos, or giving levels.
 export const revalidate = 3600
 
-type Rendering = { src: string; alt: string; caption: string }
-
-type Space = {
-  title: string
-  blurb: string
-  renderings: Rendering[]
-}
-
-// The renderings come from the architect's design package and don't change
-// with the campaign's text, so they live in code rather than the database.
-const SPACES: Space[] = [
-  {
-    title: 'Multi-Purpose Room',
-    blurb:
-      'The lower level becomes a true gathering space: a full kitchen, a large video wall for game days and chapter meetings, and long tables that seat the whole chapter for meals, study, and events.',
-    renderings: [
-      {
-        src: '/images/campaign/multipurpose-room-option-1.jpg',
-        alt: 'Rendering of the renovated multi-purpose room with a purple accent wall, video wall, kitchen, and long wood tables (Option 1)',
-        caption: 'Multi-Purpose Room — Design Option 1',
-      },
-      {
-        src: '/images/campaign/multipurpose-room-option-2.jpg',
-        alt: 'Rendering of the renovated multi-purpose room with wood-look flooring and a stone veneer wall (Option 2)',
-        caption: 'Multi-Purpose Room — Design Option 2',
-      },
-    ],
-  },
-  {
-    title: 'Custom Coat of Arms Flooring',
-    blurb:
-      'The fraternity coat of arms inlaid in the floor of the multi-purpose room.',
-    renderings: [
-      {
-        src: '/images/campaign/crest-flooring-option-1.jpg',
-        alt: 'Rendering of the multi-purpose room with a custom coat of arms inlaid in the floor (Option 1)',
-        caption: 'Custom Coat of Arms Flooring — Design Option 1',
-      },
-      {
-        src: '/images/campaign/crest-flooring-option-2.jpg',
-        alt: 'Rendering of the multi-purpose room with a full-color custom coat of arms inlaid in the floor (Option 2)',
-        caption: 'Custom Coat of Arms Flooring — Design Option 2',
-      },
-    ],
-  },
-  {
-    title: 'Living Room',
-    blurb:
-      'A warmer, updated living room built around a stone fireplace, new flooring, and space for the chapter’s history on the walls.',
-    renderings: [
-      {
-        src: '/images/campaign/living-room.jpg',
-        alt: 'Rendering of the renovated living room with a stone fireplace, wood-look flooring, and framed chapter photos',
-        caption: 'Living Room',
-      },
-    ],
-  },
-]
-
-const SCOPE = [
-  'New flooring and wall base throughout the lower level, corridors, and stairs',
-  'Updated lighting in the renovated spaces',
-  'Redesigned multi-purpose room with kitchen and audio/video wall',
-  'Renovated living room',
-  'Updated meeting room',
-  'Refreshed restrooms and showers',
-]
+const DEFAULT_HERO = '/images/campaign/living-room.jpg'
 
 function toNumber(value: string): number {
   const n = parseFloat(value.replace(/[^0-9.]/g, ''))
@@ -99,10 +33,20 @@ function toNumber(value: string): number {
 const usd = (n: number) =>
   n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })
 
+// A friendly label for the give-online link, e.g. "dtdepsilonnu.causevox.com".
+function urlLabel(url: string): string {
+  try {
+    const u = new URL(url)
+    return `${u.hostname}${u.pathname}`.replace(/\/$/, '')
+  } catch {
+    return url
+  }
+}
+
 export default async function CampaignPage() {
   const admin = createAdminClient()
 
-  const [content, { data: levelRows }, { data: donorRows }] = await Promise.all([
+  const [content, { data: levelRows }, { data: donorRows }, { data: sectionRows }, { data: photoRows }] = await Promise.all([
     getSiteContent(),
     admin
       .from('campaign_giving_levels')
@@ -113,6 +57,15 @@ export default async function CampaignPage() {
     // doesn't exist yet (migration not run), only donor names are missing —
     // the levels themselves still load.
     admin.from('campaign_giving_levels').select('id, donors'),
+    admin
+      .from('campaign_sections')
+      .select('id, title, body')
+      .eq('is_published', true)
+      .order('sort_order', { ascending: true }),
+    admin
+      .from('campaign_section_photos')
+      .select('id, section_id, photo_url, caption')
+      .order('sort_order', { ascending: true }),
   ])
 
   if (content.campaign_enabled !== 'true') notFound()
@@ -124,10 +77,26 @@ export default async function CampaignPage() {
     ]),
   )
   const levels = (levelRows ?? []).map(l => ({ ...l, donors: donorsByLevel.get(l.id) ?? [] }))
+
+  const photosBySection = new Map<string, { id: string; photo_url: string; caption: string | null }[]>()
+  for (const p of photoRows ?? []) {
+    if (!photosBySection.has(p.section_id)) photosBySection.set(p.section_id, [])
+    photosBySection.get(p.section_id)!.push(p)
+  }
+  const sections = (sectionRows ?? []).map(s => ({ ...s, photos: photosBySection.get(s.id) ?? [] }))
+
   const goal = toNumber(content.campaign_goal)
   const raised = toNumber(content.campaign_raised)
   const donorCount = toNumber(content.campaign_donors)
   const percent = goal > 0 ? Math.min(100, Math.round((raised / goal) * 100)) : 0
+
+  const giftFunds = content.campaign_gift_funds.split('\n').map(s => s.trim()).filter(Boolean)
+
+  const giveUrl = content.campaign_give_url
+  const giveLabel = urlLabel(giveUrl)
+  const qrDataUrl = await QRCode.toDataURL(giveUrl, { margin: 1, width: 400 })
+
+  const heroImage = content.campaign_hero_image || DEFAULT_HERO
 
   return (
     <div className="bg-kp-dark min-h-screen">
@@ -135,7 +104,7 @@ export default async function CampaignPage() {
       <div
         className="border-b border-kp-border relative overflow-hidden"
         style={{
-          backgroundImage: "url('/images/campaign/living-room.jpg')",
+          backgroundImage: `url('${heroImage}')`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
         }}
@@ -152,12 +121,14 @@ export default async function CampaignPage() {
             >
               Give Now
             </a>
-            <a
-              href="#renderings"
-              className="inline-block border-2 border-white/40 text-white font-bold px-6 py-3 rounded-xl text-sm no-underline hover:border-kp-gold hover:text-kp-gold transition-colors"
-            >
-              See the Renderings
-            </a>
+            {sections.length > 0 && (
+              <a
+                href="#renderings"
+                className="inline-block border-2 border-white/40 text-white font-bold px-6 py-3 rounded-xl text-sm no-underline hover:border-kp-gold hover:text-kp-gold transition-colors"
+              >
+                See the Renderings
+              </a>
+            )}
             <Link
               href="/newsletters"
               className="inline-block border-2 border-white/40 text-white font-bold px-6 py-3 rounded-xl text-sm no-underline hover:border-kp-gold hover:text-kp-gold transition-colors"
@@ -206,68 +177,76 @@ export default async function CampaignPage() {
         )}
 
         {/* Renderings */}
-        <section id="renderings" className="scroll-mt-24 space-y-10">
-          <div>
-            <div className="text-kp-gold text-xs font-bold uppercase tracking-widest mb-2">The Vision</div>
-            <h2 className="text-white font-black text-3xl">What We&apos;re Building</h2>
-            <p className="text-gray-400 text-sm mt-2 max-w-2xl">
-              Select any image to view it full size.
-            </p>
-          </div>
+        {sections.length > 0 && (
+          <section id="renderings" className="scroll-mt-24 space-y-10">
+            <div>
+              <div className="text-kp-gold text-xs font-bold uppercase tracking-widest mb-2">The Vision</div>
+              <h2 className="text-white font-black text-3xl">What We&apos;re Building</h2>
+              <p className="text-gray-400 text-sm mt-2 max-w-2xl">
+                Select any image to view it full size.
+              </p>
+            </div>
 
-          {SPACES.map(space => {
-            const single = space.renderings.length === 1
-            const heading = (
-              <div>
-                <h3 className="text-white font-bold text-xl">{space.title}</h3>
-                <p className="text-gray-300 text-sm leading-relaxed mt-1 max-w-3xl">{space.blurb}</p>
-              </div>
-            )
-            return (
-              <div
-                key={space.title}
-                className={single ? 'grid grid-cols-1 md:grid-cols-5 gap-6 items-center' : 'space-y-4'}
-              >
-                {!single && heading}
-                <div className={single ? 'md:col-span-3' : 'grid grid-cols-1 md:grid-cols-2 gap-4'}>
-                  {space.renderings.map(r => (
-                    <figure key={r.src} className="space-y-2">
-                      <ImageLightboxThumbnail
-                        src={r.src}
-                        alt={r.alt}
-                        caption={r.caption}
-                        fit="cover"
-                        sizes={single ? '(max-width: 768px) 100vw, 60vw' : '(max-width: 768px) 100vw, 50vw'}
-                        className="relative block w-full aspect-video rounded-xl overflow-hidden border border-kp-border bg-kp-card"
-                      />
-                      <figcaption className="text-gray-500 text-xs">{r.caption}</figcaption>
-                    </figure>
-                  ))}
+            {sections.map(section => {
+              const single = section.photos.length === 1
+              const heading = (
+                <div>
+                  <h3 className="text-white font-bold text-xl">{section.title}</h3>
+                  {section.body && (
+                    <Markdown body={section.body} className="text-gray-300 text-sm leading-relaxed mt-1 max-w-3xl" />
+                  )}
                 </div>
-                {single && <div className="md:col-span-2">{heading}</div>}
-              </div>
-            )
-          })}
+              )
+              return (
+                <div
+                  key={section.id}
+                  className={single ? 'grid grid-cols-1 md:grid-cols-5 gap-6 items-center' : 'space-y-4'}
+                >
+                  {!single && heading}
+                  {section.photos.length > 0 && (
+                    <div className={single ? 'md:col-span-3' : 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4'}>
+                      {section.photos.map(p => (
+                        <figure key={p.id} className="space-y-2">
+                          <ImageLightboxThumbnail
+                            src={p.photo_url}
+                            alt={p.caption ?? section.title}
+                            caption={p.caption ?? section.title}
+                            fit="cover"
+                            sizes={single ? '(max-width: 768px) 100vw, 60vw' : '(max-width: 768px) 100vw, 33vw'}
+                            className="relative block w-full aspect-video rounded-xl overflow-hidden border border-kp-border bg-kp-card"
+                          />
+                          {p.caption && <figcaption className="text-gray-500 text-xs">{p.caption}</figcaption>}
+                        </figure>
+                      ))}
+                    </div>
+                  )}
+                  {single && <div className="md:col-span-2">{heading}</div>}
+                </div>
+              )
+            })}
 
-          <p className="text-gray-500 text-xs">
-            Renderings by Chiodini Architects. These are design concepts; final finishes and layouts may vary.
-          </p>
-        </section>
+            {content.campaign_renderings_credit && (
+              <p className="text-gray-500 text-xs">{content.campaign_renderings_credit}</p>
+            )}
+          </section>
+        )}
 
         {/* Scope */}
-        <section className="bg-kp-surface border border-kp-border rounded-2xl p-6 md:p-8">
-          <h2 className="text-white font-black text-2xl mb-5">What Your Gift Funds</h2>
-          <ul className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3">
-            {SCOPE.map(item => (
-              <li key={item} className="flex items-start gap-3 text-gray-300 text-sm leading-relaxed">
-                <svg className="w-4 h-4 mt-0.5 shrink-0 text-kp-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                </svg>
-                {item}
-              </li>
-            ))}
-          </ul>
-        </section>
+        {giftFunds.length > 0 && (
+          <section className="bg-kp-surface border border-kp-border rounded-2xl p-6 md:p-8">
+            <h2 className="text-white font-black text-2xl mb-5">What Your Gift Funds</h2>
+            <ul className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3">
+              {giftFunds.map(item => (
+                <li key={item} className="flex items-start gap-3 text-gray-300 text-sm leading-relaxed">
+                  <svg className="w-4 h-4 mt-0.5 shrink-0 text-kp-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                  </svg>
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
 
         {/* Giving levels */}
         {levels.length > 0 && (
@@ -321,15 +300,15 @@ export default async function CampaignPage() {
               <div className="bg-kp-blue p-6 md:p-8 flex flex-col items-center gap-3">
                 <div className="text-kp-gold text-xs font-bold uppercase tracking-widest">Scan to give</div>
                 <a
-                  href={GIVE_URL}
+                  href={giveUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  aria-label={`Give online at ${GIVE_LABEL}`}
+                  aria-label={`Give online at ${giveLabel}`}
                   className="block rounded-2xl bg-white p-2 ring-4 ring-kp-gold"
                 >
                   <Image
-                    src="/images/campaign/give-qr.svg"
-                    alt={`QR code linking to ${GIVE_LABEL}`}
+                    src={qrDataUrl}
+                    alt={`QR code linking to ${giveLabel}`}
                     width={200}
                     height={200}
                     unoptimized
@@ -339,14 +318,14 @@ export default async function CampaignPage() {
               </div>
               <div className="p-6 md:p-8 space-y-4">
                 <p className="text-gray-200 leading-relaxed">
-                  Join your brothers and make a gift today! Every donation will help bring us closer to an improved
-                  Shelter. Scan the QR code with your phone, or visit{' '}
-                  <a href={GIVE_URL} target="_blank" rel="noopener noreferrer" className="text-kp-gold font-bold">
-                    {GIVE_LABEL}
+                  {content.campaign_give_blurb}
+                  {' '}Scan the QR code with your phone, or visit{' '}
+                  <a href={giveUrl} target="_blank" rel="noopener noreferrer" className="text-kp-gold font-bold">
+                    {giveLabel}
                   </a>.
                 </p>
                 <a
-                  href={GIVE_URL}
+                  href={giveUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-block bg-kp-gold text-black font-bold px-6 py-3 rounded-xl text-sm no-underline hover:opacity-90 transition-opacity"

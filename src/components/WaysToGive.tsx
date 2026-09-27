@@ -1,5 +1,7 @@
-// The CauseVox / PayPal / Venmo / Check cards for /donations.
-export default function WaysToGive() {
+// The CauseVox / PayPal / Venmo / Check cards for /donations. `campaignGiveUrl`
+// comes from site_content (Admin → Capital Campaign & Giving Levels) so it
+// always matches the link used on the Campaign page.
+export default function WaysToGive({ campaignGiveUrl }: { campaignGiveUrl: string }) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
       <div className="bg-kp-surface border border-kp-gold/40 rounded-2xl overflow-hidden text-center">
@@ -9,7 +11,7 @@ export default function WaysToGive() {
         <div className="p-6">
           <p className="text-gray-400 text-sm mb-5">Give toward the Shelter renovation</p>
           <a
-            href="https://dtdepsilonnu.causevox.com/"
+            href={campaignGiveUrl}
             target="_blank" rel="noopener noreferrer"
             className="inline-block bg-kp-gold text-black font-bold px-6 py-2.5 rounded-lg hover:opacity-90 transition-opacity text-sm no-underline"
           >
