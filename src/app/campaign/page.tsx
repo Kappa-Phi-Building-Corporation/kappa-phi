@@ -52,19 +52,19 @@ const SPACES: Space[] = [
     ],
   },
   {
-    title: 'Custom Crest Flooring',
+    title: 'Custom Coat of Arms Flooring',
     blurb:
-      'The fraternity crest inlaid in the floor of the multi-purpose room.',
+      'The fraternity coat of arms inlaid in the floor of the multi-purpose room.',
     renderings: [
       {
         src: '/images/campaign/crest-flooring-option-1.jpg',
-        alt: 'Rendering of the multi-purpose room with a custom crest inlaid in the floor (Option 1)',
-        caption: 'Custom Crest Flooring — Design Option 1',
+        alt: 'Rendering of the multi-purpose room with a custom coat of arms inlaid in the floor (Option 1)',
+        caption: 'Custom Coat of Arms Flooring — Design Option 1',
       },
       {
         src: '/images/campaign/crest-flooring-option-2.jpg',
-        alt: 'Rendering of the multi-purpose room with a full-color custom crest inlaid in the floor (Option 2)',
-        caption: 'Custom Crest Flooring — Design Option 2',
+        alt: 'Rendering of the multi-purpose room with a full-color custom coat of arms inlaid in the floor (Option 2)',
+        caption: 'Custom Coat of Arms Flooring — Design Option 2',
       },
     ],
   },
