@@ -19,20 +19,39 @@ async function assertAdmin() {
   return admin
 }
 
+function storagePathFromUrl(url: string): string | null {
+  try {
+    return new URL(url).pathname.split(`/${BUCKET}/`)[1] || null
+  } catch {
+    return null
+  }
+}
+
+// Every upload gets a unique, timestamped filename rather than reusing
+// `${mascotId}.jpg`. Overwriting the same path left the public URL
+// unchanged, and browsers/CDNs/Next's image optimizer all cache by URL — so
+// replacing a photo at a stable URL could go on serving the old image
+// (inconsistently per device/cache) instead of the new one. A new URL on
+// every upload forces everyone to fetch fresh.
 async function uploadPhoto(
   admin: ReturnType<typeof createAdminClient>,
   mascotId: string,
   file: File,
+  previousPhotoUrl?: string | null,
 ): Promise<string | null> {
-  const path = `${mascotId}.jpg`
+  const path = `${mascotId}-${Date.now()}.jpg`
   const raw = new Uint8Array(await file.arrayBuffer())
   const { buffer, contentType } = await compressImage(raw)
   const { error } = await admin.storage.from(BUCKET).upload(path, buffer, {
     contentType,
-    upsert: true,
+    upsert: false,
   })
   if (error) return null
   const { data: { publicUrl } } = admin.storage.from(BUCKET).getPublicUrl(path)
+
+  const oldPath = previousPhotoUrl ? storagePathFromUrl(previousPhotoUrl) : null
+  if (oldPath) await admin.storage.from(BUCKET).remove([oldPath])
+
   return publicUrl
 }
 
@@ -73,7 +92,8 @@ export async function updateMascot(id: string, formData: FormData) {
 
   const photo = formData.get('photo') as File | null
   if (photo && photo.size > 0) {
-    const url = await uploadPhoto(admin, id, photo)
+    const { data: existing } = await admin.from('chapter_mascots').select('photo_url').eq('id', id).single()
+    const url = await uploadPhoto(admin, id, photo, existing?.photo_url)
     if (url) payload.photo_url = url
   }
 
@@ -88,10 +108,9 @@ export async function updateMascot(id: string, formData: FormData) {
 
 export async function deleteMascot(id: string) {
   const admin = await assertAdmin()
-  const { data: existing } = await admin.from('chapter_mascots').select('name').eq('id', id).single()
-  for (const ext of ['jpg', 'jpeg', 'png', 'webp']) {
-    await admin.storage.from(BUCKET).remove([`${id}.${ext}`])
-  }
+  const { data: existing } = await admin.from('chapter_mascots').select('name, photo_url').eq('id', id).single()
+  const photoPath = existing?.photo_url ? storagePathFromUrl(existing.photo_url) : null
+  if (photoPath) await admin.storage.from(BUCKET).remove([photoPath])
   await admin.from('chapter_mascots').delete().eq('id', id)
   await logActivity(admin, { action: 'delete', entityType: 'chapter_mascot', entityId: id, entityLabel: existing?.name ?? 'Mascot' })
   revalidatePath('/about')

@@ -19,16 +19,39 @@ async function assertAdmin() {
   return admin
 }
 
-async function uploadPhoto(admin: ReturnType<typeof createAdminClient>, memberId: string, file: File): Promise<string | null> {
-  const path = `${memberId}.jpg`
+function storagePathFromUrl(url: string): string | null {
+  try {
+    return new URL(url).pathname.split(`/${BUCKET}/`)[1] || null
+  } catch {
+    return null
+  }
+}
+
+// Every upload gets a unique, timestamped filename rather than reusing
+// `${memberId}.jpg`. Overwriting the same path left the public URL
+// unchanged, and browsers/CDNs/Next's image optimizer all cache by URL — so
+// replacing a photo at a stable URL could go on serving the old image
+// (inconsistently per device/cache) instead of the new one. A new URL on
+// every upload forces everyone to fetch fresh.
+async function uploadPhoto(
+  admin: ReturnType<typeof createAdminClient>,
+  memberId: string,
+  file: File,
+  previousPhotoUrl?: string | null,
+): Promise<string | null> {
+  const path = `${memberId}-${Date.now()}.jpg`
   const raw = new Uint8Array(await file.arrayBuffer())
   const { buffer, contentType } = await compressImage(raw, 1200)
   const { error } = await admin.storage.from(BUCKET).upload(path, buffer, {
     contentType,
-    upsert: true,
+    upsert: false,
   })
   if (error) return null
   const { data: { publicUrl } } = admin.storage.from(BUCKET).getPublicUrl(path)
+
+  const oldPath = previousPhotoUrl ? storagePathFromUrl(previousPhotoUrl) : null
+  if (oldPath) await admin.storage.from(BUCKET).remove([oldPath])
+
   return publicUrl
 }
 
@@ -49,7 +72,8 @@ export async function createEternalEntry(formData: FormData) {
 
   const photo = formData.get('photo') as File | null
   if (photo && photo.size > 0) {
-    const url = await uploadPhoto(admin, memberId, photo)
+    const { data: existing } = await admin.from('members').select('photo_url').eq('id', memberId).single()
+    const url = await uploadPhoto(admin, memberId, photo, existing?.photo_url)
     if (url) payload.photo_url = url
   }
 
@@ -79,7 +103,8 @@ export async function updateEternalEntry(id: string, formData: FormData) {
 
   const photo = formData.get('photo') as File | null
   if (photo && photo.size > 0) {
-    const url = await uploadPhoto(admin, id, photo)
+    const { data: existing } = await admin.from('members').select('photo_url').eq('id', id).single()
+    const url = await uploadPhoto(admin, id, photo, existing?.photo_url)
     if (url) payload.photo_url = url
   }
 

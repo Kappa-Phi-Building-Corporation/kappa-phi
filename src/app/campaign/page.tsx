@@ -282,8 +282,8 @@ export default async function CampaignPage() {
               ))}
             </div>
             <p className="text-gray-500 text-xs mt-4">
-              Donor list as of {content.campaign_as_of}. To request a change to how you&apos;re recognized, use the
-              contact below.
+              Donor list as of {content.campaign_as_of}. To request a change to how you&apos;re recognized, email{' '}
+              <a href="mailto:kappaphi@kappa-phi.org" className="text-kp-gold">kappaphi@kappa-phi.org</a>.
             </p>
           </section>
         )}
