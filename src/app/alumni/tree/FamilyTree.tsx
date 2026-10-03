@@ -322,17 +322,33 @@ function FamilyTreeInner({ members, initialFocusId }: { members: TreeMember[]; i
     }
   }, [focusedId, fitView])
 
+  // Waits for a React re-render to reach the DOM, then for the member boxes'
+  // own CSS opacity/color transition (transition-all, ~150ms) to settle, so
+  // a capture taken right after doesn't catch them mid-fade.
+  function waitForSettledRender(): Promise<void> {
+    return new Promise(resolve => {
+      requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(resolve, 220)))
+    })
+  }
+
   // Renders the whole tree (not just the current pan/zoom) to an image at
   // native resolution, then either downloads it directly or wraps it in a
   // same-size PDF page — which most PDF viewers' print dialogs will scale
-  // to fit the paper automatically. Reflects whatever is currently
-  // highlighted on screen, since that's what the person is looking at.
+  // to fit the paper automatically. Always exports every box at full
+  // clarity — if a member's lineage is highlighted on screen, that fade is
+  // cleared for the export and restored afterward.
   const handleExport = useCallback(async (format: 'png' | 'pdf') => {
     const viewportEl = document.querySelector<HTMLElement>('.react-flow__viewport')
     if (!viewportEl || baseNodes.length === 0) return
 
     setExporting(format)
+    const hadFocus = focusedId
     try {
+      if (hadFocus) {
+        setFocusedId(null)
+        await waitForSettledRender()
+      }
+
       const bounds = getNodesBounds(baseNodes)
       let width = Math.ceil(bounds.width + EXPORT_PADDING * 2)
       let height = Math.ceil(bounds.height + EXPORT_PADDING * 2)
@@ -345,11 +361,16 @@ function FamilyTreeInner({ members, initialFocusId }: { members: TreeMember[]; i
       }
       const x = (-bounds.x + EXPORT_PADDING) * scale
       const y = (-bounds.y + EXPORT_PADDING) * scale
+      // Capturing at 1x CSS pixels looks soft, especially the small badge
+      // number/pledge class text — render at up to 2x for crisp output,
+      // tapering down for very large trees so the raster stays canvas-safe.
+      const pixelRatio = Math.min(2, Math.max(1, 10000 / Math.max(width, height)))
 
       const dataUrl = await toPng(viewportEl, {
         backgroundColor: '#0D0000',
         width,
         height,
+        pixelRatio,
         style: {
           width: `${width}px`,
           height: `${height}px`,
@@ -374,9 +395,10 @@ function FamilyTreeInner({ members, initialFocusId }: { members: TreeMember[]; i
         pdf.save(`${filename}.pdf`)
       }
     } finally {
+      if (hadFocus) setFocusedId(hadFocus)
       setExporting(null)
     }
-  }, [baseNodes])
+  }, [baseNodes, focusedId])
 
   const focusedMember = focusedId ? memberMap.get(focusedId) ?? null : null
   const bigBrother = focusedMember?.big_brother_id ? memberMap.get(focusedMember.big_brother_id) ?? null : null
