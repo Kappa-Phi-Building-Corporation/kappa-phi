@@ -217,8 +217,18 @@ function MemberNodeComponent({ data }: NodeProps) {
 const nodeTypes = { member: MemberNodeComponent }
 
 // ── Inner tree (needs ReactFlowProvider context) ───────────────────────────────
-// Max raster dimension (px) for the exported image — the browser's canvas
-// size limit is commonly ~16,384px, so this keeps well clear of it.
+// html-to-image rasterizes through an SVG <foreignObject> sized to exactly
+// the CSS pixels we tell it to capture. A tree with many separate root
+// families side by side can span tens of thousands of pixels — asking the
+// browser to rasterize a foreignObject anywhere near that size reliably
+// fails (large blank regions with only scattered fragments of content, and
+// it gets dramatically slower well before that). So the content itself must
+// be real-zoomed down to fit within this cap *before* capture; pixelRatio
+// then only upscales that already-safely-sized raster for sharpness and
+// never controls how big the foreignObject is.
+const SAFE_CONTENT_DIMENSION = 4000
+// Final output raster cap (post pixelRatio). Comfortably under the ~16,384px
+// canvas limit most browsers share.
 const EXPORT_MAX_DIMENSION = 8000
 const EXPORT_PADDING = 48
 
@@ -330,22 +340,26 @@ function FamilyTreeInner({ members, initialFocusId }: { members: TreeMember[]; i
     })
   }
 
-  // Renders the whole tree (not just the current pan/zoom) to an image at
-  // native resolution, then either downloads it directly or wraps it in a
-  // same-size PDF page — which most PDF viewers' print dialogs will scale
-  // to fit the paper automatically.
+  // Renders the whole tree (not just the current pan/zoom) to an image, then
+  // either downloads it directly or wraps it in a same-size PDF page — which
+  // most PDF viewers' print dialogs will scale to fit the paper
+  // automatically.
   //
-  // Earlier versions captured at the live zoom level and faked a "zoom to
-  // fit everything" by overriding the cloned element's CSS `transform` at
-  // capture time. html-to-image rasterizes through an SVG <foreignObject>,
-  // and Chromium renders foreignObject text very softly under a non-1 CSS
-  // transform — borders/lines stay crisp (they're drawn, not laid-out text)
-  // while every label blurs. The fix: actually pan/zoom the real xyflow
-  // viewport to zoom 1 framing the whole tree (so there's no capture-time
-  // transform at all) and let `pixelRatio` alone control output resolution
-  // — that's a canvas-level raster scale, not a DOM transform, so text stays
-  // sharp. Also always exports every box at full clarity, clearing any
-  // highlighted lineage first and restoring it afterward.
+  // Two earlier versions of this got the sizing wrong in opposite ways: one
+  // capped the *output* size but still asked html-to-image to rasterize an
+  // SVG <foreignObject> at the tree's full, uncapped natural size (which for
+  // a tree with many separate root families side by side can be tens of
+  // thousands of pixels wide) — that reliably produces mostly-blank, corrupted
+  // output, not a resize. The other avoided that but could still produce a
+  // foreignObject that large for a big enough tree.
+  //
+  // The fix: actually pan/zoom the real xyflow viewport so the tree's content
+  // footprint is zoomed down to fit within SAFE_CONTENT_DIMENSION *before*
+  // capture (never just a post-hoc canvas resize), then let `pixelRatio` —
+  // a true raster-resolution multiplier, not a DOM transform — scale that
+  // already-safely-sized capture back up for a sharp final image. Also
+  // always exports every box at full clarity, clearing any highlighted
+  // lineage first and restoring it afterward.
   const handleExport = useCallback(async (format: 'png' | 'pdf') => {
     const viewportEl = document.querySelector<HTMLElement>('.react-flow__viewport')
     if (!viewportEl || baseNodes.length === 0) return
@@ -357,18 +371,22 @@ function FamilyTreeInner({ members, initialFocusId }: { members: TreeMember[]; i
       if (hadFocus) setFocusedId(null)
 
       const bounds = getNodesBounds(baseNodes)
-      const width = Math.ceil(bounds.width + EXPORT_PADDING * 2)
-      const height = Math.ceil(bounds.height + EXPORT_PADDING * 2)
+      const naturalWidth = bounds.width + EXPORT_PADDING * 2
+      const naturalHeight = bounds.height + EXPORT_PADDING * 2
+      const zoom = Math.min(1, SAFE_CONTENT_DIMENSION / Math.max(naturalWidth, naturalHeight))
+      const width = Math.ceil(bounds.width * zoom + EXPORT_PADDING * 2)
+      const height = Math.ceil(bounds.height * zoom + EXPORT_PADDING * 2)
 
       await setViewport(
-        { x: -bounds.x + EXPORT_PADDING, y: -bounds.y + EXPORT_PADDING, zoom: 1 },
+        { x: EXPORT_PADDING - bounds.x * zoom, y: EXPORT_PADDING - bounds.y * zoom, zoom },
         { duration: 0 },
       )
       await waitForSettledRender()
 
-      // Raster scale only (no DOM transform): defaults to 2x for crisp text,
-      // tapering down for very large trees so the output stays canvas-safe.
-      const pixelRatio = Math.min(2, EXPORT_MAX_DIMENSION / Math.max(width, height))
+      // Pure raster upscale on top of the already content-safe size above —
+      // up to 3x for a small tree, tapering down so the final file stays
+      // under EXPORT_MAX_DIMENSION regardless of tree size.
+      const pixelRatio = Math.min(3, EXPORT_MAX_DIMENSION / Math.max(width, height))
 
       const dataUrl = await toPng(viewportEl, {
         backgroundColor: '#0D0000',
