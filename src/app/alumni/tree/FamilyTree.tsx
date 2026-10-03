@@ -9,6 +9,7 @@ import {
   Controls,
   MiniMap,
   useReactFlow,
+  getNodesBounds,
   Handle,
   Position,
   type Node,
@@ -16,6 +17,8 @@ import {
   type NodeProps,
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
+import { toPng } from 'html-to-image'
+import { jsPDF } from 'jspdf'
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 export type TreeMember = {
@@ -214,11 +217,18 @@ function MemberNodeComponent({ data }: NodeProps) {
 const nodeTypes = { member: MemberNodeComponent }
 
 // ── Inner tree (needs ReactFlowProvider context) ───────────────────────────────
+// Max output dimension (px) for the exported image. Large enough to stay
+// crisp for a tree with a few hundred members, capped so the browser's
+// canvas size limit (commonly ~16,384px) and render time stay sane.
+const EXPORT_MAX_DIMENSION = 6000
+const EXPORT_PADDING = 48
+
 function FamilyTreeInner({ members, initialFocusId }: { members: TreeMember[]; initialFocusId?: string }) {
   const { fitView } = useReactFlow()
   const [focusedId, setFocusedId] = useState<string | null>(initialFocusId ?? null)
   const [search, setSearch] = useState('')
   const [showDropdown, setShowDropdown] = useState(false)
+  const [exporting, setExporting] = useState<'png' | 'pdf' | null>(null)
 
   const { nodes: baseNodes, edges: baseEdges } = useMemo(
     () => buildFlowElements(members),
@@ -312,6 +322,62 @@ function FamilyTreeInner({ members, initialFocusId }: { members: TreeMember[]; i
     }
   }, [focusedId, fitView])
 
+  // Renders the whole tree (not just the current pan/zoom) to an image at
+  // native resolution, then either downloads it directly or wraps it in a
+  // same-size PDF page — which most PDF viewers' print dialogs will scale
+  // to fit the paper automatically. Reflects whatever is currently
+  // highlighted on screen, since that's what the person is looking at.
+  const handleExport = useCallback(async (format: 'png' | 'pdf') => {
+    const viewportEl = document.querySelector<HTMLElement>('.react-flow__viewport')
+    if (!viewportEl || baseNodes.length === 0) return
+
+    setExporting(format)
+    try {
+      const bounds = getNodesBounds(baseNodes)
+      let width = Math.ceil(bounds.width + EXPORT_PADDING * 2)
+      let height = Math.ceil(bounds.height + EXPORT_PADDING * 2)
+      let scale = 1
+      const largest = Math.max(width, height)
+      if (largest > EXPORT_MAX_DIMENSION) {
+        scale = EXPORT_MAX_DIMENSION / largest
+        width = Math.ceil(width * scale)
+        height = Math.ceil(height * scale)
+      }
+      const x = (-bounds.x + EXPORT_PADDING) * scale
+      const y = (-bounds.y + EXPORT_PADDING) * scale
+
+      const dataUrl = await toPng(viewportEl, {
+        backgroundColor: '#0D0000',
+        width,
+        height,
+        style: {
+          width: `${width}px`,
+          height: `${height}px`,
+          transform: `translate(${x}px, ${y}px) scale(${scale})`,
+          transformOrigin: 'top left',
+        },
+      })
+
+      const filename = `family-tree-${new Date().toISOString().split('T')[0]}`
+      if (format === 'png') {
+        const link = document.createElement('a')
+        link.download = `${filename}.png`
+        link.href = dataUrl
+        link.click()
+      } else {
+        const pdf = new jsPDF({
+          orientation: width >= height ? 'landscape' : 'portrait',
+          unit: 'px',
+          format: [width, height],
+        })
+        pdf.addImage(dataUrl, 'PNG', 0, 0, width, height)
+        pdf.save(`${filename}.pdf`)
+      }
+    } finally {
+      setExporting(null)
+    }
+  }, [baseNodes])
+
   const focusedMember = focusedId ? memberMap.get(focusedId) ?? null : null
   const bigBrother = focusedMember?.big_brother_id ? memberMap.get(focusedMember.big_brother_id) ?? null : null
   const littleBrothers = focusedId ? members.filter(m => m.big_brother_id === focusedId) : []
@@ -358,9 +424,31 @@ function FamilyTreeInner({ members, initialFocusId }: { members: TreeMember[]; i
         )}
       </div>
 
-      {/* ── Member detail card ───────────────────────────────────────────── */}
-      {focusedMember && (
-        <div className="absolute top-4 right-4 z-10 w-72 bg-kp-surface border border-kp-border rounded-2xl shadow-2xl overflow-hidden">
+      {/* ── Export toolbar ──────────────────────────────────────────────── */}
+      <div className="absolute top-4 right-4 z-10 flex flex-col items-end gap-3">
+        <div className="flex items-center gap-2 bg-kp-surface border border-kp-border rounded-xl px-2 py-2 shadow-xl">
+          <span className="text-gray-500 text-xs pl-1 pr-0.5 hidden sm:inline">Export</span>
+          <button
+            onClick={() => handleExport('png')}
+            disabled={exporting !== null}
+            title="Download the whole tree as a PNG image"
+            className="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-gray-300 hover:text-kp-gold hover:bg-kp-card transition-colors disabled:opacity-50 disabled:cursor-wait"
+          >
+            {exporting === 'png' ? 'Rendering…' : 'Image'}
+          </button>
+          <button
+            onClick={() => handleExport('pdf')}
+            disabled={exporting !== null}
+            title="Download the whole tree as a printable PDF"
+            className="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-gray-300 hover:text-kp-gold hover:bg-kp-card transition-colors disabled:opacity-50 disabled:cursor-wait"
+          >
+            {exporting === 'pdf' ? 'Rendering…' : 'PDF'}
+          </button>
+        </div>
+
+        {/* ── Member detail card ─────────────────────────────────────────── */}
+        {focusedMember && (
+        <div className="w-72 bg-kp-surface border border-kp-border rounded-2xl shadow-2xl overflow-hidden">
           {/* Header */}
           <div className="bg-kp-gold/10 border-b border-kp-border px-4 py-3 flex items-start justify-between gap-2">
             <div>
@@ -452,7 +540,8 @@ function FamilyTreeInner({ members, initialFocusId }: { members: TreeMember[]; i
             </div>
           )}
         </div>
-      )}
+        )}
+      </div>
 
       {/* ── React Flow canvas ────────────────────────────────────────────── */}
       <ReactFlow
