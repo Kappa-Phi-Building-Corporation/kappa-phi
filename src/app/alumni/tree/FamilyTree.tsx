@@ -217,14 +217,13 @@ function MemberNodeComponent({ data }: NodeProps) {
 const nodeTypes = { member: MemberNodeComponent }
 
 // ── Inner tree (needs ReactFlowProvider context) ───────────────────────────────
-// Max output dimension (px) for the exported image. Large enough to stay
-// crisp for a tree with a few hundred members, capped so the browser's
-// canvas size limit (commonly ~16,384px) and render time stay sane.
-const EXPORT_MAX_DIMENSION = 6000
+// Max raster dimension (px) for the exported image — the browser's canvas
+// size limit is commonly ~16,384px, so this keeps well clear of it.
+const EXPORT_MAX_DIMENSION = 8000
 const EXPORT_PADDING = 48
 
 function FamilyTreeInner({ members, initialFocusId }: { members: TreeMember[]; initialFocusId?: string }) {
-  const { fitView } = useReactFlow()
+  const { fitView, setViewport, getViewport } = useReactFlow()
   const [focusedId, setFocusedId] = useState<string | null>(initialFocusId ?? null)
   const [search, setSearch] = useState('')
   const [showDropdown, setShowDropdown] = useState(false)
@@ -334,49 +333,48 @@ function FamilyTreeInner({ members, initialFocusId }: { members: TreeMember[]; i
   // Renders the whole tree (not just the current pan/zoom) to an image at
   // native resolution, then either downloads it directly or wraps it in a
   // same-size PDF page — which most PDF viewers' print dialogs will scale
-  // to fit the paper automatically. Always exports every box at full
-  // clarity — if a member's lineage is highlighted on screen, that fade is
-  // cleared for the export and restored afterward.
+  // to fit the paper automatically.
+  //
+  // Earlier versions captured at the live zoom level and faked a "zoom to
+  // fit everything" by overriding the cloned element's CSS `transform` at
+  // capture time. html-to-image rasterizes through an SVG <foreignObject>,
+  // and Chromium renders foreignObject text very softly under a non-1 CSS
+  // transform — borders/lines stay crisp (they're drawn, not laid-out text)
+  // while every label blurs. The fix: actually pan/zoom the real xyflow
+  // viewport to zoom 1 framing the whole tree (so there's no capture-time
+  // transform at all) and let `pixelRatio` alone control output resolution
+  // — that's a canvas-level raster scale, not a DOM transform, so text stays
+  // sharp. Also always exports every box at full clarity, clearing any
+  // highlighted lineage first and restoring it afterward.
   const handleExport = useCallback(async (format: 'png' | 'pdf') => {
     const viewportEl = document.querySelector<HTMLElement>('.react-flow__viewport')
     if (!viewportEl || baseNodes.length === 0) return
 
     setExporting(format)
     const hadFocus = focusedId
+    const prevViewport = getViewport()
     try {
-      if (hadFocus) {
-        setFocusedId(null)
-        await waitForSettledRender()
-      }
+      if (hadFocus) setFocusedId(null)
 
       const bounds = getNodesBounds(baseNodes)
-      let width = Math.ceil(bounds.width + EXPORT_PADDING * 2)
-      let height = Math.ceil(bounds.height + EXPORT_PADDING * 2)
-      let scale = 1
-      const largest = Math.max(width, height)
-      if (largest > EXPORT_MAX_DIMENSION) {
-        scale = EXPORT_MAX_DIMENSION / largest
-        width = Math.ceil(width * scale)
-        height = Math.ceil(height * scale)
-      }
-      const x = (-bounds.x + EXPORT_PADDING) * scale
-      const y = (-bounds.y + EXPORT_PADDING) * scale
-      // Capturing at 1x CSS pixels looks soft, especially the small badge
-      // number/pledge class text — render at up to 2x for crisp output,
-      // tapering down for very large trees so the raster stays canvas-safe.
-      const pixelRatio = Math.min(2, Math.max(1, 10000 / Math.max(width, height)))
+      const width = Math.ceil(bounds.width + EXPORT_PADDING * 2)
+      const height = Math.ceil(bounds.height + EXPORT_PADDING * 2)
+
+      await setViewport(
+        { x: -bounds.x + EXPORT_PADDING, y: -bounds.y + EXPORT_PADDING, zoom: 1 },
+        { duration: 0 },
+      )
+      await waitForSettledRender()
+
+      // Raster scale only (no DOM transform): defaults to 2x for crisp text,
+      // tapering down for very large trees so the output stays canvas-safe.
+      const pixelRatio = Math.min(2, EXPORT_MAX_DIMENSION / Math.max(width, height))
 
       const dataUrl = await toPng(viewportEl, {
         backgroundColor: '#0D0000',
         width,
         height,
         pixelRatio,
-        style: {
-          width: `${width}px`,
-          height: `${height}px`,
-          transform: `translate(${x}px, ${y}px) scale(${scale})`,
-          transformOrigin: 'top left',
-        },
       })
 
       const filename = `family-tree-${new Date().toISOString().split('T')[0]}`
@@ -395,10 +393,11 @@ function FamilyTreeInner({ members, initialFocusId }: { members: TreeMember[]; i
         pdf.save(`${filename}.pdf`)
       }
     } finally {
+      await setViewport(prevViewport, { duration: 0 })
       if (hadFocus) setFocusedId(hadFocus)
       setExporting(null)
     }
-  }, [baseNodes, focusedId])
+  }, [baseNodes, focusedId, getViewport, setViewport])
 
   const focusedMember = focusedId ? memberMap.get(focusedId) ?? null : null
   const bigBrother = focusedMember?.big_brother_id ? memberMap.get(focusedMember.big_brother_id) ?? null : null
