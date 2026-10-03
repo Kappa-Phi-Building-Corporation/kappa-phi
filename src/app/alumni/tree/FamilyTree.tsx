@@ -301,7 +301,7 @@ function FamilyTreeInner({ members, initialFocusId }: { members: TreeMember[]; i
   const [focusedId, setFocusedId] = useState<string | null>(initialFocusId ?? null)
   const [search, setSearch] = useState('')
   const [showDropdown, setShowDropdown] = useState(false)
-  const [exporting, setExporting] = useState<'png' | 'pdf' | null>(null)
+  const [exporting, setExporting] = useState<'svg' | 'png' | 'pdf' | null>(null)
 
   const { nodes: baseNodes, edges: baseEdges } = useMemo(
     () => buildFlowElements(members),
@@ -408,11 +408,25 @@ function FamilyTreeInner({ members, initialFocusId }: { members: TreeMember[]; i
   // mostly-blank output once the tree was wide enough to have many separate
   // root families side by side (tens of thousands of pixels) — vector SVG has
   // no equivalent size limit, so this works at any tree size.
-  const handleExport = useCallback(async (format: 'png' | 'pdf') => {
+  const handleExport = useCallback(async (format: 'svg' | 'png' | 'pdf') => {
     if (baseNodes.length === 0) return
     setExporting(format)
     try {
       const { svg, width: naturalWidth, height: naturalHeight } = buildExportSvgMarkup(baseNodes, baseEdges)
+      const filename = `family-tree-${new Date().toISOString().split('T')[0]}`
+
+      // SVG is the full-fidelity option: a tree with many separate root
+      // families can be tens of thousands of pixels wide, which would shrink
+      // text below legibility in any fixed-size PNG/PDF. SVG has no such
+      // cap — open it in a browser or vector app and zoom to any level.
+      if (format === 'svg') {
+        const link = document.createElement('a')
+        link.download = `${filename}.svg`
+        link.href = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml' }))
+        link.click()
+        URL.revokeObjectURL(link.href)
+        return
+      }
 
       const svgUrl = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml' }))
       let img: HTMLImageElement
@@ -436,7 +450,6 @@ function FamilyTreeInner({ members, initialFocusId }: { members: TreeMember[]; i
       ctx.drawImage(img, 0, 0, width, height)
 
       const dataUrl = canvas.toDataURL('image/png')
-      const filename = `family-tree-${new Date().toISOString().split('T')[0]}`
       if (format === 'png') {
         const link = document.createElement('a')
         link.download = `${filename}.png`
@@ -507,9 +520,17 @@ function FamilyTreeInner({ members, initialFocusId }: { members: TreeMember[]; i
         <div className="flex items-center gap-2 bg-kp-surface border border-kp-border rounded-xl px-2 py-2 shadow-xl">
           <span className="text-gray-500 text-xs pl-1 pr-0.5 hidden sm:inline">Export</span>
           <button
+            onClick={() => handleExport('svg')}
+            disabled={exporting !== null}
+            title="Download the whole tree as a vector SVG — no size limit, zoom in to any level without losing detail. Best for a large or widely-branched tree."
+            className="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-gray-300 hover:text-kp-gold hover:bg-kp-card transition-colors disabled:opacity-50 disabled:cursor-wait"
+          >
+            {exporting === 'svg' ? 'Rendering…' : 'SVG'}
+          </button>
+          <button
             onClick={() => handleExport('png')}
             disabled={exporting !== null}
-            title="Download the whole tree as a PNG image"
+            title="Download the whole tree as a PNG image, scaled to fit. For a large tree, individual labels may be too small to read — use SVG instead for full detail."
             className="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-gray-300 hover:text-kp-gold hover:bg-kp-card transition-colors disabled:opacity-50 disabled:cursor-wait"
           >
             {exporting === 'png' ? 'Rendering…' : 'Image'}
@@ -517,7 +538,7 @@ function FamilyTreeInner({ members, initialFocusId }: { members: TreeMember[]; i
           <button
             onClick={() => handleExport('pdf')}
             disabled={exporting !== null}
-            title="Download the whole tree as a printable PDF"
+            title="Download the whole tree as a PDF, scaled to fit one page. For a large tree, individual labels may be too small to read — use SVG instead for full detail."
             className="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-gray-300 hover:text-kp-gold hover:bg-kp-card transition-colors disabled:opacity-50 disabled:cursor-wait"
           >
             {exporting === 'pdf' ? 'Rendering…' : 'PDF'}
