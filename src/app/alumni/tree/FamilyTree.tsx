@@ -17,7 +17,6 @@ import {
   type NodeProps,
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
-import { toPng } from 'html-to-image'
 import { jsPDF } from 'jspdf'
 
 // ── Types ──────────────────────────────────────────────────────────────────────
@@ -157,6 +156,82 @@ function buildFlowElements(members: TreeMember[]): { nodes: Node[], edges: Edge[
   return { nodes: flowNodes, edges: flowEdges }
 }
 
+// ── Export: hand-built SVG, not a DOM screenshot ────────────────────────────────
+// Earlier versions rendered the export by screenshotting the live xyflow DOM
+// (via html-to-image, rasterizing through an SVG <foreignObject>). That broke
+// badly for a tree wide enough to have many separate root families side by
+// side — tens of thousands of CSS pixels is far more than that kind of
+// foreignObject rasterization reliably handles, producing mostly-blank,
+// corrupted output rather than a resize, regardless of how the final file
+// size was capped.
+//
+// This builds the export directly from the same layout data used to draw the
+// tree on screen (exact positions, text, lineage) as plain SVG markup —
+// rectangles, text, and elbow-connector paths. No DOM cloning, no rasterize-
+// at-full-size step: a 20,000px-wide tree is still just a few KB of markup,
+// loads as an <img> in milliseconds, and draws cleanly onto a canvas of any
+// target size since it's true vector source, not a pre-rasterized bitmap.
+const EXPORT_PADDING = 48
+
+function escapeXml(s: string): string {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+}
+
+function buildExportSvgMarkup(nodes: Node[], edges: Edge[]): { svg: string; width: number; height: number } {
+  const bounds = getNodesBounds(nodes)
+  const width = Math.ceil(bounds.width + EXPORT_PADDING * 2)
+  const height = Math.ceil(bounds.height + EXPORT_PADDING * 2)
+  const ox = -bounds.x + EXPORT_PADDING
+  const oy = -bounds.y + EXPORT_PADDING
+
+  const nodeById = new Map(nodes.map(n => [n.id, n]))
+
+  const edgeMarkup = edges.map(e => {
+    const s = nodeById.get(e.source)
+    const t = nodeById.get(e.target)
+    if (!s || !t) return ''
+    const x1 = s.position.x + NODE_W / 2 + ox
+    const y1 = s.position.y + NODE_H + oy
+    const x2 = t.position.x + NODE_W / 2 + ox
+    const y2 = t.position.y + oy
+    const midY = (y1 + y2) / 2
+    return `<path d="M ${x1} ${y1} V ${midY} H ${x2} V ${y2}" fill="none" stroke="#4D0000" stroke-width="2"/>`
+  }).join('')
+
+  const nodeMarkup = nodes.map(n => {
+    const { member } = n.data as NodeData
+    const x = n.position.x + ox
+    const y = n.position.y + oy
+
+    if (isTreeHidden(member)) {
+      return `<rect x="${x}" y="${y}" width="${NODE_W}" height="${NODE_H}" rx="12" ry="12" fill="#1A0000" fill-opacity="0.3" stroke="#4D0000" stroke-dasharray="4 3"/>`
+    }
+
+    const name = `${member.first_name ?? ''} ${member.last_name ?? ''}`.trim() || '—'
+    return (
+      `<rect x="${x}" y="${y}" width="${NODE_W}" height="${NODE_H}" rx="12" ry="12" fill="#1A0000" stroke="#4D0000"/>` +
+      `<text x="${x + 12}" y="${y + 23}" fill="#ffffff" font-size="11" font-weight="700" font-family="Arial, Helvetica, sans-serif">${escapeXml(name)}</text>` +
+      `<text x="${x + 12}" y="${y + 39}" fill="#C8A028" font-size="10" font-family="Arial, Helvetica, sans-serif">#${escapeXml(member.badge_number ?? '')}</text>` +
+      `<text x="${x + 12}" y="${y + 54}" fill="#8A8A8A" font-size="10" font-family="Arial, Helvetica, sans-serif">${escapeXml(member.pledge_class ?? '')}</text>`
+    )
+  }).join('')
+
+  const svg =
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">` +
+    `<rect width="100%" height="100%" fill="#0D0000"/>${edgeMarkup}${nodeMarkup}</svg>`
+
+  return { svg, width, height }
+}
+
+function loadImage(src: string): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const img = new Image()
+    img.onload = () => resolve(img)
+    img.onerror = () => reject(new Error('Could not load the generated image.'))
+    img.src = src
+  })
+}
+
 // ── Member node component ──────────────────────────────────────────────────────
 function MemberNodeComponent({ data }: NodeProps) {
   const { member, focused, inLineage, dimmed } = data as NodeData
@@ -217,23 +292,12 @@ function MemberNodeComponent({ data }: NodeProps) {
 const nodeTypes = { member: MemberNodeComponent }
 
 // ── Inner tree (needs ReactFlowProvider context) ───────────────────────────────
-// html-to-image rasterizes through an SVG <foreignObject> sized to exactly
-// the CSS pixels we tell it to capture. A tree with many separate root
-// families side by side can span tens of thousands of pixels — asking the
-// browser to rasterize a foreignObject anywhere near that size reliably
-// fails (large blank regions with only scattered fragments of content, and
-// it gets dramatically slower well before that). So the content itself must
-// be real-zoomed down to fit within this cap *before* capture; pixelRatio
-// then only upscales that already-safely-sized raster for sharpness and
-// never controls how big the foreignObject is.
-const SAFE_CONTENT_DIMENSION = 4000
-// Final output raster cap (post pixelRatio). Comfortably under the ~16,384px
-// canvas limit most browsers share.
+// Raster output cap (px, long edge) for the exported PNG/PDF — comfortably
+// under the ~16,384px canvas size limit most browsers share.
 const EXPORT_MAX_DIMENSION = 8000
-const EXPORT_PADDING = 48
 
 function FamilyTreeInner({ members, initialFocusId }: { members: TreeMember[]; initialFocusId?: string }) {
-  const { fitView, setViewport, getViewport } = useReactFlow()
+  const { fitView } = useReactFlow()
   const [focusedId, setFocusedId] = useState<string | null>(initialFocusId ?? null)
   const [search, setSearch] = useState('')
   const [showDropdown, setShowDropdown] = useState(false)
@@ -331,70 +395,47 @@ function FamilyTreeInner({ members, initialFocusId }: { members: TreeMember[]; i
     }
   }, [focusedId, fitView])
 
-  // Waits for a React re-render to reach the DOM, then for the member boxes'
-  // own CSS opacity/color transition (transition-all, ~150ms) to settle, so
-  // a capture taken right after doesn't catch them mid-fade.
-  function waitForSettledRender(): Promise<void> {
-    return new Promise(resolve => {
-      requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(resolve, 220)))
-    })
-  }
-
-  // Renders the whole tree (not just the current pan/zoom) to an image, then
-  // either downloads it directly or wraps it in a same-size PDF page — which
-  // most PDF viewers' print dialogs will scale to fit the paper
-  // automatically.
+  // Renders the whole tree (every box, not just the current pan/zoom or
+  // highlight) to an image, then either downloads it directly or wraps it in
+  // a same-size PDF page — which most PDF viewers' print dialogs will scale
+  // to fit the paper automatically.
   //
-  // Two earlier versions of this got the sizing wrong in opposite ways: one
-  // capped the *output* size but still asked html-to-image to rasterize an
-  // SVG <foreignObject> at the tree's full, uncapped natural size (which for
-  // a tree with many separate root families side by side can be tens of
-  // thousands of pixels wide) — that reliably produces mostly-blank, corrupted
-  // output, not a resize. The other avoided that but could still produce a
-  // foreignObject that large for a big enough tree.
-  //
-  // The fix: actually pan/zoom the real xyflow viewport so the tree's content
-  // footprint is zoomed down to fit within SAFE_CONTENT_DIMENSION *before*
-  // capture (never just a post-hoc canvas resize), then let `pixelRatio` —
-  // a true raster-resolution multiplier, not a DOM transform — scale that
-  // already-safely-sized capture back up for a sharp final image. Also
-  // always exports every box at full clarity, clearing any highlighted
-  // lineage first and restoring it afterward.
+  // Built from the same layout data used to draw the tree (buildExportSvgMarkup,
+  // using baseNodes/baseEdges directly — always the full, un-dimmed tree,
+  // regardless of any on-screen highlight) as plain SVG, then rasterized onto
+  // a canvas at a capped resolution. Two earlier versions instead screenshotted
+  // the live DOM via html-to-image, which reliably produced corrupted,
+  // mostly-blank output once the tree was wide enough to have many separate
+  // root families side by side (tens of thousands of pixels) — vector SVG has
+  // no equivalent size limit, so this works at any tree size.
   const handleExport = useCallback(async (format: 'png' | 'pdf') => {
-    const viewportEl = document.querySelector<HTMLElement>('.react-flow__viewport')
-    if (!viewportEl || baseNodes.length === 0) return
-
+    if (baseNodes.length === 0) return
     setExporting(format)
-    const hadFocus = focusedId
-    const prevViewport = getViewport()
     try {
-      if (hadFocus) setFocusedId(null)
+      const { svg, width: naturalWidth, height: naturalHeight } = buildExportSvgMarkup(baseNodes, baseEdges)
 
-      const bounds = getNodesBounds(baseNodes)
-      const naturalWidth = bounds.width + EXPORT_PADDING * 2
-      const naturalHeight = bounds.height + EXPORT_PADDING * 2
-      const zoom = Math.min(1, SAFE_CONTENT_DIMENSION / Math.max(naturalWidth, naturalHeight))
-      const width = Math.ceil(bounds.width * zoom + EXPORT_PADDING * 2)
-      const height = Math.ceil(bounds.height * zoom + EXPORT_PADDING * 2)
+      const svgUrl = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml' }))
+      let img: HTMLImageElement
+      try {
+        img = await loadImage(svgUrl)
+      } finally {
+        URL.revokeObjectURL(svgUrl)
+      }
 
-      await setViewport(
-        { x: EXPORT_PADDING - bounds.x * zoom, y: EXPORT_PADDING - bounds.y * zoom, zoom },
-        { duration: 0 },
-      )
-      await waitForSettledRender()
+      const scale = Math.min(1, EXPORT_MAX_DIMENSION / Math.max(naturalWidth, naturalHeight))
+      const width = Math.max(1, Math.round(naturalWidth * scale))
+      const height = Math.max(1, Math.round(naturalHeight * scale))
 
-      // Pure raster upscale on top of the already content-safe size above —
-      // up to 3x for a small tree, tapering down so the final file stays
-      // under EXPORT_MAX_DIMENSION regardless of tree size.
-      const pixelRatio = Math.min(3, EXPORT_MAX_DIMENSION / Math.max(width, height))
+      const canvas = document.createElement('canvas')
+      canvas.width = width
+      canvas.height = height
+      const ctx = canvas.getContext('2d')
+      if (!ctx) return
+      ctx.fillStyle = '#0D0000'
+      ctx.fillRect(0, 0, width, height)
+      ctx.drawImage(img, 0, 0, width, height)
 
-      const dataUrl = await toPng(viewportEl, {
-        backgroundColor: '#0D0000',
-        width,
-        height,
-        pixelRatio,
-      })
-
+      const dataUrl = canvas.toDataURL('image/png')
       const filename = `family-tree-${new Date().toISOString().split('T')[0]}`
       if (format === 'png') {
         const link = document.createElement('a')
@@ -411,11 +452,9 @@ function FamilyTreeInner({ members, initialFocusId }: { members: TreeMember[]; i
         pdf.save(`${filename}.pdf`)
       }
     } finally {
-      await setViewport(prevViewport, { duration: 0 })
-      if (hadFocus) setFocusedId(hadFocus)
       setExporting(null)
     }
-  }, [baseNodes, focusedId, getViewport, setViewport])
+  }, [baseNodes, baseEdges])
 
   const focusedMember = focusedId ? memberMap.get(focusedId) ?? null : null
   const bigBrother = focusedMember?.big_brother_id ? memberMap.get(focusedMember.big_brother_id) ?? null : null
